@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:orientation="vertical"
+android:layout_width="325dp"
+android:layout_height="wrap_content"
+android:layout_gravity="center_horizontal"
+android:layout_marginTop="15dp">
+tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
+
+
+<ImageButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/btnClose"
+    android:src="@drawable/ic_close1"
+    android:background="@null"
+    android:onClick="closeToMain"
+    android:layout_gravity="start" />
+
+<TextView
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:text="SETTING"
+    android:textSize="20sp"
+    android:gravity="center"
+    android:layout_marginBottom="25dp"
+    />
+
+<EditText
+    android:id="@+id/SetUser"
+    android:layout_width="260dp"
+    android:layout_height="match_parent"
+    android:hint="User Name"
+    android:maxLength="12"
+    android:textSize="16sp"
+    android:inputType="textCapCharacters"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/field_box"/>
+
+<EditText
+    android:id="@+id/SetPass"
+    android:layout_width="260dp"
+    android:layout_height="match_parent"
+    android:hint="Password"
+    android:maxLength="12"
+    android:textSize="16sp"
+    android:inputType="numberPassword"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/field_box"/>
+
+<EditText
+    android:id="@+id/SetIp"
+    android:layout_width="260dp"
+    android:layout_height="match_parent"
+    android:hint="IP Address"
+    android:maxLength="12"
+    android:textSize="16sp"
+    android:inputType="text"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/field_box"/>
+
+<EditText
+    android:id="@+id/Settime"
+    android:layout_width="260dp"
+    android:layout_height="match_parent"
+    android:hint="Timeout (seconds)"
+    android:maxLength="12"
+    android:textSize="16sp"
+    android:inputType="number"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="25dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/field_box"/>
+
+
+<Button
+    android:id="@+id/btnSaveSet"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="simpan"
+    android:textSize="16sp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignBaseline="@+id/btnEditSet"
+    android:layout_alignBottom="@+id/btnEditSet"
+    android:background="@drawable/button1"
+    android:textColor="#fff"
+    android:textAllCaps="true"
+    android:layout_gravity="center_horizontal"
+    android:onClick="SaveSett" />
+
+
+
+</LinearLayout>

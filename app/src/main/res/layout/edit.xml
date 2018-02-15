@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.procodecg.codingmom.ehealth.utils.Edit"
+    android:orientation="vertical" android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="3dp">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnClose"
+        android:src="@drawable/ic_close1"
+        android:background="@null"
+        android:onClick="closeToMain"
+        android:layout_gravity="start"
+        android:layout_marginLeft="25dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Data Puskesmas"
+        android:gravity="center_horizontal"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/inputId"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:hint="ID Puskesmas"
+        android:maxLength="12"
+        android:textSize="16sp"
+        android:inputType="textCapCharacters"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="5dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/field_box"/>
+
+    <EditText
+        android:id="@+id/inputNama"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:hint="Nama Puskesmas"
+        android:maxLength="30"
+        android:textSize="16sp"
+        android:inputType="textCapCharacters"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/field_box"/>
+
+    <Button
+        android:id="@+id/btnSimpan"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="simpan"
+        android:textSize="16sp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/button1"
+        android:textColor="#fff"
+        android:textAllCaps="true"
+        android:layout_gravity="center_horizontal"
+        android:onClick="SimpanData" />
+
+
+</LinearLayout>

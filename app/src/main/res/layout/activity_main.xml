@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#42b665">
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selamat datang di"
+        android:gravity="center"
+        android:paddingBottom="20dp"
+        android:textSize="24sp"
+        android:textColor="@color/black"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:src="@drawable/logo1"
+        android:scaleType="fitCenter"
+        android:paddingLeft="80dp"
+        android:paddingRight="80dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/button2">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textIdPuskes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="ID Puskesmas"
+                android:textSize="16sp"
+                android:textColor="@color/blue"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txt_idPuskesmas"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textNamaPuskes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nama Puskesmas"
+                android:textColor="@color/blue"
+                android:textSize="16sp"
+                android:layout_marginTop="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txt_namaPuskesmas"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnSetting"
+                android:src="@drawable/ic_edit1"
+                android:background="@null"
+                android:layout_marginTop="10dp"
+                android:onClick="showEdit"
+                android:layout_gravity="end"/>
+
+
+    </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Masukkan kartu HPC Anda"
+            android:paddingTop="20dp"
+            android:paddingBottom="15dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+
+        <Button
+            android:id="@+id/btnShowDialog"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:background="@drawable/button1"
+            android:textColor="#fff"
+            android:textAllCaps="true"
+            android:onClick="goToPin" />
+
+    <ImageButton
+        android:id="@+id/btnSet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_setting"
+        android:background="@null"
+        android:layout_marginTop="120dp"
+        android:layout_marginRight="35dp"
+        android:onClick="showSett"
+        android:layout_gravity="end"/>
+
+</LinearLayout>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#42b665"
+    tools:context="com.procodecg.codingmom.ehealth.main.PinActivity">
+
+
+    <com.goodiebag.pinview.Pinview
+        android:id="@+id/pinView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        app:pinWidth="30dp"
+        app:pinHeight="30dp"
+        app:pinLength="5"
+        app:cursorVisible="true"
+        app:forceKeyboard="true"
+        app:inputType="number"
+        app:password="true" />
+
+    <TextView
+        android:id="@+id/textPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Masukkan 5 digit PIN Anda"
+        android:layout_centerInParent="true"
+        android:layout_above="@id/pinView"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:layout_marginBottom="10dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/attemptsLeft"
+        android:layout_above="@id/textPin"
+        android:layout_marginBottom="10dp"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:id="@+id/attemptsLeftTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kesempatan Login : "
+            android:visibility="invisible"
+            android:textColor="#FF1401"
+            android:textSize="18sp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/numberOfRemainingLoginAttemptsTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/attemptsLeftTV"
+            android:textColor="#FF1401"
+            android:textSize="18sp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/textViewKali"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/numberOfRemainingLoginAttemptsTV"
+            android:textColor="#FF1401"
+            android:textSize="18sp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text=" kali"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+    <!--Button
+        android:id="@+id/btnMasukPin"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="masuk"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button1"
+        android:textColor="#fff"
+        android:textAllCaps="true"
+        android:layout_below="@id/pinView"
+        android:onClick="goToPasien"/-->
+</RelativeLayout>

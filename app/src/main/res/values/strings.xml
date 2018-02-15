@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">eHealth</string>
+    <string name="profil">Profil Pasien</string>
+    <string name="rekammedis">Rekam Medis</string>
+    <string name="rekmeddinamis">Rekam Medis Dinamis</string>
+    <string name="rekmedstatis">Rekam Medis Statis</string>
+    <string name="pencarian">Pencarian</string>
+    <string name="dialog_title">Kartu yang Anda masukkan salah</string>
+    <string name="dialog_msg">Silahkan coba lagi atau masukkan kartu lain</string>
+    <string name="dialog_title_pin">Anda sudah 3 kali salah memasukkan PIN</string>
+    <string name="dialog_msg_pin">Silahkan masukkan kartu kembali</string>
+
+
+    <string-array name="poli">
+        <item>Umum</item>
+        <item>Gigi</item>
+    </string-array>
+
+    <string-array name="kesadaran">
+        <item>Composmentis</item>
+        <item>Apatis</item>
+        <item>Delirium</item>Headache
+        <item>Somnolen</item>
+        <item>Sopor</item>
+        <item>Semi-coma</item>
+        <item>Coma</item>
+    </string-array>
+
+    <string-array name="status_labradio">
+        <item>Dilayani penuh</item>
+        <item>Dilayani sebagian</item>
+        <item>Tidak dilayani sama sekali</item>
+    </string-array>
+
+    <string-array name="icd_status">
+        <item>Headache Chronic F44.3</item>
+        <item>Headache Migrain G43.9</item>
+        <item>Headache Tension G44.2</item>
+        <item>Pharyngitis diphtheritic A36.0</item>
+        <item>Pharyngitis purulunt J02.9</item>
+        <item>Pharyngitis Tb 16.8</item>
+    </string-array>
+
+    <string-array name="status_resep">
+        <item>Dilayani penuh</item>
+        <item>Dilayani sebagian</item>
+        <item>Dilayani ada penggantian</item>
+        <item>Dilayani sebagian dan ada penggantian</item>
+        <item>Tidak dilayani sama sekali</item>
+    </string-array>
+
+    <string-array name="ad_vitam">
+        <item>Ad bonam</item>
+        <item>Dubia ad bonam</item>
+        <item>Dubia ad malam</item>
+        <item>Ad malam</item>
+    </string-array>
+
+    <string-array name="ad_functionam">
+        <item>Ad bonam</item>
+        <item>Dubia ad bonam</item>
+        <item>Dubia ad malam</item>
+        <item>Ad malam</item>
+    </string-array>
+
+    <string-array name="ad_sanationam">
+        <item>Ad bonam</item>
+        <item>Dubia ad bonam</item>
+        <item>Dubia ad malam</item>
+        <item>Ad malam</item>
+    </string-array>
+
+</resources>

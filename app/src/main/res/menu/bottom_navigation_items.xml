@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/profil"
+        android:icon="@drawable/profil"
+        android:title="Profil Pasien" />
+
+    <!--<item-->
+        <!--android:id="@+id/rekmeddinamis"-->
+        <!--android:icon="@drawable/folderdinamis"-->
+        <!--android:title="RM Dinamis" />-->
+    <item
+    android:id="@+id/rekammedis"
+    android:icon="@drawable/folder"
+    android:title="Rekam Medis" />
+
+    <!--<itemt-->
+        <!--android:id="@+id/rekmedstatis"-->
+    <!--android:icon="@drawable/folderstatis"-->
+    <!--android:title="RM Satis" />-->
+
+
+
+
+
+    <item
+        android:id="@+id/pencarian"
+        android:icon="@drawable/search"
+        android:title="@string/pencarian" />
+
+</menu>
