@@ -1,1 +1,0 @@
-# synevirta-project
