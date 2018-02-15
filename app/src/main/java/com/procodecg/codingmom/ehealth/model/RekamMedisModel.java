@@ -3,7 +3,7 @@ package com.procodecg.codingmom.ehealth.model;
 import java.util.Date;
 
 /**
- * Created by neo on 11/02/18.
+ * Created by Irma on 11/02/18.
  */
 
 public class RekamMedisModel {
