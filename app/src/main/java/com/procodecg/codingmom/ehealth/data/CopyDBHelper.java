@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEntry;
 /**
  * Created by neo on 10/10/17.
+ * komen
  */
 
 public class CopyDBHelper extends SQLiteOpenHelper {
