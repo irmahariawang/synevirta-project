@@ -162,98 +162,98 @@
                 android:textSize="16sp"
                 android:inputType="text"/>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@color/separator" />
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="3dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginRight="10dp"-->
+                <!--android:background="@color/separator" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
-                android:text="Data Pasien"
-                android:textColor="@color/colorPrimary"
-                android:textSize="16sp" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:text="Data Pasien"-->
+                <!--android:textColor="@color/colorPrimary"-->
+                <!--android:textSize="16sp" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
-                android:text="Nama"
-                android:textSize="14sp" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:text="Nama"-->
+                <!--android:textSize="14sp" />-->
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
-                android:id="@+id/namaPasien"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:padding="5dp"
-                android:enabled="false"
-                android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
-                android:textColor="@color/blue"
-                android:textSize="16sp" />
+            <!--<com.cielyang.android.clearableedittext.ClearableEditText-->
+                <!--android:id="@+id/namaPasien"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginRight="20dp"-->
+                <!--android:padding="5dp"-->
+                <!--android:enabled="false"-->
+                <!--android:background="@drawable/noborder"-->
+                <!--app:clearIconDrawable="@drawable/ic_xclear"-->
+                <!--android:textColor="@color/blue"-->
+                <!--android:textSize="16sp" />-->
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@color/separator" />
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_marginLeft="15dp"-->
+                <!--android:layout_marginRight="15dp"-->
+                <!--android:background="@color/separator" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
-                android:text="Umur"
-                android:textSize="14sp" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:text="Umur"-->
+                <!--android:textSize="14sp" />-->
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
-                android:id="@+id/umurPasien"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:padding="5dp"
-                android:enabled="false"
-                android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
-                android:textColor="@color/blue"
-                android:textSize="16sp" />
+            <!--<com.cielyang.android.clearableedittext.ClearableEditText-->
+                <!--android:id="@+id/umurPasien"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginRight="20dp"-->
+                <!--android:padding="5dp"-->
+                <!--android:enabled="false"-->
+                <!--android:background="@drawable/noborder"-->
+                <!--app:clearIconDrawable="@drawable/ic_xclear"-->
+                <!--android:textColor="@color/blue"-->
+                <!--android:textSize="16sp" />-->
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@color/separator" />
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_marginLeft="15dp"-->
+                <!--android:layout_marginRight="15dp"-->
+                <!--android:background="@color/separator" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
-                android:text="Jenis Kelamin"
-                android:textSize="14sp" />
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:text="Jenis Kelamin"-->
+                <!--android:textSize="14sp" />-->
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
-                android:id="@+id/jenisKelamin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:padding="5dp"
-                android:enabled="false"
-                android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
-                android:textColor="@color/blue"
-                android:textSize="16sp" />
+            <!--<com.cielyang.android.clearableedittext.ClearableEditText-->
+                <!--android:id="@+id/jenisKelamin"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginRight="20dp"-->
+                <!--android:padding="5dp"-->
+                <!--android:enabled="false"-->
+                <!--android:background="@drawable/noborder"-->
+                <!--app:clearIconDrawable="@drawable/ic_xclear"-->
+                <!--android:textColor="@color/blue"-->
+                <!--android:textSize="16sp" />-->
 
             <View
                 android:layout_width="match_parent"
