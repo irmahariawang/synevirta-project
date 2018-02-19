@@ -2,8 +2,9 @@ package com.procodecg.codingmom.ehealth.utils;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,6 +43,14 @@ public class Setting extends AppCompatActivity {
         ((TextView) findViewById(R.id.SetIp)).setText(address);
         ((TextView) findViewById(R.id.Settime)).setText(time);
 
+        //set popup window
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+
+        getWindow().setLayout((int)(width*.80),(int)(height*.60));
 
     }
 
