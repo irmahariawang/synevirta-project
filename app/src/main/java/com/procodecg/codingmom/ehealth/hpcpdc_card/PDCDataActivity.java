@@ -199,15 +199,16 @@ public class PDCDataActivity {
                             Log.i(TAG, "Serial port opened");
                             Toast.makeText(context.getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
 
-                            try {
-                                send();
-                                Thread.sleep(2000);
-                                send();
-                                Thread.sleep(6000);
-                                send();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                            send();
+//                            try {
+//                                send();
+//                                Thread.sleep(2000);
+//                                send();
+//                                Thread.sleep(6000);
+//                                send();
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
                         } else {
                             Log.w(TAG, "PORT NOT OPEN");
                         }
@@ -239,7 +240,7 @@ public class PDCDataActivity {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
-
+                    send();
                 }
             } else if (i == 2) { //medrec statik
                 respondData.put(bytes);
@@ -277,6 +278,8 @@ public class PDCDataActivity {
                     Log.i(TAG, "kronis: " + Util.bytesToString(Util.trimZeroPadding(kronis)));
                     Log.i(TAG, "bawaan: " + Util.bytesToString(Util.trimZeroPadding(bawaan)));
                     Log.i(TAG, "resiko: " + Util.bytesToString(Util.trimZeroPadding(resiko)));
+
+                    send();
                 }
             } else if (i == 3) { // biodata
                 respondData.put(bytes);
@@ -306,14 +309,16 @@ public class PDCDataActivity {
                     tvSet(hubKeluargaTv, Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga)));
                     tvSet(alamatTv, Util.bytesToString(Util.trimZeroPadding(alamat)));
 */
-                    Log.i(TAG, "nik: " + Util.bytesToString(Util.trimZeroPadding(nik)));
-                    Log.i(TAG, "kategori pasien: " + Util.bytesToString(Util.trimZeroPadding(kategoriPasien)));
-                    Log.i(TAG, "nomor asuransi: " + Util.bytesToString(Util.trimZeroPadding(nomorAsuransi)));
-                    Log.i(TAG, "tgl daftar: " + Util.bytesToString(Util.trimZeroPadding(tglDaftar)));
-                    Log.i(TAG, "nama: " + Util.bytesToHex(nama));
-                    Log.i(TAG, "namakk: " + Util.bytesToHex(namaKK));
-                    Log.i(TAG, "hub keluarga: " + Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga)));
-                    Log.i(TAG, "alamat: " + Util.bytesToHex(alamat));
+//                    Log.i(TAG, "nik: " + Util.bytesToString(Util.trimZeroPadding(nik)));
+//                    Log.i(TAG, "kategori pasien: " + Util.bytesToString(Util.trimZeroPadding(kategoriPasien)));
+//                    Log.i(TAG, "nomor asuransi: " + Util.bytesToString(Util.trimZeroPadding(nomorAsuransi)));
+//                    Log.i(TAG, "tgl daftar: " + Util.bytesToString(Util.trimZeroPadding(tglDaftar)));
+//                    Log.i(TAG, "nama: " + Util.bytesToHex(nama));
+//                    Log.i(TAG, "namakk: " + Util.bytesToHex(namaKK));
+//                    Log.i(TAG, "hub keluarga: " + Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga)));
+//                    Log.i(TAG, "alamat: " + Util.bytesToHex(alamat));
+
+                    send();
                 }
 
             }
@@ -327,19 +332,19 @@ public class PDCDataActivity {
         if ( i == 0 ) {
             serialPort.write(APDU_select);
             i++;
-            Log.d(TAG, "write apdu select");
+            Log.i(TAG, "write apdu select");
         } else if (i == 1) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
-            Log.d(TAG, "write apdu read medrec statik");
+            Log.i(TAG, "write apdu read medrec statik");
         } else if (i == 2) {
             serialPort.write(APDU_read_biodata);
             i++;
-            Log.d(TAG, "write apdu read biodata");
+            Log.i(TAG, "write apdu read biodata");
         }
         else {
             serialPort.close();
-            Log.d(TAG, "serial port closed");
+            Log.i(TAG, "serial port closed");
         }
 
     }
