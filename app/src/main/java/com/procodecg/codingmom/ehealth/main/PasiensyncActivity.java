@@ -447,6 +447,7 @@ public class PasiensyncActivity extends AppCompatActivity {
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
+            unregisterReceiver(broadcastReceiver);
         }
 
     }
