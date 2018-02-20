@@ -28,8 +28,6 @@ public class HPCActivity{
 
     final String TAG = "HPCPDCDUMMY";
 
-    HPCData hpcData;
-
     public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
     public final String ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
@@ -63,17 +61,8 @@ public class HPCActivity{
 
     //@Override
     public HPCActivity (Context context){
-        //Log.d(TAG, "onCreate");
-        //super.onCreate(savedInstanceState);
-        //setContentView(R.layout.hpcdata_activity);
-
         i = 0;
-        hpcData = new HPCData("", "", "", "");
         respondData = ByteBuffer.allocate(102);
-
-        //hpcNama = findViewById(R.id.hpc_data_nama);
-        //hpcRole = findViewById(R.id.hpc_data_role);
-        //hpcSIP = findViewById(R.id.hpc_data_sip);
 
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         filter = new IntentFilter();
@@ -204,6 +193,10 @@ public class HPCActivity{
                     Log.i(TAG, "nik: " + Util.bytesToString(nik));
                     Log.i(TAG, "nama: " + Util.bytesToString(nama));
                     Log.i(TAG, "sip: " + Util.bytesToString(sip));
+
+                    HPCData.nik = Util.bytesToString(nik);
+                    HPCData.nama = Util.bytesToString(nama);
+                    HPCData.sip = Util.bytesToString(sip);
 /*
                     tvSet(hpcNama, CardUtil.bytesToString(nama));
                     tvSet(hpcRole, "Dokter");
@@ -266,39 +259,4 @@ public class HPCActivity{
             Log.i(TAG, "serial port closed");
         }
     }
-
-    /*
-    private void tvSet(TextView tv, CharSequence text) {
-        final TextView ftv = tv;
-        final CharSequence ftext = text;
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                ftv.setText(ftext);
-            }
-        });
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        super.onBackPressed();
-        startActivity(new Intent(HPCActivity.this, MainActivity.class));
-        finish();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        registerReceiver(broadcastReceiver, filter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(broadcastReceiver);
-    }
-    */
 }
