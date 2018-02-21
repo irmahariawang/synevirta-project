@@ -26,6 +26,19 @@
             android:clickable="true"
             android:src="@drawable/ic_add"
             app:backgroundTint="@color/blue" />
+        
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabSinkronSikda"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="10dp"
+            android:clickable="true"
+            android:src="@drawable/ic_sync"
+            app:backgroundTint="@color/blue"
+            android:layout_toStartOf="@+id/fabRekmedBaru"
+            android:layout_alignTop="@+id/fabRekmedBaru" />
 
     </RelativeLayout>
 
