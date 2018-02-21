@@ -20,7 +20,7 @@ import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
  * Created by macbookpro on 7/31/17.
  */
 
-public class BottombarActivity extends AppCompatActivity {
+public class BottombarActivity extends AppCompatActivity implements AsyncResponse{
 
 //    private void displayFragment(int position) {
 //        // update the main content by replacing fragments
@@ -174,7 +174,134 @@ public class BottombarActivity extends AppCompatActivity {
         txtSubTitle.setText(PasiensyncActivity.getNamaDokter());
     }
 
+    //menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA dalam bentuk JSON Object
+    public void getDataAndPost() throws ParseException {
+        i++;
+        String timestamp;
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
+        //get last timestamp yang dikirim
+        settings = getSharedPreferences("SETTING", MODE_PRIVATE);
+        String ts = settings.getString("LAST_TIMESTAMP", "");
+
+        //get token yang sudah ada pada app
+        jwt = getSharedPreferences("TOKEN", MODE_PRIVATE);
+        String token = jwt.getString("ACCESS_TOKEN", "");
+
+        if(ts.isEmpty()){
+            timestamp = "0";
+        } else {
+            timestamp = ts;
+        }
+        
+        String[] columns = {
+                //kode pelayanan
+                EhealthContract.RekamMedisEntry._ID,
+                EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA,
+                //NIK
+                EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA,
+                EhealthContract.RekamMedisEntry.COLUMN_KEPALA,
+                EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO,
+                EhealthContract.RekamMedisEntry.COLUMN_SUHU,
+                EhealthContract.RekamMedisEntry.COLUMN_NADI,
+                EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI,
+                EhealthContract.RekamMedisEntry.COLUMN_BERAT,
+                EhealthContract.RekamMedisEntry.COLUMN_TINGGI
+        };
+        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
+        if(cursor.getCount()==0){
+            Toast.makeText(BottombarActivity.this, "No Data Update", Toast.LENGTH_LONG).show();
+        } else {
+            cursor.moveToFirst();
+
+            DateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+            Date in = input.parse(cursor.getString(1));
+            String out = output.format(in);
+
+            //KD_PELAYANAN[0] belum jelas definisi kodenya jadi sementara menggunakan kode mulai dari 10001
+            //KD_PUSKESMAS[1] dan NIK[3] belum tersedia di SQLite jadi di hard core untuk sementara
+            JSONObject postDataParams = new JSONObject();
+            try {
+                postDataParams.put("0", "1000" + i);
+                postDataParams.put("1", "P3344556677");
+                postDataParams.put("2", out);
+                postDataParams.put("3", "111111111111111" + i);
+                postDataParams.put("4", cursor.getString(2));
+                postDataParams.put("5", cursor.getString(3));
+                postDataParams.put("6", cursor.getString(4));
+                postDataParams.put("7", cursor.getString(5));
+                postDataParams.put("8", cursor.getString(6));
+                postDataParams.put("9", cursor.getString(7));
+                postDataParams.put("10", cursor.getString(8));
+                postDataParams.put("11", cursor.getString(9));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            //memanggil asynctask
+            new UpdateMedrecDinamik(this).execute(postDataParams.toString(), token, "" + cursor.getString(1));
+            Log.i("Array", postDataParams.toString());
+        }
+    }
+
+    //fungsi untuk membaca response dari rest service saat melakukan update medrek dinamik
+    @Override
+    public void taskComplete(String output) {
+        JSONObject obj;
+        String code = "", error_code = "";
+        try {
+            obj = new JSONObject(output);
+            code = obj.getString("code");
+            error_code = obj.getString("status");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.i("Status", error_code);
+
+        settings = getSharedPreferences("SETTING", MODE_PRIVATE);
+        String username = settings.getString("USERNAME", "");
+        String password = settings.getString("PASSWORD", "");
+
+        if(code.equals("0x23")){
+            Toast.makeText(BottombarActivity.this, "Generating new token ... ", Toast.LENGTH_SHORT).show();
+            new TokenRequest(this).execute(username, password);
+        } else if(code.equals("1x26")){
+            try {
+                getDataAndPost();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(BottombarActivity.this, "Update data berhasil", Toast.LENGTH_SHORT).show();
+        } else if(code.equals("0x26")){
+            Toast.makeText(BottombarActivity.this, "Update data gagal", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    //fungsi untuk membaca response dari rest service saat melakukan token request
+    @Override
+    public void tokenRequest(String output) {
+        JSONObject obj;
+        String code = "", accessToken = "";
+        try {
+            obj = new JSONObject(output);
+            code = obj.getString("code");
+            accessToken = obj.getString("token");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if(code.equals("1x11")){
+            SharedPreferences sp = getSharedPreferences("TOKEN", MODE_PRIVATE);
+            SharedPreferences.Editor editor=sp.edit();
+            editor.putString("ACCESS_TOKEN", accessToken);
+            editor.apply();
+
+            Toast.makeText(BottombarActivity.this, "Generate token success", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
 //    public void setSubTitleText(String title){
 //            txtSubTitle.setText(title);
 //        }
