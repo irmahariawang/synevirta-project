@@ -90,6 +90,31 @@ public class RekmedDinamisFragment extends Fragment {
             }
         };
         fabRekmedBaru.setOnClickListener(listener);
+        
+        FloatingActionButton fabSinkronSikda = (FloatingActionButton) view.findViewById(R.id.fabSinkronSikda);
+        fabSinkronSikda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
+                String token = jwt.getString("ACCESS_TOKEN", "");
+
+                settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
+                String username = settings.getString("USERNAME", "");
+                String password = settings.getString("PASSWORD", "");
+                String ts = settings.getString("LAST_TIMESTAMP", "");
+
+                if(token.isEmpty()){
+                    Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
+                    new TokenRequest(getActivity()).execute(username, password);
+                } else {
+                    try {
+                        getDataAndPost();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
         return view;
     }
@@ -186,6 +211,75 @@ public class RekmedDinamisFragment extends Fragment {
 
         } else {
             //Toast.makeText(getActivity(), "Table not exist", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    //menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA dalam bentuk JSON Object
+    public void getDataAndPost() throws ParseException {
+        String timestamp;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        //mengambil last timestamp yang dikirim
+        settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
+        String ts = settings.getString("LAST_TIMESTAMP", "");
+
+        //mengambil token yang sudah ada pada app
+        jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
+        String token = jwt.getString("ACCESS_TOKEN", "");
+
+        if(ts.isEmpty()){
+            timestamp = "0";
+        } else {
+            timestamp = ts;
+        }
+
+        String[] columns = {
+                //kode pelayanan
+                RekamMedisEntry._ID,
+                RekamMedisEntry.COLUMN_TGL_PERIKSA,
+                //NIK
+                RekamMedisEntry.COLUMN_KELUHANUTAMA,
+                RekamMedisEntry.COLUMN_KEPALA,
+                RekamMedisEntry.COLUMN_STATUS_LABRADIO,
+                RekamMedisEntry.COLUMN_SUHU,
+                RekamMedisEntry.COLUMN_NADI,
+                RekamMedisEntry.COLUMN_RESPIRASI,
+                RekamMedisEntry.COLUMN_BERAT,
+                RekamMedisEntry.COLUMN_TINGGI
+        };
+        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, columns, ""+RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
+        if(cursor.getCount()==0){
+            Toast.makeText(getActivity(), "No Data Update", Toast.LENGTH_LONG).show();
+        } else {
+            cursor.moveToFirst();
+
+            DateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+            Date in = input.parse(cursor.getString(1));
+            String out = output.format(in);
+
+            //KD_PELAYANAN[0] belum jelas definisi kodenya jadi untuk sementara menggunakan kode mulai dari 10001
+            //KD_PUSKESMAS[1] dan NIK[3] belum ada pada db SQLite jadi di hard core untuk sementara
+            JSONObject postDataParams = new JSONObject();
+            try {
+                postDataParams.put("0", "10001");
+                postDataParams.put("1", "P3344556677");
+                postDataParams.put("2", out);
+                postDataParams.put("3", "1111111111111111");
+                postDataParams.put("4", cursor.getString(2));
+                postDataParams.put("5", cursor.getString(3));
+                postDataParams.put("6", cursor.getString(4));
+                postDataParams.put("7", cursor.getString(5));
+                postDataParams.put("8", cursor.getString(6));
+                postDataParams.put("9", cursor.getString(7));
+                postDataParams.put("10", cursor.getString(8));
+                postDataParams.put("11", cursor.getString(9));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            new UpdateMedrecDinamik(getActivity()).execute(postDataParams.toString(), token, "" + cursor.getString(1));
+            Log.i("Array", postDataParams.toString());
         }
     }
 }
