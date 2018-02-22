@@ -57,6 +57,9 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
     private TextView txtTitle;
     private TextView txtSubTitle;
     public static BottombarActivity instance;
+    
+    private SharedPreferences jwt, settings;
+    int i = 1;
 
     Typeface fontBold;
 
