@@ -36,6 +36,8 @@ public class RekmedDinamisFragment extends Fragment {
     }
 
     private RecycleListAdapter rAdapter;
+    
+    private SharedPreferences jwt, settings;
 
     private ArrayList<String> listTanggal;
     private ArrayList<String> listNamaDokter;
