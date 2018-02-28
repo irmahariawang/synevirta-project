@@ -236,18 +236,47 @@ public class RekmedDinamisFragment extends Fragment {
         }
 
         String[] columns = {
-                //kode pelayanan
-                RekamMedisEntry._ID,
+                //0-6 json object luar
+                RekamMedisEntry.COLUMN_NAMA_DOKTER,
                 RekamMedisEntry.COLUMN_TGL_PERIKSA,
-                //NIK
+                RekamMedisEntry.COLUMN_NIK,
+                RekamMedisEntry.COLUMN_ID_PUSKESMAS,
+                RekamMedisEntry.COLUMN_POLI,
                 RekamMedisEntry.COLUMN_KELUHANUTAMA,
+                RekamMedisEntry.COLUMN_RUJUKAN,
+                //7-12 json array pelayanan
                 RekamMedisEntry.COLUMN_KEPALA,
-                RekamMedisEntry.COLUMN_STATUS_LABRADIO,
                 RekamMedisEntry.COLUMN_SUHU,
                 RekamMedisEntry.COLUMN_NADI,
                 RekamMedisEntry.COLUMN_RESPIRASI,
                 RekamMedisEntry.COLUMN_BERAT,
-                RekamMedisEntry.COLUMN_TINGGI
+                RekamMedisEntry.COLUMN_TINGGI,
+                //13-37 json array pelayanan_ket_tambahan
+                RekamMedisEntry.COLUMN_SYSTOLE,
+                RekamMedisEntry.COLUMN_DIASTOLE,
+                RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG,
+                RekamMedisEntry.COLUMN_PENYAKIT_DULU,
+                RekamMedisEntry.COLUMN_PENYAKIT_KEL,
+                RekamMedisEntry.COLUMN_KESADARAN,
+                RekamMedisEntry.COLUMN_THORAX,
+                RekamMedisEntry.COLUMN_ABDOMEN,
+                RekamMedisEntry.COLUMN_GENITALIA,
+                RekamMedisEntry.COLUMN_EXTREMITAS,
+                RekamMedisEntry.COLUMN_KULIT,
+                RekamMedisEntry.COLUMN_NEUROLOGI,
+                RekamMedisEntry.COLUMN_LABORATORIUM,
+                RekamMedisEntry.COLUMN_RADIOLOGI,
+                RekamMedisEntry.COLUMN_STATUS_LABRADIO,
+                RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA,
+                RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING,
+                RekamMedisEntry.COLUMN_RESEP,
+                RekamMedisEntry.COLUMN_CATTRESEP,
+                RekamMedisEntry.COLUMN_STATUSRESEP,
+                RekamMedisEntry.COLUMN_REPETISIRESEP,
+                RekamMedisEntry.COLUMN_TINDAKAN,
+                RekamMedisEntry.COLUMN_AD_VITAM,
+                RekamMedisEntry.COLUMN_AD_FUNCTIONAM,
+                RekamMedisEntry.COLUMN_AD_SANATIONAM
         };
         Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, columns, ""+RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
         if(cursor.getCount()==0){
@@ -260,28 +289,41 @@ public class RekmedDinamisFragment extends Fragment {
             Date in = input.parse(cursor.getString(1));
             String out = output.format(in);
 
-            //KD_PELAYANAN[0] belum jelas definisi kodenya jadi untuk sementara menggunakan kode mulai dari 10001
-            //KD_PUSKESMAS[1] dan NIK[3] belum ada pada db SQLite jadi di hard core untuk sementara
-            JSONObject postDataParams = new JSONObject();
+            JSONArray pelayanan_array = new JSONArray();
+            JSONArray pelayanan_ket_array = new JSONArray();
+            JSONObject data_param = new JSONObject();
+            JSONObject pelayanan = new JSONObject();
+            JSONObject pelayanan_ket_tambahan = new JSONObject();
+
             try {
-                postDataParams.put("0", "10001");
-                postDataParams.put("1", "P3344556677");
-                postDataParams.put("2", out);
-                postDataParams.put("3", "1111111111111111");
-                postDataParams.put("4", cursor.getString(2));
-                postDataParams.put("5", cursor.getString(3));
-                postDataParams.put("6", cursor.getString(4));
-                postDataParams.put("7", cursor.getString(5));
-                postDataParams.put("8", cursor.getString(6));
-                postDataParams.put("9", cursor.getString(7));
-                postDataParams.put("10", cursor.getString(8));
-                postDataParams.put("11", cursor.getString(9));
+                data_param.put("nama_dokter", cursor.getString(0));
+                data_param.put("date", out);
+                data_param.put("datetime", cursor.getString(1));
+                data_param.put("nik", cursor.getString(2));
+                data_param.put("kd_puskesmas", "P3273020203");
+                data_param.put("poli", cursor.getString(4));
+                data_param.put("anamnesa", cursor.getString(5));
+                data_param.put("rujukan", cursor.getString(6));
+                data_param.put("username", "admincaringin");
+
+                for(int i=0; i<6; i++){
+                    pelayanan.put(""+i, cursor.getString(i+7));
+                }
+                pelayanan_array.put(pelayanan);
+                data_param.put("pelayanan", pelayanan_array);
+
+                for(int i=0; i<25; i++){
+                    pelayanan_ket_tambahan.put(""+i, cursor.getString(i+13));
+                }
+                pelayanan_ket_array.put(pelayanan_ket_tambahan);
+                data_param.put("pelayanan_ket_tambahan", pelayanan_ket_array);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            new UpdateMedrecDinamik(getActivity()).execute(postDataParams.toString(), token, "" + cursor.getString(1));
-            Log.i("Array", postDataParams.toString());
+            new UpdateMedrecDinamik(getActivity()).execute(data_param.toString(), token, "" + cursor.getString(1));
+            Log.i("Array", data_param.toString());
         }
     }
 }
