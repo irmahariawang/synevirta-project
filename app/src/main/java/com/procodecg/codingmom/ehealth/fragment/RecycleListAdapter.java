@@ -27,7 +27,7 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
     private ArrayList<String> listTanggal;
     private ArrayList<String> listNamaDokter;
     private Activity activity;
-    public static String currentPosition;
+    public static String tanggalPelayanan;
 
 /*
     private List<RekamMedisModel> rekamMedisModelList = new ArrayList<>();
@@ -108,8 +108,8 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
         holder.rootLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentPosition = String.valueOf(position+1);
-                Toast.makeText(activity, currentPosition, Toast.LENGTH_SHORT).show();
+                tanggalPelayanan = holder.mTextView1.getText().toString();
+                Toast.makeText(activity, tanggalPelayanan, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(activity, RekmedlamaActivity.class);
                 activity.startActivity(intent);
 
@@ -141,7 +141,7 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
         });
     }
 
-    public static String getCurrentPosition(){
-        return currentPosition;
+    public static String getTanggalPelayanaan(){
+        return tanggalPelayanan;
     }
 }
