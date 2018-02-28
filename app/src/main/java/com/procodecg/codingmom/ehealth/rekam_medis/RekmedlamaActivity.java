@@ -136,8 +136,8 @@ public class RekmedlamaActivity extends AppCompatActivity {
 
         };
 
-        String whereClause = EhealthContract.RekamMedisEntry._ID + " = ? ";
-        String[] whereArgs = new String[]{RecycleListAdapter.getCurrentPosition()};
+        String whereClause = EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+ " = ? ";
+        String[] whereArgs = new String[]{RecycleListAdapter.getTanggalPelayanan()};
 
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME,projection, whereClause,whereArgs,null,null,null);
 
