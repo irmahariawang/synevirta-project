@@ -558,6 +558,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 ContentValues values = new ContentValues();
                 values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
                 values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
+                values.put(RekamMedisEntry.COLUMN_NIK, "1802280000000001");
                 values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
                 values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
                 values.put(RekamMedisEntry.COLUMN_RUJUKAN, mPemberiRujukanString);
