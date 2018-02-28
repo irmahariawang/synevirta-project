@@ -95,6 +95,7 @@ public class EhealthDbHelper extends SQLiteOpenHelper {
                 + RekamMedisEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_TGL_PERIKSA + " DATETIME, "
                 + COLUMN_NAMA_DOKTER + " TEXT, "
+                + EhealthContract.RekamMedisEntry.COLUMN_NIK + " TEXT, "
                 + RekamMedisEntry.COLUMN_ID_PUSKESMAS + " TEXT, "
                 + EhealthContract.RekamMedisEntry.COLUMN_POLI + " INTEGER, "
                 + EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN + " TEXT, "
