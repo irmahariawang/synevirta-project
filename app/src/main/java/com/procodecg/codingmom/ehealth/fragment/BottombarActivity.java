@@ -179,15 +179,14 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
 
     //menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA dalam bentuk JSON Object
     public void getDataAndPost() throws ParseException {
-        i++;
         String timestamp;
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        //get last timestamp yang dikirim
+        //mengambil last timestamp yang dikirim
         settings = getSharedPreferences("SETTING", MODE_PRIVATE);
         String ts = settings.getString("LAST_TIMESTAMP", "");
 
-        //get token yang sudah ada pada app
+        //mengambil token yang sudah ada pada app
         jwt = getSharedPreferences("TOKEN", MODE_PRIVATE);
         String token = jwt.getString("ACCESS_TOKEN", "");
 
@@ -196,21 +195,51 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         } else {
             timestamp = ts;
         }
-        
+
         String[] columns = {
-                //kode pelayanan
-                EhealthContract.RekamMedisEntry._ID,
+                //0-6 json object luar
+                EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER,
                 EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA,
-                //NIK
+                EhealthContract.RekamMedisEntry.COLUMN_NIK,
+                EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS,
+                EhealthContract.RekamMedisEntry.COLUMN_POLI,
                 EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA,
+                EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN,
+                //7-12 json array pelayanan
                 EhealthContract.RekamMedisEntry.COLUMN_KEPALA,
-                EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO,
                 EhealthContract.RekamMedisEntry.COLUMN_SUHU,
                 EhealthContract.RekamMedisEntry.COLUMN_NADI,
                 EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI,
                 EhealthContract.RekamMedisEntry.COLUMN_BERAT,
-                EhealthContract.RekamMedisEntry.COLUMN_TINGGI
+                EhealthContract.RekamMedisEntry.COLUMN_TINGGI,
+                //13-37
+                EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE,
+                EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE,
+                EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG,
+                EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU,
+                EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL,
+                EhealthContract.RekamMedisEntry.COLUMN_KESADARAN,
+                EhealthContract.RekamMedisEntry.COLUMN_THORAX,
+                EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN,
+                EhealthContract.RekamMedisEntry.COLUMN_GENITALIA,
+                EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS,
+                EhealthContract.RekamMedisEntry.COLUMN_KULIT,
+                EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI,
+                EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM,
+                EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI,
+                EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO,
+                EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA,
+                EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING,
+                EhealthContract.RekamMedisEntry.COLUMN_RESEP,
+                EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP,
+                EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP,
+                EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP,
+                EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN,
+                EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM,
+                EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM,
+                EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM
         };
+
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
         if(cursor.getCount()==0){
             Toast.makeText(BottombarActivity.this, "No Data Update", Toast.LENGTH_LONG).show();
@@ -222,29 +251,41 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
             Date in = input.parse(cursor.getString(1));
             String out = output.format(in);
 
-            //KD_PELAYANAN[0] belum jelas definisi kodenya jadi sementara menggunakan kode mulai dari 10001
-            //KD_PUSKESMAS[1] dan NIK[3] belum tersedia di SQLite jadi di hard core untuk sementara
-            JSONObject postDataParams = new JSONObject();
+            JSONArray pelayanan_array = new JSONArray();
+            JSONArray pelayanan_ket_array = new JSONArray();
+            JSONObject data_param = new JSONObject();
+            JSONObject pelayanan = new JSONObject();
+            JSONObject pelayanan_ket_tambahan = new JSONObject();
+
             try {
-                postDataParams.put("0", "1000" + i);
-                postDataParams.put("1", "P3344556677");
-                postDataParams.put("2", out);
-                postDataParams.put("3", "111111111111111" + i);
-                postDataParams.put("4", cursor.getString(2));
-                postDataParams.put("5", cursor.getString(3));
-                postDataParams.put("6", cursor.getString(4));
-                postDataParams.put("7", cursor.getString(5));
-                postDataParams.put("8", cursor.getString(6));
-                postDataParams.put("9", cursor.getString(7));
-                postDataParams.put("10", cursor.getString(8));
-                postDataParams.put("11", cursor.getString(9));
+                data_param.put("nama_dokter", cursor.getString(0));
+                data_param.put("date", out);
+                data_param.put("datetime", cursor.getString(1));
+                data_param.put("nik", cursor.getString(2));
+                data_param.put("kd_puskesmas", "P3273020203");
+                data_param.put("poli", cursor.getString(4));
+                data_param.put("anamnesa", cursor.getString(5));
+                data_param.put("rujukan", cursor.getString(6));
+                data_param.put("username", "admincaringin");
+
+                for(int i=0; i<6; i++){
+                    pelayanan.put(""+i, cursor.getString(i+7));
+                }
+                pelayanan_array.put(pelayanan);
+                data_param.put("pelayanan", pelayanan_array);
+
+                for(int i=0; i<25; i++){
+                    pelayanan_ket_tambahan.put(""+i, cursor.getString(i+13));
+                }
+                pelayanan_ket_array.put(pelayanan_ket_tambahan);
+                data_param.put("pelayanan_ket_tambahan", pelayanan_ket_array);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            //memanggil asynctask
-            new UpdateMedrecDinamik(this).execute(postDataParams.toString(), token, "" + cursor.getString(1));
-            Log.i("Array", postDataParams.toString());
+            new UpdateMedrecDinamik(this).execute(data_param.toString(), token, "" + cursor.getString(1));
+            Log.i("Array", data_param.toString());
         }
     }
 
