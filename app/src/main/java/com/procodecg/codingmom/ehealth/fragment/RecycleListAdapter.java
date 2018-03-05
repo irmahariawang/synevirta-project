@@ -141,7 +141,7 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
         });
     }
 
-    public static String getTanggalPelayanaan(){
+    public static String getTanggalPelayanan(){
         return tanggalPelayanan;
     }
 }
