@@ -63,6 +63,8 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
     
     private SharedPreferences jwt, settings;
     int i = 1;
+    
+    EhealthDbHelper mDbHelper;
 
     Typeface fontBold;
 
@@ -114,7 +116,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        EhealthDbHelper mDbHelper = new EhealthDbHelper(this);
+        mDbHelper = new EhealthDbHelper(this);
         mDbHelper.openDB();
         boolean Tableexist = mDbHelper.isTableExists(EhealthContract.RekamMedisEntry.TABLE_NAME, true);
 
