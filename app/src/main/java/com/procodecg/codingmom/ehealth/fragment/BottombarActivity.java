@@ -1,5 +1,8 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,8 +11,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.asynctask.AsyncResponse;
@@ -18,6 +23,15 @@ import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by macbookpro on 7/31/17.
