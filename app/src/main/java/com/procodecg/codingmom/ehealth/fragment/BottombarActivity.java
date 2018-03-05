@@ -12,6 +12,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.procodecg.codingmom.ehealth.R;
+import com.procodecg.codingmom.ehealth.asynctask.AsyncResponse;
+import com.procodecg.codingmom.ehealth.asynctask.TokenRequest;
+import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
