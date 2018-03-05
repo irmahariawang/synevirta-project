@@ -302,7 +302,7 @@ public class RekmedlamaActivity extends AppCompatActivity {
         }
 
         //TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-        Toast.makeText(this, RecycleListAdapter.getCurrentPosition(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, RecycleListAdapter.getCurrentPosition(), Toast.LENGTH_SHORT).show();
         //Toast.makeText(this, getIntent().getStringExtra("dokter"), Toast.LENGTH_SHORT).show();
     }
 
