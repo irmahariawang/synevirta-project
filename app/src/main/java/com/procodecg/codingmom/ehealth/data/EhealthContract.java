@@ -74,13 +74,6 @@ public final class EhealthContract {
          * Type: TEXT
          */
         public final static String COLUMN_DOKTER = "nama_dokter";
-        
-        /**
-         * NIK Pasien.
-         *
-         * Type: TEXT
-         */
-        public final static String COLUMN_NIK = "nik";
 
         /**
          * PHC number.
@@ -129,6 +122,12 @@ public final class EhealthContract {
          */
         public final static String COLUMN_NAMA_DOKTER = "nama_dokter";
 
+        /**
+         * NIK Pasien.
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_NIK = "nik";
 
         /**
          * ID Puskesmas.
