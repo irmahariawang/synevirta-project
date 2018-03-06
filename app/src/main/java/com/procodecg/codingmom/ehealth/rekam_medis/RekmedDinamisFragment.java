@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.procodecg.codingmom.ehealth.R;
+import com.procodecg.codingmom.ehealth.asynctask.HostChecking;
 import com.procodecg.codingmom.ehealth.asynctask.TokenRequest;
 import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
@@ -111,23 +112,39 @@ public class RekmedDinamisFragment extends Fragment {
         fabSinkronSikda.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
-                String token = jwt.getString("ACCESS_TOKEN", "");
+                ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                if (networkInfo != null && networkInfo.isConnected()) {
+//                    ((BottombarActivity)getActivity()).changeTextStatus(true);
+                    new HostChecking(getActivity()).execute();
 
-                settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
-                String username = settings.getString("USERNAME", "");
-                String password = settings.getString("PASSWORD", "");
-                String ts = settings.getString("LAST_TIMESTAMP", "");
+                    settings = getActivity().getSharedPreferences("HOST", MODE_PRIVATE);
+                    Boolean hostDetected = settings.getBoolean("DETECTED", true);
 
-                if(token.isEmpty()){
-                    Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
-                    new TokenRequest(getActivity()).execute(username, password);
-                } else {
-                    try {
-                        getDataAndPost();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                    if(hostDetected){
+                        jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
+                        String token = jwt.getString("ACCESS_TOKEN", "");
+
+                        settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
+                        String username = settings.getString("USERNAME", "");
+                        String password = settings.getString("PASSWORD", "");
+                        String ts = settings.getString("LAST_TIMESTAMP", "");
+
+                        if(token.isEmpty()){
+                            Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
+                            new TokenRequest(getActivity()).execute(username, password);
+                        } else {
+                            try {
+                                ((BottombarActivity)getActivity()).getDataAndPost();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Host not detected", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    ((BottombarActivity)getActivity()).changeTextStatus(false);
                 }
             }
         });
@@ -227,117 +244,6 @@ public class RekmedDinamisFragment extends Fragment {
 
         } else {
             //Toast.makeText(getActivity(), "Table not exist", Toast.LENGTH_SHORT).show();
-        }
-    }
-    
-    //menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA dalam bentuk JSON Object
-    public void getDataAndPost() throws ParseException {
-        String timestamp;
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        //mengambil last timestamp yang dikirim
-        settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
-        String ts = settings.getString("LAST_TIMESTAMP", "");
-
-        //mengambil token yang sudah ada pada app
-        jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
-        String token = jwt.getString("ACCESS_TOKEN", "");
-
-        if(ts.isEmpty()){
-            timestamp = "0";
-        } else {
-            timestamp = ts;
-        }
-
-        String[] columns = {
-                //0-6 json object luar
-                RekamMedisEntry.COLUMN_NAMA_DOKTER,
-                RekamMedisEntry.COLUMN_TGL_PERIKSA,
-                RekamMedisEntry.COLUMN_NIK,
-                RekamMedisEntry.COLUMN_ID_PUSKESMAS,
-                RekamMedisEntry.COLUMN_POLI,
-                RekamMedisEntry.COLUMN_KELUHANUTAMA,
-                RekamMedisEntry.COLUMN_RUJUKAN,
-                //7-12 json array pelayanan
-                RekamMedisEntry.COLUMN_KEPALA,
-                RekamMedisEntry.COLUMN_SUHU,
-                RekamMedisEntry.COLUMN_NADI,
-                RekamMedisEntry.COLUMN_RESPIRASI,
-                RekamMedisEntry.COLUMN_BERAT,
-                RekamMedisEntry.COLUMN_TINGGI,
-                //13-37 json array pelayanan_ket_tambahan
-                RekamMedisEntry.COLUMN_SYSTOLE,
-                RekamMedisEntry.COLUMN_DIASTOLE,
-                RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG,
-                RekamMedisEntry.COLUMN_PENYAKIT_DULU,
-                RekamMedisEntry.COLUMN_PENYAKIT_KEL,
-                RekamMedisEntry.COLUMN_KESADARAN,
-                RekamMedisEntry.COLUMN_THORAX,
-                RekamMedisEntry.COLUMN_ABDOMEN,
-                RekamMedisEntry.COLUMN_GENITALIA,
-                RekamMedisEntry.COLUMN_EXTREMITAS,
-                RekamMedisEntry.COLUMN_KULIT,
-                RekamMedisEntry.COLUMN_NEUROLOGI,
-                RekamMedisEntry.COLUMN_LABORATORIUM,
-                RekamMedisEntry.COLUMN_RADIOLOGI,
-                RekamMedisEntry.COLUMN_STATUS_LABRADIO,
-                RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA,
-                RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING,
-                RekamMedisEntry.COLUMN_RESEP,
-                RekamMedisEntry.COLUMN_CATTRESEP,
-                RekamMedisEntry.COLUMN_STATUSRESEP,
-                RekamMedisEntry.COLUMN_REPETISIRESEP,
-                RekamMedisEntry.COLUMN_TINDAKAN,
-                RekamMedisEntry.COLUMN_AD_VITAM,
-                RekamMedisEntry.COLUMN_AD_FUNCTIONAM,
-                RekamMedisEntry.COLUMN_AD_SANATIONAM
-        };
-        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, columns, ""+RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
-        if(cursor.getCount()==0){
-            Toast.makeText(getActivity(), "No Data Update", Toast.LENGTH_LONG).show();
-        } else {
-            cursor.moveToFirst();
-
-            DateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            DateFormat output = new SimpleDateFormat("yyyy-MM-dd");
-            Date in = input.parse(cursor.getString(1));
-            String out = output.format(in);
-
-            JSONArray pelayanan_array = new JSONArray();
-            JSONArray pelayanan_ket_array = new JSONArray();
-            JSONObject data_param = new JSONObject();
-            JSONObject pelayanan = new JSONObject();
-            JSONObject pelayanan_ket_tambahan = new JSONObject();
-
-            try {
-                data_param.put("nama_dokter", cursor.getString(0));
-                data_param.put("date", out);
-                data_param.put("datetime", cursor.getString(1));
-                data_param.put("nik", cursor.getString(2));
-                data_param.put("kd_puskesmas", "P3273020203");
-                data_param.put("poli", cursor.getString(4));
-                data_param.put("anamnesa", cursor.getString(5));
-                data_param.put("rujukan", cursor.getString(6));
-                data_param.put("username", "admincaringin");
-
-                for(int i=0; i<6; i++){
-                    pelayanan.put(""+i, cursor.getString(i+7));
-                }
-                pelayanan_array.put(pelayanan);
-                data_param.put("pelayanan", pelayanan_array);
-
-                for(int i=0; i<25; i++){
-                    pelayanan_ket_tambahan.put(""+i, cursor.getString(i+13));
-                }
-                pelayanan_ket_array.put(pelayanan_ket_tambahan);
-                data_param.put("pelayanan_ket_tambahan", pelayanan_ket_array);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            new UpdateMedrecDinamik(getActivity()).execute(data_param.toString(), token, "" + cursor.getString(1));
-            Log.i("Array", data_param.toString());
         }
     }
 }
