@@ -254,7 +254,6 @@ public class PasiensyncActivity extends AppCompatActivity {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context.getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
@@ -273,17 +272,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                             serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                             serialPort.read(mCallback);
                             Log.i(TAG, "Serial port opened");
-                            Toast.makeText(context.getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
 
-//                            try {
-//                                send();
-//                                Thread.sleep(2000);
-//                                send();
-//                                Thread.sleep(6000);
-//                                send();
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
                             send();
                         } else {
                             Log.w(TAG, "PORT NOT OPEN");
@@ -295,7 +284,6 @@ public class PasiensyncActivity extends AppCompatActivity {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
-                Toast.makeText(getApplicationContext(), "Usb device attached", Toast.LENGTH_SHORT).show();
 
                 // connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
@@ -321,9 +309,8 @@ public class PasiensyncActivity extends AppCompatActivity {
                     Toast.makeText(context.getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
                 }
 
-//            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
-//                Toast.makeText(getApplicationContext(), "Usb device detached", Toast.LENGTH_SHORT).show();
-//                i = 0;
+            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                i = 0;
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -346,7 +333,11 @@ public class PasiensyncActivity extends AppCompatActivity {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
-                    send();
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
+                        i--;
+                    } else {
+                        send();
+                    }
                 }
             } else if (i == 2) { //medrec statik
                 respondData.put(bytes);
@@ -368,15 +359,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     kronis = Arrays.copyOfRange(medrecStatikResponse, 617, 872);
                     bawaan = Arrays.copyOfRange(medrecStatikResponse, 874, 1129);
                     resiko = Arrays.copyOfRange(medrecStatikResponse, 1131, 1386);
-/*
-                    tvSet(goldar, Integer.toString(g));
-                    tvSet(alergi, Util.bytesToString(Util.trimZeroPadding(al)));
-                    tvSet(riwayatOperasi, Util.bytesToString(Util.trimZeroPadding(operasi)));
-                    tvSet(riwayatRawat, Util.bytesToString(Util.trimZeroPadding(rawatrs)));
-                    tvSet(riwayatPenyakitKronis, Util.bytesToString(Util.trimZeroPadding(kronis)));
-                    tvSet(riwayatPenyakitBawaan, Util.bytesToString(Util.trimZeroPadding(bawaan)));
-                    tvSet(faktorRisiko, Util.bytesToString(Util.trimZeroPadding(resiko)));
-*/
+
                     Log.i(TAG, "Goldar: " + g);
                     Log.i(TAG, "alergi: " + Util.bytesToString(Util.trimZeroPadding(al)));
                     Log.i(TAG, "operasi: " + Util.bytesToString(Util.trimZeroPadding(operasi)));
@@ -450,9 +433,47 @@ public class PasiensyncActivity extends AppCompatActivity {
 
                     PDCData.nik = Util.bytesToString(Util.trimZeroPadding(nik));
                     PDCData.kategoriPasien = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
+                    PDCData.noAsuransi = Util.bytesToString(noAsuransi);
+                    PDCData.tglDaftar = Util.getformattedDate(Util.bytestoDate(tglDaftar));
                     PDCData.namaPasien = Util.bytesToString(Util.trimZeroPadding(namaPasien));
+                    PDCData.namaKK = Util.bytesToString(Util.trimZeroPadding(namaKK));
+                    PDCData.hubunganKeluarga = Util.bytesToString(hubunganKeluarga);
+                    PDCData.alamat = Util.bytesToString(Util.trimZeroPadding(alamat));
+                    PDCData.rt = Util.bytesToHex(rt);
+                    PDCData.rw = Util.bytesToHex(rw);
+                    PDCData.kelurahanDesa = Util.bytesToHex(kelurahanDesa);
+                    PDCData.kecamatan = Util.bytesToHex(kecamatan);
+                    PDCData.kotaKabupaten = Util.bytesToHex(kotaKabupaten);
+                    PDCData.provinsi = Util.bytesToHex(provinsi);
+                    PDCData.kodepos = Util.bytesToString(kodepos);
+                    PDCData.isDalamWilayahKerja = Util.bytesToHex(isDalamWilayahKerja);
+                    PDCData.tempatLahir = Util.bytesToString(Util.trimZeroPadding(tempatLahir));
                     PDCData.tglLahir = Util.getformattedDate(Util.bytestoDate(tglLahir));
+                    PDCData.telepon = Util.bytesToString(Util.trimZeroPadding(telepon));
+                    PDCData.hp = Util.bytesToString(Util.trimZeroPadding(hp));
                     PDCData.jenisKelamin = Util.bytesToString(jenisKelamin);
+                    PDCData.agama = Util.bytesToHex(agama);
+                    PDCData.pendidikan = Util.bytesToHex(pendidikan);
+                    PDCData.pekerjaan = Util.bytesToHex(pekerjaan);
+                    PDCData.kelasPerawatan = Util.bytesToHex(kelasPerawatan);
+                    PDCData.email = Util.bytesToString(Util.trimZeroPadding(email));
+                    PDCData.statusPernikahan = Util.bytesToHex(statusPernikahan);
+                    PDCData.kewarganegaraan = Util.bytesToHex(kewarganegaraan);
+                    PDCData.namaKerabat = Util.bytesToString(Util.trimZeroPadding(namaKerabat));
+                    PDCData.hubunganKerabat = Util.bytesToHex(hubunganKerabat);
+                    PDCData.alamatKerabat = Util.bytesToString(Util.trimZeroPadding(alamatKerabat));
+                    PDCData.kelurahanDesaKerabat = Util.bytesToHex(kelurahanDesaKerabat);
+                    PDCData.kecamatanKerabat = Util.bytesToHex(kecamatanKerabat);
+                    PDCData.kotaKabupatenKerabat = Util.bytesToHex(kotaKabupatenKerabat);
+                    PDCData.provinsiKerabat = Util.bytesToHex(provinsiKerabat);
+                    PDCData.kodeposKerabat = Util.bytesToString(kodeposKerabat);
+                    PDCData.teleponKerabat = Util.bytesToString(Util.trimZeroPadding(teleponKerabat));
+                    PDCData.hpKerabat =  Util.bytesToString(Util.trimZeroPadding(hpKerabat));
+                    PDCData.namaKantor = Util.bytesToString(Util.trimZeroPadding(namaKantor));
+                    PDCData.alamatKantor = Util.bytesToString(Util.trimZeroPadding(alamatKantor));
+                    PDCData.kotaKabupatenKantor = Util.bytesToHex(kotaKabupatenKantor);
+                    PDCData.teleponKantor = Util.bytesToString(Util.trimZeroPadding(teleponKantor));
+                    PDCData.hpKantor = Util.bytesToString(Util.trimZeroPadding(hpKantor));
 
                     send();
                 }
