@@ -365,6 +365,28 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         }
     }
     
+    @Override
+    public void hostDetected(Boolean output) {
+        SharedPreferences sp = getSharedPreferences("HOST", MODE_PRIVATE);
+        SharedPreferences.Editor editor=sp.edit();
+        editor.putBoolean("DETECTED", output);
+        editor.apply();
+    }
+
+    // Method to change the text status
+    public void changeTextStatus(boolean isConnected) {
+
+        // Change status according to boolean value
+        if (isConnected) {
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Internet Connection Detected", Snackbar.LENGTH_LONG);
+            snackbar.show();
+        } else {
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "No Internet Connection", Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
+
+    }
+    
 //    public void setSubTitleText(String title){
 //            txtSubTitle.setText(title);
 //        }
