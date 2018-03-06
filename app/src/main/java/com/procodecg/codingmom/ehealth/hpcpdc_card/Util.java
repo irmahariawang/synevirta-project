@@ -1,10 +1,12 @@
 package com.procodecg.codingmom.ehealth.hpcpdc_card;
 
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * Created by neo on 24/01/18.
@@ -20,6 +22,20 @@ public class Util {
                     + Character.digit(s.charAt(i+1), 16));
         }
         return data;
+    }
+
+    public static Date bytestoDate(byte[] dateBytes) {
+        String hexDate = bytesToHex(dateBytes);
+        int secs = Integer.parseInt(hexDate, 16);
+        byte[] bytes = ByteBuffer.allocate(4).putInt(secs).array();
+        int dis = ByteBuffer.wrap(bytes).getInt();
+        long l = (long) dis*1000;
+        return new Date(l);
+    }
+
+    public static String getformattedDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
     }
 
     public static long getCurrentTimeMillis() {
@@ -80,6 +96,17 @@ public class Util {
         buffer.put(bytes);
         buffer.flip();//need flip
         return buffer.getLong();
+    }
+
+    public static String asciiToHex(String asciiValue)
+    {
+        char[] chars = asciiValue.toCharArray();
+        StringBuffer hex = new StringBuffer();
+        for (int i = 0; i < chars.length; i++)
+        {
+            hex.append(Integer.toHexString((int) chars[i]));
+        }
+        return hex.toString();
     }
 /*
     public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {

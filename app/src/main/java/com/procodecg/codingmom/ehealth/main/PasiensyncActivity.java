@@ -33,6 +33,7 @@ import com.procodecg.codingmom.ehealth.data.EhealthContract.KartuEntry;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecStatikData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCDataActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 
@@ -320,9 +321,9 @@ public class PasiensyncActivity extends AppCompatActivity {
                     Toast.makeText(context.getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
                 }
 
-            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
-                Toast.makeText(getApplicationContext(), "Usb device detached", Toast.LENGTH_SHORT).show();
-                i = 0;
+//            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+//                Toast.makeText(getApplicationContext(), "Usb device detached", Toast.LENGTH_SHORT).show();
+//                i = 0;
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -388,7 +389,13 @@ public class PasiensyncActivity extends AppCompatActivity {
             } else if (i == 3) { // biodata
                 respondData.put(bytes);
                 if (respondData.position() == 826) {
-                    byte[] nik, kategoriPasien, nomorAsuransi, tglDaftar, nama, namaKK, hubunganKeluarga, alamat;
+                    byte[] nik, kategoriPasien, noAsuransi, tglDaftar, namaPasien, namaKK,
+                            hubunganKeluarga, alamat, rt, rw, kelurahanDesa, kecamatan, kotaKabupaten, provinsi, kodepos,
+                            isDalamWilayahKerja, tempatLahir, tglLahir, telepon, hp, jenisKelamin, agama, pendidikan,
+                            pekerjaan, kelasPerawatan, email, statusPernikahan, kewarganegaraan, namaKerabat,
+                            hubunganKerabat, alamatKerabat, kelurahanDesaKerabat, kecamatanKerabat, kotaKabupatenKerabat,
+                            provinsiKerabat, kodeposKerabat, teleponKerabat, hpKerabat, namaKantor, alamatKantor,
+                            kotaKabupatenKantor, teleponKantor, hpKantor;
                     biodataResponse = new byte[826];
                     respondData.rewind();
                     respondData.get(biodataResponse);
@@ -398,29 +405,55 @@ public class PasiensyncActivity extends AppCompatActivity {
 
                     nik = Arrays.copyOfRange(biodataResponse, 0, 16);
                     kategoriPasien = Arrays.copyOfRange(biodataResponse, 16, 68);
-                    nomorAsuransi = Arrays.copyOfRange(biodataResponse, 68, 150);
+                    noAsuransi = Arrays.copyOfRange(biodataResponse, 68, 150);
                     tglDaftar = Arrays.copyOfRange(biodataResponse, 150, 154);
-                    nama = Arrays.copyOfRange(biodataResponse, 154, 206);
+                    namaPasien = Arrays.copyOfRange(biodataResponse, 154, 206);
                     namaKK = Arrays.copyOfRange(biodataResponse, 206, 258);
                     hubunganKeluarga = Arrays.copyOfRange(biodataResponse, 258, 259);
                     alamat = Arrays.copyOfRange(biodataResponse, 259, 361);
-/*
-                    tvSet(nikTv, Util.bytesToString(Util.trimZeroPadding(nik)));
-                    tvSet(kategoriPasienTv, Util.bytesToString(Util.trimZeroPadding(kategoriPasien)));
-                    tvSet(noAsuransiTv, Util.bytesToString(Util.trimZeroPadding(nomorAsuransi)));
-                    tvSet(namaTv, Util.bytesToString(Util.trimZeroPadding(nama)));
-                    tvSet(namaKKTv, Util.bytesToString(Util.trimZeroPadding(namaKK)));
-                    tvSet(hubKeluargaTv, Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga)));
-                    tvSet(alamatTv, Util.bytesToString(Util.trimZeroPadding(alamat)));
-*/
-                    Log.i(TAG, "nik: " + Util.bytesToString(Util.trimZeroPadding(nik)));
-                    Log.i(TAG, "kategori pasien: " + Util.bytesToString(Util.trimZeroPadding(kategoriPasien)));
-                    Log.i(TAG, "nomor asuransi: " + Util.bytesToString(Util.trimZeroPadding(nomorAsuransi)));
-                    Log.i(TAG, "tgl daftar: " + Util.bytesToString(Util.trimZeroPadding(tglDaftar)));
-                    Log.i(TAG, "nama: " + Util.bytesToHex(nama));
-                    Log.i(TAG, "namakk: " + Util.bytesToHex(namaKK));
-                    Log.i(TAG, "hub keluarga: " + Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga)));
-                    Log.i(TAG, "alamat: " + Util.bytesToHex(alamat));
+                    rt = Arrays.copyOfRange(biodataResponse, 361, 362);
+                    rw = Arrays.copyOfRange(biodataResponse, 362, 363);
+                    kelurahanDesa = Arrays.copyOfRange(biodataResponse, 363, 365);
+                    kecamatan = Arrays.copyOfRange(biodataResponse, 365, 366);
+                    kotaKabupaten = Arrays.copyOfRange(biodataResponse, 366, 367);
+                    provinsi = Arrays.copyOfRange(biodataResponse, 367, 368);
+                    kodepos = Arrays.copyOfRange(biodataResponse, 368, 371);
+                    isDalamWilayahKerja = Arrays.copyOfRange(biodataResponse, 371, 372);
+                    tempatLahir = Arrays.copyOfRange(biodataResponse, 372, 394);
+                    tglLahir = Arrays.copyOfRange(biodataResponse, 394, 398);
+                    telepon = Arrays.copyOfRange(biodataResponse, 398, 416);
+                    hp = Arrays.copyOfRange(biodataResponse, 416, 434);
+                    jenisKelamin = Arrays.copyOfRange(biodataResponse, 434, 435);
+                    agama = Arrays.copyOfRange(biodataResponse, 435, 436);
+                    pendidikan = Arrays.copyOfRange(biodataResponse, 436, 437);
+                    pekerjaan = Arrays.copyOfRange(biodataResponse, 437, 438);
+                    kelasPerawatan = Arrays.copyOfRange(biodataResponse, 438, 440);
+                    email = Arrays.copyOfRange(biodataResponse, 440, 462);
+                    statusPernikahan = Arrays.copyOfRange(biodataResponse, 462, 463);
+                    kewarganegaraan = Arrays.copyOfRange(biodataResponse, 463, 464);
+
+                    namaKerabat = Arrays.copyOfRange(biodataResponse, 464, 516);
+                    hubunganKerabat = Arrays.copyOfRange(biodataResponse, 516, 517);
+                    alamatKerabat = Arrays.copyOfRange(biodataResponse, 517, 619);
+                    kelurahanDesaKerabat = Arrays.copyOfRange(biodataResponse, 619, 621);
+                    kecamatanKerabat = Arrays.copyOfRange(biodataResponse, 621, 622);
+                    kotaKabupatenKerabat = Arrays.copyOfRange(biodataResponse, 622, 623);
+                    provinsiKerabat = Arrays.copyOfRange(biodataResponse, 623, 624);
+                    kodeposKerabat = Arrays.copyOfRange(biodataResponse, 624, 627);
+                    teleponKerabat = Arrays.copyOfRange(biodataResponse, 627, 645);
+                    hpKerabat = Arrays.copyOfRange(biodataResponse, 645, 663);
+                    namaKantor = Arrays.copyOfRange(biodataResponse, 663, 685);
+                    alamatKantor = Arrays.copyOfRange(biodataResponse, 685, 787);
+                    kotaKabupatenKantor = Arrays.copyOfRange(biodataResponse, 787, 788);
+                    teleponKantor = Arrays.copyOfRange(biodataResponse, 788, 806);
+                    hpKantor = Arrays.copyOfRange(biodataResponse, 806, 822);
+
+                    PDCData.nik = Util.bytesToString(Util.trimZeroPadding(nik));
+                    PDCData.kategoriPasien = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
+                    PDCData.namaPasien = Util.bytesToString(Util.trimZeroPadding(namaPasien));
+                    PDCData.tglLahir = Util.getformattedDate(Util.bytestoDate(tglLahir));
+                    PDCData.jenisKelamin = Util.bytesToString(jenisKelamin);
+
                     send();
                 }
             }

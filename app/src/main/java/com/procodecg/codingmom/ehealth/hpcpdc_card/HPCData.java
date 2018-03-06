@@ -5,7 +5,6 @@ package com.procodecg.codingmom.ehealth.hpcpdc_card;
  */
 
 public class HPCData {
-    public static int lock;
     public static String holderRole, nik; // cert
     public static String nama, sip; // hpdata
 
