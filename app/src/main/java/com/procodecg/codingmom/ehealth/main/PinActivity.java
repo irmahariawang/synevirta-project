@@ -68,12 +68,18 @@ public class PinActivity extends SessionManagement {
     TextView hpcRole;
     TextView hpcSIP;
 
+    TextView attemptslefttv;
+    TextView numberOfRemainingLoginAttemptstv;
+    TextView textviewkali;
+
+    Pinview pinview;
+
     UsbManager usbManager;
     UsbDevice usbDevice;
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
 
-    byte[] APDU_owner_auth = {(byte) 0x80, (byte) 0xC3, 0x00, 0x00, 0x00, 0x00, 0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
+    byte[] APDU_owner_auth = {(byte) 0x80, (byte) 0xC3, 0x00, 0x00, 0x00, 0x00, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35};
     // 00A4040008 48504344554D4D59
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     // 80D10000000000
@@ -144,9 +150,14 @@ public class PinActivity extends SessionManagement {
 
         setContentView(R.layout.activity_pin);
 
-        final TextView attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
-        final TextView numberOfRemainingLoginAttemptstv = (TextView) findViewById(R.id.numberOfRemainingLoginAttemptsTV);
-        final TextView textviewkali = (TextView) findViewById(R.id.textViewKali);
+        //TODO diganti
+//        final TextView attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
+//        final TextView numberOfRemainingLoginAttemptstv = (TextView) findViewById(R.id.numberOfRemainingLoginAttemptsTV);
+//        final TextView textviewkali = (TextView) findViewById(R.id.textViewKali);
+
+        attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
+        numberOfRemainingLoginAttemptstv = (TextView) findViewById(R.id.numberOfRemainingLoginAttemptsTV);
+        textviewkali = (TextView) findViewById(R.id.textViewKali);
 
         font = Typeface.createFromAsset(getAssets(), "font1.ttf");
         fontbold = Typeface.createFromAsset(getAssets(), "font1bold.ttf");
@@ -159,59 +170,62 @@ public class PinActivity extends SessionManagement {
         tv3.setTypeface(fontbold);
         tv4.setTypeface(fontbold);
 
-        Pinview pinview = (Pinview) findViewById(R.id.pinView);
+        pinview = (Pinview) findViewById(R.id.pinView);
 
 //        getHPCdata();
 
         pinview.setPinViewEventListener(new Pinview.PinViewEventListener() {
             @Override
             public void onDataEntered(Pinview pinview, boolean b) {
-//          jika pin benar
-                if (pinview.getValue().toString().equals("12345")) {
-                    Toast.makeText(PinActivity.this, "Pin Anda benar", Toast.LENGTH_SHORT).show();
-                    hideKeyboard(PinActivity.this);
-                    Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
-                    startActivity(activity);
-                    finish();
-
-//          jika pin salah
-                } else {
-
-                    clearPin((ViewGroup) pinview);
-                    pinview.clearFocus();
-                    Toast.makeText(getApplicationContext(), "PIN yang Anda masukkan salah",
-                            Toast.LENGTH_SHORT).show();
-
-                    numberOfRemainingLoginAttempts--;
-                    numberOfRemainingLoginAttemptstv.setText(Integer.toString(numberOfRemainingLoginAttempts));
-
-//                  tampilkan text "Kesempatan login : x kali"
-                    attemptslefttv.setVisibility(View.VISIBLE);
-                    numberOfRemainingLoginAttemptstv.setVisibility(View.VISIBLE);
-                    textviewkali.setVisibility(View.VISIBLE);
-
-//                  jika kesempatan login habis
-                    if (numberOfRemainingLoginAttempts == 0) {
-                        hideKeyboard(PinActivity.this);
-//                      tampilkan dialog box alert
-                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(PinActivity.this);
-                        mBuilder.setTitle(R.string.dialog_title_pin);
-                        mBuilder.setMessage(R.string.dialog_msg_pin);
-                        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                                Intent activity = new Intent(PinActivity.this, MainActivity.class);
-                                startActivity(activity);
-                                finish();
-                            }
-                        });
-
-                        AlertDialog alertDialog = mBuilder.create();
-                        alertDialog.show();
-
-                    }
-                }
+                String cmd_auth = "80c30000000005" + Util.asciiToHex(pinview.getValue().toString());
+                APDU_owner_auth = Util.hexStringToByteArray(cmd_auth);
+                send();
+////          jika pin benar
+//                if (pinview.getValue().toString().equals("12345")) {
+//                    Toast.makeText(PinActivity.this, "Pin Anda benar", Toast.LENGTH_SHORT).show();
+//                    hideKeyboard(PinActivity.this);
+//                    Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
+//                    startActivity(activity);
+//                    finish();
+//
+////          jika pin salah
+//                } else {
+//
+//                    clearPin((ViewGroup) pinview);
+//                    pinview.clearFocus();
+//                    Toast.makeText(getApplicationContext(), "PIN yang Anda masukkan salah",
+//                            Toast.LENGTH_SHORT).show();
+//
+//                    numberOfRemainingLoginAttempts--;
+//                    numberOfRemainingLoginAttemptstv.setText(Integer.toString(numberOfRemainingLoginAttempts));
+//
+////                  tampilkan text "Kesempatan login : x kali"
+//                    attemptslefttv.setVisibility(View.VISIBLE);
+//                    numberOfRemainingLoginAttemptstv.setVisibility(View.VISIBLE);
+//                    textviewkali.setVisibility(View.VISIBLE);
+//
+////                  jika kesempatan login habis
+//                    if (numberOfRemainingLoginAttempts == 0) {
+//                        hideKeyboard(PinActivity.this);
+////                      tampilkan dialog box alert
+//                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(PinActivity.this);
+//                        mBuilder.setTitle(R.string.dialog_title_pin);
+//                        mBuilder.setMessage(R.string.dialog_msg_pin);
+//                        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                dialogInterface.dismiss();
+//                                Intent activity = new Intent(PinActivity.this, MainActivity.class);
+//                                startActivity(activity);
+//                                finish();
+//                            }
+//                        });
+//
+//                        AlertDialog alertDialog = mBuilder.create();
+//                        alertDialog.show();
+//
+//                    }
+//                }
 
             }
         });
@@ -229,29 +243,7 @@ public class PinActivity extends SessionManagement {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(broadcastReceiver, filter);
 
-        // connect usb device
-        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        if (!usbDevices.isEmpty()) {
-            boolean keep = true;
-            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
-                usbDevice = entry.getValue();
-                int deviceID = usbDevice.getVendorId();
-                if (deviceID == 1027 || deviceID == 9025) {
-                    Log.d(TAG, "Device ID " + deviceID);
-                    PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-                    usbManager.requestPermission(usbDevice, pi);
-                    keep = false;
-                } else {
-                    usbConn = null;
-                    usbDevice = null;
-                }
-
-                if (!keep)
-                    break;
-            }
-        } else {
-            //Toast.makeText(getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
-        }
+        connectUsbDevice();
         /*
          * Komunikasi dengan kartu
          */
@@ -263,10 +255,6 @@ public class PinActivity extends SessionManagement {
      */
 
     public void getHPCdata() {
-
-        // TODO: HPC data taken from HPCData class, put into ContentValues
-//        hpc = new HPCActivity(getApplicationContext());
-
         Log.i(TAG, "nik: " + HPCData.nik);
         Log.i(TAG, "nama: " + HPCData.nama);
         Log.i(TAG, "sip: " + HPCData.sip);
@@ -371,7 +359,9 @@ public class PinActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
-                    send();
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000"))
+                        showToastOnUi("Koneksi applet gagal");
+//                    send();
                 }
             } else if (i == 2) {
                 respondData.put(bytes);
@@ -383,7 +373,14 @@ public class PinActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Auth response string: " + Util.bytesToHex(authResponse));
-                    send();
+                    if (!Util.bytesToHex(authResponse).toString().equals("9000")) {
+                        showToastOnUi("PIN SALAH");
+                        i--;
+                        //TODO pin salah handler, buat di thread ui
+                        clearPinUi();
+                    } else { // pin berhasil
+                        send();
+                    }
                 }
             } else if (i == 3) {
                 respondData.put(bytes);
@@ -468,7 +465,52 @@ public class PinActivity extends SessionManagement {
             Log.i(TAG, "serial port closed");
             unregisterReceiver(broadcastReceiver);
             getHPCdata();
+            hideKeyboard(PinActivity.this);
+            Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
+            startActivity(activity);
+            finish();
         }
+    }
+
+    //TODO lakukan ini di thread ui, serial port close, unreg receiver?
+    private void clearPinUi() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                clearPin(pinview);
+                pinview.clearFocus();
+
+                numberOfRemainingLoginAttempts--;
+                numberOfRemainingLoginAttemptstv.setText(Integer.toString(numberOfRemainingLoginAttempts));
+
+//                  tampilkan text "Kesempatan login : x kali"
+                attemptslefttv.setVisibility(View.VISIBLE);
+                numberOfRemainingLoginAttemptstv.setVisibility(View.VISIBLE);
+                textviewkali.setVisibility(View.VISIBLE);
+
+//                  jika kesempatan login habis
+                if (numberOfRemainingLoginAttempts == 0) {
+                    serialPort.close();
+                    hideKeyboard(PinActivity.this);
+//                      tampilkan dialog box alert
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(PinActivity.this);
+                    mBuilder.setTitle(R.string.dialog_title_pin);
+                    mBuilder.setMessage(R.string.dialog_msg_pin);
+                    mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            Intent activity = new Intent(PinActivity.this, MainActivity.class);
+                            startActivity(activity);
+                            finish();
+                        }
+                    });
+
+                    AlertDialog alertDialog = mBuilder.create();
+                    alertDialog.show();
+                }
+            }
+        });
     }
 
     private void showToastOnUi(String text) {
@@ -479,6 +521,31 @@ public class PinActivity extends SessionManagement {
                 Toast.makeText(PinActivity.this, ftext, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void connectUsbDevice() {
+        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+        if (!usbDevices.isEmpty()) {
+            boolean keep = true;
+            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                usbDevice = entry.getValue();
+                int deviceID = usbDevice.getVendorId();
+                if (deviceID == 1027 || deviceID == 9025) {
+                    Log.d(TAG, "Device ID " + deviceID);
+                    PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                    usbManager.requestPermission(usbDevice, pi);
+                    keep = false;
+                } else {
+                    usbConn = null;
+                    usbDevice = null;
+                }
+
+                if (!keep)
+                    break;
+            }
+        } else {
+            //Toast.makeText(getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
