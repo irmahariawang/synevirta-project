@@ -262,7 +262,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
 
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
         if(cursor.getCount()==0){
-            Toast.makeText(BottombarActivity.this, "No Data Update", Toast.LENGTH_LONG).show();
+            Toast.makeText(BottombarActivity.this, "Sinkronisasi selesai "+cursor.getCount(), Toast.LENGTH_LONG).show();
         } else {
             cursor.moveToFirst();
 
@@ -311,7 +311,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
 
     //fungsi untuk membaca response dari rest service saat melakukan update medrek dinamik
     @Override
-    public void taskComplete(String output) {
+    public void taskComplete(String output, String timestamp) {
         JSONObject obj;
         String code = "", error_code = "";
         try {
@@ -329,10 +329,15 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         String password = settings.getString("PASSWORD", "");
 
         if(code.equals("0x23")){
+//            callLoginDialog();
             Toast.makeText(BottombarActivity.this, "Generating new token ... ", Toast.LENGTH_SHORT).show();
             new TokenRequest(this).execute(username, password);
         } else if(code.equals("1x26")){
             try {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("LAST_TIMESTAMP", timestamp);
+                editor.apply();
+
                 getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();
