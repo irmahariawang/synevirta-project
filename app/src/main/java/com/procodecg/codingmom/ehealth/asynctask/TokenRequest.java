@@ -55,13 +55,13 @@ public class TokenRequest extends AsyncTask<String, String, String> {
 
             //token baru
             if(token==null || token.isEmpty()){
-                url = new URL("https://"+IP+"/oop-copy/index.php");
+                url = new URL("https://"+IP+"/service/jwt/Token.php");
 
                 postDataParams.put("0", args[0]);
                 postDataParams.put("1", args[1]);
                 Log.e("params", postDataParams.toString());
             } else { //token expired
-                url = new URL("https://"+IP+"/oop-copy/index.php");
+                url = new URL("https://"+IP+"/service/jwt/Token.php");
 
                 postDataParams.put("0", args[0]);
                 postDataParams.put("1", args[1]);
