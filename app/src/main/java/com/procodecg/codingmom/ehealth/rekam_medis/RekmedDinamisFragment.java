@@ -125,23 +125,29 @@ public class RekmedDinamisFragment extends Fragment {
                     settings = getActivity().getSharedPreferences("HOST", MODE_PRIVATE);
                     Boolean hostDetected = settings.getBoolean("DETECTED", true);
 
+                    settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
+                    String username = settings.getString("USERNAME", "");
+                    String password = settings.getString("PASSWORD", "");
+                    String timestamp = settings.getString("LAST_TIMESTAMP", "");
+
                     if(hostDetected){
-                        jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
-                        String token = jwt.getString("ACCESS_TOKEN", "");
-
-                        settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
-                        String username = settings.getString("USERNAME", "");
-                        String password = settings.getString("PASSWORD", "");
-                        String ts = settings.getString("LAST_TIMESTAMP", "");
-
-                        if(token.isEmpty()){
-                            Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
-                            new TokenRequest(getActivity()).execute(username, password);
+                        SQLiteDatabase db = dbHelper.getReadableDatabase();
+                        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
+                        if(cursor.getCount()==0){
+                            Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
                         } else {
-                            try {
-                                ((BottombarActivity)getActivity()).getDataAndPost();
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+                            jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
+                            String token = jwt.getString("ACCESS_TOKEN", "");
+
+                            if (token.isEmpty()) {
+                                Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
+                                new TokenRequest(getActivity()).execute(username, password);
+                            } else {
+                                try {
+                                    ((BottombarActivity) getActivity()).getDataAndPost();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     } else {
