@@ -5,7 +5,7 @@ package com.procodecg.codingmom.ehealth.asynctask;
  */
 
 public interface AsyncResponse {
-    void taskComplete(String output);
+    void taskComplete(String output, String timestamp);
     void tokenRequest(String output);
     void hostDetected(Boolean output);
 }
