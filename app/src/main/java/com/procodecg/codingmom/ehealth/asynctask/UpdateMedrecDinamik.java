@@ -48,7 +48,7 @@ public class UpdateMedrecDinamik extends AsyncTask<String, String, String> {
             settings = mContext.getSharedPreferences("SETTING", MODE_PRIVATE);
             String IP = settings.getString("ADDRESS", "");
 
-            URL url = new URL("https://"+IP+"/oop-copy/MedrecDinamik.php");
+            URL url = new URL("https://"+IP+"/service/rest/MedrecDinamik.php");
 
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setConnectTimeout(60000);
