@@ -126,19 +126,6 @@ public class UpdateMedrecDinamik extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        try {
-            JSONObject obj = new JSONObject(response);
-            String code = obj.getString("code");
-
-            if(code.equals("1x26")){
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("LAST_TIMESTAMP", timestamp);
-                editor.apply();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        asyncResponse.taskComplete(result);
+        asyncResponse.taskComplete(result, timestamp);
     }
 }
