@@ -96,6 +96,8 @@ public class HostChecking extends AsyncTask<Void, Void, Boolean> {
             e.printStackTrace();
         } catch (MalformedURLException e) {
             e.printStackTrace();
+        } catch (SocketTimeoutException e){
+            isReachable = false;
         } catch (IOException e) {
             e.printStackTrace();
         }
