@@ -24,6 +24,7 @@ import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util.*;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedStatisFragment;
@@ -36,8 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToDate;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToHex;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToString;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.trimZeroPadding;
 
 /**
  * Created by macbookpro on 8/29/17.
@@ -298,7 +301,7 @@ public class RekmedFragment extends Fragment {
         // pemberi rujukan
         byte[] pemberiRujukan = new byte[30];
         bb.get(pemberiRujukan, 0, 30);
-        Log.i(TAG,"Pemberi Rujukan: " + bytesToString(pemberiRujukan));
+        Log.i(TAG,"Pemberi Rujukan: " + bytesToString(trimZeroPadding(pemberiRujukan)));
 
         // systole
         int systole = bb.getInt();
@@ -327,22 +330,22 @@ public class RekmedFragment extends Fragment {
         // keluhan utama
         byte[] keluhanUtama = new byte[50];
         bb.get(keluhanUtama, 0, 50);
-        Log.i(TAG,"Keluhan Utama: " + bytesToString(keluhanUtama));
+        Log.i(TAG,"Keluhan Utama: " + bytesToString(trimZeroPadding(keluhanUtama)));
 
         // riwayat penyakit sekarang
         byte[] riwayatPenyakitSekarang = new byte[200];
         bb.get(riwayatPenyakitSekarang, 0, 200);
-        Log.i(TAG,"Riwayat penyakit Sekarang: " + bytesToString(riwayatPenyakitSekarang));
+        Log.i(TAG,"Riwayat penyakit Sekarang: " + bytesToString(trimZeroPadding(riwayatPenyakitSekarang)));
 
         // riwayat penyakit dahulu
         byte[] riwayatPenyakitDahulu = new byte[100];
         bb.get(riwayatPenyakitDahulu, 0, 100);
-        Log.i(TAG,"Riwayat Penyakit Dahulu: " + bytesToString(riwayatPenyakitDahulu));
+        Log.i(TAG,"Riwayat Penyakit Dahulu: " + bytesToString(trimZeroPadding(riwayatPenyakitDahulu)));
 
         // riwayat penyakit keluarga
         byte[] riwayatPenyakitKeluarga = new byte[100];
         bb.get(riwayatPenyakitKeluarga, 0, 100);
-        Log.i(TAG,"Riwayat Penyakit Keluarga: " + bytesToString(riwayatPenyakitKeluarga));
+        Log.i(TAG,"Riwayat Penyakit Keluarga: " + bytesToString(trimZeroPadding(riwayatPenyakitKeluarga)));
 
         // tinggi
         int tinggi = bb.getInt();
@@ -359,47 +362,47 @@ public class RekmedFragment extends Fragment {
         // kepala
         byte[] kepala = new byte[50];
         bb.get(kepala, 0, 50);
-        Log.i(TAG,"Kepala: " + bytesToString(kepala));
+        Log.i(TAG,"Kepala: " + bytesToString(trimZeroPadding(kepala)));
 
         // thorax
         byte[] thorax = new byte[50];
         bb.get(thorax, 0, 50);
-        Log.i(TAG,"Thorax: " + bytesToString(thorax));
+        Log.i(TAG,"Thorax: " + bytesToString(trimZeroPadding(thorax)));
 
         // abdomen
         byte[] abdomen = new byte[50];
         bb.get(abdomen, 0, 50);
-        Log.i(TAG,"Abdomen: " + bytesToString(abdomen));
+        Log.i(TAG,"Abdomen: " + bytesToString(trimZeroPadding(abdomen)));
 
         // genitalia
         byte[] genitalia = new byte[50];
         bb.get(genitalia, 0, 50);
-        Log.i(TAG,"Genitalia: " + bytesToString(genitalia));
+        Log.i(TAG,"Genitalia: " + bytesToString(trimZeroPadding(genitalia)));
 
         // extremitas
         byte[] extremitas = new byte[50];
         bb.get(extremitas, 0, 50);
-        Log.i(TAG,"Extremitas: " + bytesToString(extremitas));
+        Log.i(TAG,"Extremitas: " + bytesToString(trimZeroPadding(extremitas)));
 
         // kulit
         byte[] kulit = new byte[50];
         bb.get(kulit, 0, 50);
-        Log.i(TAG,"Kulit: " + bytesToString(kulit));
+        Log.i(TAG,"Kulit: " + bytesToString(trimZeroPadding(kulit)));
 
         // neurologi
         byte[] neurologi = new byte[50];
         bb.get(neurologi, 0, 50);
-        Log.i(TAG,"Neurologi: " + bytesToString(neurologi));
+        Log.i(TAG,"Neurologi: " + bytesToString(trimZeroPadding(neurologi)));
 
         // laboratorium
         byte[] laboratorium = new byte[200];
         bb.get(laboratorium, 0, 200);
-        Log.i(TAG,"Laboratorium: " + bytesToString(laboratorium));
+        Log.i(TAG,"Laboratorium: " + bytesToString(trimZeroPadding(laboratorium)));
 
         // radiolgi
         byte[] radiologi = new byte[200];
         bb.get(radiologi, 0, 200);
-        Log.i(TAG,"Radiologi: " + bytesToString(radiologi));
+        Log.i(TAG,"Radiologi: " + bytesToString(trimZeroPadding(radiologi)));
 
         // status labradio
         byte statusLabRadio = bb.get();
@@ -408,27 +411,27 @@ public class RekmedFragment extends Fragment {
         // diagnosis kerja
         byte[] diagnosisKerja = new byte[200];
         bb.get(diagnosisKerja, 0, 200);
-        Log.i(TAG,"Diagnosis Kerja: " + bytesToString(diagnosisKerja));
+        Log.i(TAG,"Diagnosis Kerja: " + bytesToString(trimZeroPadding(diagnosisKerja)));
 
         // diagnosis banding
         byte[] diagnosisBanding = new byte[200];
         bb.get(diagnosisBanding, 0, 200);
-        Log.i(TAG,"Diagnosis Banding: " + bytesToString(diagnosisBanding));
+        Log.i(TAG,"Diagnosis Banding: " + bytesToString(trimZeroPadding(diagnosisBanding)));
 
         // icd10
         byte[] icd10 = new byte[200];
         bb.get(icd10, 0, 200);
-        Log.i(TAG,"ICD 10: " + bytesToString(icd10));
+        Log.i(TAG,"ICD 10: " + bytesToString(trimZeroPadding(icd10)));
 
         // resep
         byte[] resep = new byte[200];
         bb.get(resep, 0, 200);
-        Log.i(TAG,"Resep: " + bytesToString(resep));
+        Log.i(TAG,"Resep: " + bytesToString(trimZeroPadding(resep)));
 
         // catatan resep
         byte[] catatanResep = new byte[50];
         bb.get(catatanResep, 0, 50);
-        Log.i(TAG,"Catatan Resep: " + bytesToString(catatanResep));
+        Log.i(TAG,"Catatan Resep: " + bytesToString(trimZeroPadding(catatanResep)));
 
         // status resep
         byte statusResep = bb.get();
@@ -441,7 +444,7 @@ public class RekmedFragment extends Fragment {
         // tindakan
         byte[] tindakan = new byte[200];
         bb.get(tindakan, 0, 200);
-        Log.i(TAG,"Tindakan: " + bytesToString(tindakan));
+        Log.i(TAG,"Tindakan: " + bytesToString(trimZeroPadding(tindakan)));
 
         // advitam
         byte adVitam = bb.get();
@@ -457,7 +460,7 @@ public class RekmedFragment extends Fragment {
 
         mdd = new MedrecDinamikData(noIdx,
                 // TODO date
-                new Date(),
+                bytesToDate(date),
                 bytesToString(idpuskesmas),
                 poli,
                 bytesToString(pemberiRujukan),
@@ -527,7 +530,9 @@ public class RekmedFragment extends Fragment {
         }
         else {
             serialPort.close();
-            Log.d(TAG, "serial port closed");
+            Log.i(TAG, "serial port closed");
+            Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
+            MedrecDinamikData.writeIndex = Util.getWriteIndex(mddArray);
         }
     }
 

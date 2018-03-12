@@ -1,5 +1,8 @@
 package com.procodecg.codingmom.ehealth.hpcpdc_card;
 
+import android.util.Log;
+
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,21 +68,6 @@ public class Util {
         return Arrays.copyOf(bytes, i + 1);
     }
 
-    /*
-    public static void sortMedrecDinamik(ArrayList<MedrecDinamikData> medrecDinamikList) {
-        Collections.sort(medrecDinamikList, new MedrecComparator());
-    }
-*/
-    /*
-    static class MedrecComparator implements Comparator<MedrecDinamikData> {
-        @Override
-        public int compare(MedrecDinamikData md1, MedrecDinamikData md2) {
-            Long time1 = new Long(md1.timestamp);
-            Long time2 = new Long(md2.timestamp);
-            return time1.compareTo(time2);
-        }
-    }
-*/
     public static String bytesToString(byte[] bytes) {
         String hex = bytesToHex(bytes);
         StringBuilder output = new StringBuilder();
@@ -108,18 +96,44 @@ public class Util {
         }
         return hex.toString();
     }
-/*
+
+//    public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
+//        ArrayList<Long> timestamps = new ArrayList<>();
+//        for (int i=0; i<MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
+//            Long ts = new Long(mddArray.get(i).tglPeriksa);
+//            timestamps.add(ts);
+//        }
+//
+//        Long max = Collections.max(timestamps);
+//        int maxIdx = timestamps.indexOf(max);
+//
+//        return (maxIdx+1) % MedrecDinamikData.MEDREC_DINAMIK_SIZE;
+//    }
+
     public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
-        ArrayList<Long> timestamps = new ArrayList<>();
-        for (int i=0; i<MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
-            Long ts = new Long(mddArray.get(i).timestamp);
-            timestamps.add(ts);
+        ArrayList<Date> dates = new ArrayList<>();
+        for (int i=0; i < MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
+            dates.add(mddArray.get(i).tglPeriksa);
         }
 
-        Long max = Collections.max(timestamps);
-        int maxIdx = timestamps.indexOf(max);
-
-        return (maxIdx+1) % MedrecDinamikData.MEDREC_DINAMIK_SIZE;
+        Date mostRecent = Collections.max(dates);
+        int maxIdx = dates.indexOf(mostRecent);
+        return (maxIdx+1) % 5;
     }
-    */
+
+    public static Date bytesToDate(byte[] dateBytes) {
+        int secs = Integer.parseInt(bytesToHex(dateBytes), 16);
+        System.out.println("secs: " + secs);
+        byte[] bytes = ByteBuffer.allocate(4).putInt(secs).array();
+
+        int dis = ByteBuffer.wrap(bytes).getInt();
+        long l = (long) dis*1000;
+        return new Date(l);
+    }
+
+    public static String getFormattedDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
+    }
+
 }
