@@ -24,17 +24,20 @@ import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
-import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecStatikData;
-import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.Util.*;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedStatisFragment;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToHex;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToString;
 
 /**
  * Created by macbookpro on 8/29/17.
@@ -158,7 +161,8 @@ public class RekmedFragment extends Fragment {
         // Komunikasi dengan kartu
         i = 0;
 
-        respondData = ByteBuffer.allocate(2471);
+        // TODO medrec dinamik length baru + status code
+        respondData = ByteBuffer.allocate(2336);
 
         usbManager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
         filter = new IntentFilter();
@@ -195,7 +199,6 @@ public class RekmedFragment extends Fragment {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context.getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
@@ -214,7 +217,6 @@ public class RekmedFragment extends Fragment {
                             serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                             serialPort.read(mCallback);
                             Log.i(TAG, "Serial port opened");
-                            Toast.makeText(context.getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
 
                             send();
                         } else {
@@ -236,7 +238,7 @@ public class RekmedFragment extends Fragment {
         @Override
         public void onReceivedData(byte[] bytes) {
             Log.d(TAG, "Received bytes");
-            data = Util.bytesToHex(bytes);
+            data = bytesToHex(bytes);
             Log.d(TAG, "Data " + data);
 
             if (i == 1) { //select
@@ -246,20 +248,21 @@ public class RekmedFragment extends Fragment {
                     respondData.rewind();
                     respondData.get(selectResponse);
                     respondData.position(0);
-                    Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
+                    Log.i(TAG, "Select response string: " + bytesToHex(selectResponse));
                     send();
                 }
             } else if (i == 2 || i == 3 || i == 4 || i == 5 || i == 6) { //medrec dinamik
                 respondData.put(bytes);
 
-                if (respondData.position() == 2471) {
-                    medrecDinamikResponse = new byte[2471];
+                // TODO medrec dinamik length baru + status code
+                if (respondData.position() == 2336) {
+                    medrecDinamikResponse = new byte[2336];
                     respondData.rewind();
                     respondData.get(medrecDinamikResponse);
                     respondData.position(0);
-                    Log.i(TAG, "Medrec dinamik string: " + Util.bytesToHex(medrecDinamikResponse));
+//                    Log.i(TAG, "Medrec dinamik string: " + Util.bytesToHex(medrecDinamikResponse));
 
-//                    processDinamikData(medrecDinamikResponse);
+                    processDinamikData(medrecDinamikResponse);
                     send();
                 }
             }
@@ -269,31 +272,258 @@ public class RekmedFragment extends Fragment {
         }
     };
 
+    public void processDinamikData(byte[] data) {
+        //TODO
+        ByteBuffer bb = ByteBuffer.wrap(medrecDinamikResponse);
+        bb.rewind();
+
+        // no index
+        int noIdx = bb.getInt();
+        Log.i(TAG,"No. Index: " + noIdx);
+
+        // tgl periksa
+        byte[] date = new byte[4];
+        bb.get(date, 0, 4);
+        Log.i(TAG,"Date: " + bytesToHex(date));
+
+        // id puskemsmas
+        byte[] idpuskesmas = new byte[12];
+        bb.get(idpuskesmas, 0, 12);
+        Log.i(TAG,"ID Puskesmas: " + bytesToString(idpuskesmas));
+
+        // poli yang dituju
+        byte poli = bb.get();
+        Log.i(TAG,"Poli yang dituju: " + poli);
+
+        // pemberi rujukan
+        byte[] pemberiRujukan = new byte[30];
+        bb.get(pemberiRujukan, 0, 30);
+        Log.i(TAG,"Pemberi Rujukan: " + bytesToString(pemberiRujukan));
+
+        // systole
+        int systole = bb.getInt();
+        Log.i(TAG,"Systole: " + systole);
+
+        // diastole
+        int diastole = bb.getInt();
+        Log.i(TAG,"Diastole: " + diastole);
+
+        // suhu
+        float suhu = bb.getFloat();
+        Log.i(TAG,"Suhu: " + suhu);
+
+        // nadi
+        byte[] nadi = new byte[4];
+        bb.get(nadi, 1, 3);
+        nadi[0] = 0;
+        Log.i(TAG,"Nadi: " + ByteBuffer.wrap(nadi).getInt());
+
+        // respirasi
+        byte[] respirasi = new byte[4];
+        bb.get(respirasi, 1, 3);
+        respirasi[0] = 0;
+        Log.i(TAG,"Respirasi: " + ByteBuffer.wrap(respirasi).getInt());
+
+        // keluhan utama
+        byte[] keluhanUtama = new byte[50];
+        bb.get(keluhanUtama, 0, 50);
+        Log.i(TAG,"Keluhan Utama: " + bytesToString(keluhanUtama));
+
+        // riwayat penyakit sekarang
+        byte[] riwayatPenyakitSekarang = new byte[200];
+        bb.get(riwayatPenyakitSekarang, 0, 200);
+        Log.i(TAG,"Riwayat penyakit Sekarang: " + bytesToString(riwayatPenyakitSekarang));
+
+        // riwayat penyakit dahulu
+        byte[] riwayatPenyakitDahulu = new byte[100];
+        bb.get(riwayatPenyakitDahulu, 0, 100);
+        Log.i(TAG,"Riwayat Penyakit Dahulu: " + bytesToString(riwayatPenyakitDahulu));
+
+        // riwayat penyakit keluarga
+        byte[] riwayatPenyakitKeluarga = new byte[100];
+        bb.get(riwayatPenyakitKeluarga, 0, 100);
+        Log.i(TAG,"Riwayat Penyakit Keluarga: " + bytesToString(riwayatPenyakitKeluarga));
+
+        // tinggi
+        int tinggi = bb.getInt();
+        Log.i(TAG,"Tinggi: " + tinggi);
+
+        // berat
+        int berat = bb.getInt();
+        Log.i(TAG,"Berat: " + berat);
+
+        // kesadaran
+        byte kesadaran = bb.get();
+        Log.i(TAG,"Kesadaran: " + kesadaran);
+
+        // kepala
+        byte[] kepala = new byte[50];
+        bb.get(kepala, 0, 50);
+        Log.i(TAG,"Kepala: " + bytesToString(kepala));
+
+        // thorax
+        byte[] thorax = new byte[50];
+        bb.get(thorax, 0, 50);
+        Log.i(TAG,"Thorax: " + bytesToString(thorax));
+
+        // abdomen
+        byte[] abdomen = new byte[50];
+        bb.get(abdomen, 0, 50);
+        Log.i(TAG,"Abdomen: " + bytesToString(abdomen));
+
+        // genitalia
+        byte[] genitalia = new byte[50];
+        bb.get(genitalia, 0, 50);
+        Log.i(TAG,"Genitalia: " + bytesToString(genitalia));
+
+        // extremitas
+        byte[] extremitas = new byte[50];
+        bb.get(extremitas, 0, 50);
+        Log.i(TAG,"Extremitas: " + bytesToString(extremitas));
+
+        // kulit
+        byte[] kulit = new byte[50];
+        bb.get(kulit, 0, 50);
+        Log.i(TAG,"Kulit: " + bytesToString(kulit));
+
+        // neurologi
+        byte[] neurologi = new byte[50];
+        bb.get(neurologi, 0, 50);
+        Log.i(TAG,"Neurologi: " + bytesToString(neurologi));
+
+        // laboratorium
+        byte[] laboratorium = new byte[200];
+        bb.get(laboratorium, 0, 200);
+        Log.i(TAG,"Laboratorium: " + bytesToString(laboratorium));
+
+        // radiolgi
+        byte[] radiologi = new byte[200];
+        bb.get(radiologi, 0, 200);
+        Log.i(TAG,"Radiologi: " + bytesToString(radiologi));
+
+        // status labradio
+        byte statusLabRadio = bb.get();
+        Log.i(TAG,"Status LabRadio: " + statusLabRadio);
+
+        // diagnosis kerja
+        byte[] diagnosisKerja = new byte[200];
+        bb.get(diagnosisKerja, 0, 200);
+        Log.i(TAG,"Diagnosis Kerja: " + bytesToString(diagnosisKerja));
+
+        // diagnosis banding
+        byte[] diagnosisBanding = new byte[200];
+        bb.get(diagnosisBanding, 0, 200);
+        Log.i(TAG,"Diagnosis Banding: " + bytesToString(diagnosisBanding));
+
+        // icd10
+        byte[] icd10 = new byte[200];
+        bb.get(icd10, 0, 200);
+        Log.i(TAG,"ICD 10: " + bytesToString(icd10));
+
+        // resep
+        byte[] resep = new byte[200];
+        bb.get(resep, 0, 200);
+        Log.i(TAG,"Resep: " + bytesToString(resep));
+
+        // catatan resep
+        byte[] catatanResep = new byte[50];
+        bb.get(catatanResep, 0, 50);
+        Log.i(TAG,"Catatan Resep: " + bytesToString(catatanResep));
+
+        // status resep
+        byte statusResep = bb.get();
+        Log.i(TAG,"Status Resep: " + statusResep);
+
+        // repetisi resep
+        byte repetisiResep = bb.get();
+        Log.i(TAG,"Repetisi Resep: " + repetisiResep);
+
+        // tindakan
+        byte[] tindakan = new byte[200];
+        bb.get(tindakan, 0, 200);
+        Log.i(TAG,"Tindakan: " + bytesToString(tindakan));
+
+        // advitam
+        byte adVitam = bb.get();
+        Log.i(TAG,"Ad vitam: " + adVitam);
+
+        // ad functionam
+        byte adFunctionam = bb.get();
+        Log.i(TAG,"Ad functionam: " + adFunctionam);
+
+        // ad sanationam
+        byte adSanationam = bb.get();
+        Log.i(TAG,"Ad sanationam: " + adSanationam);
+
+        mdd = new MedrecDinamikData(noIdx,
+                // TODO date
+                new Date(),
+                bytesToString(idpuskesmas),
+                poli,
+                bytesToString(pemberiRujukan),
+                systole,
+                diastole,
+                suhu,
+                ByteBuffer.wrap(nadi).getInt(),
+                ByteBuffer.wrap(respirasi).getInt(),
+                bytesToString(keluhanUtama),
+                bytesToString(riwayatPenyakitSekarang),
+                bytesToString(riwayatPenyakitDahulu),
+                bytesToString(riwayatPenyakitKeluarga),
+                tinggi,
+                berat,
+                kesadaran,
+                bytesToString(kepala),
+                bytesToString(thorax),
+                bytesToString(abdomen),
+                bytesToString(genitalia),
+                bytesToString(extremitas),
+                bytesToString(kulit),
+                bytesToString(neurologi),
+                bytesToString(laboratorium),
+                bytesToString(radiologi),
+                statusLabRadio,
+                bytesToString(diagnosisKerja),
+                bytesToString(diagnosisBanding),
+                bytesToString(icd10),
+                bytesToString(resep),
+                bytesToString(catatanResep),
+                statusResep,
+                repetisiResep,
+                bytesToString(tindakan),
+                adVitam,
+                adFunctionam,
+                adSanationam
+                );
+
+        mddArray.add(mdd);
+    }
+
     public void send() {
         if ( i == 0 ) {
             serialPort.write(APDU_select);
             i++;
-            Log.d(TAG, "write apdu select");
+            Log.i(TAG, "write apdu select");
         } else if (i == 1) {
             serialPort.write(APDU_read_medrec_dinamik1);
             i++;
-            Log.d(TAG, "write apdu read medrec dinamik 1");
+            Log.i(TAG, "write apdu read medrec dinamik 1");
         } else if (i == 2) {
             serialPort.write(APDU_read_medrec_dinamik2);
             i++;
-            Log.d(TAG, "write apdu read medrec dinamik 2");
+            Log.i(TAG, "write apdu read medrec dinamik 2");
         } else if (i == 3) {
             serialPort.write(APDU_read_medrec_dinamik3);
             i++;
-            Log.d(TAG, "write apdu read medrec dinamik 3");
+            Log.i(TAG, "write apdu read medrec dinamik 3");
         } else if (i == 4) {
             serialPort.write(APDU_read_medrec_dinamik4);
             i++;
-            Log.d(TAG, "write apdu read medrec dinamik 4");
+            Log.i(TAG, "write apdu read medrec dinamik 4");
         } else if (i == 5) {
             serialPort.write(APDU_read_medrec_dinamik5);
             i++;
-            Log.d(TAG, "write apdu read medrec dinamik 5");
+            Log.i(TAG, "write apdu read medrec dinamik 5");
         }
         else {
             serialPort.close();
