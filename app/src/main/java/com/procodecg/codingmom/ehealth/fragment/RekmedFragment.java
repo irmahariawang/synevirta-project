@@ -459,7 +459,6 @@ public class RekmedFragment extends Fragment {
         Log.i(TAG,"Ad sanationam: " + adSanationam);
 
         mdd = new MedrecDinamikData(noIdx,
-                // TODO date
                 bytesToDate(date),
                 bytesToString(idpuskesmas),
                 poli,

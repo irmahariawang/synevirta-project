@@ -434,7 +434,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     PDCData.nik = Util.bytesToString(Util.trimZeroPadding(nik));
                     PDCData.kategoriPasien = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
                     PDCData.noAsuransi = Util.bytesToString(noAsuransi);
-                    PDCData.tglDaftar = Util.getformattedDate(Util.bytestoDate(tglDaftar));
+                    PDCData.tglDaftar = Util.getformattedDate(Util.bytesToDate(tglDaftar));
                     PDCData.namaPasien = Util.bytesToString(Util.trimZeroPadding(namaPasien));
                     PDCData.namaKK = Util.bytesToString(Util.trimZeroPadding(namaKK));
                     PDCData.hubunganKeluarga = Util.bytesToString(hubunganKeluarga);
@@ -448,7 +448,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     PDCData.kodepos = Util.bytesToString(kodepos);
                     PDCData.isDalamWilayahKerja = Util.bytesToHex(isDalamWilayahKerja);
                     PDCData.tempatLahir = Util.bytesToString(Util.trimZeroPadding(tempatLahir));
-                    PDCData.tglLahir = Util.getformattedDate(Util.bytestoDate(tglLahir));
+                    PDCData.tglLahir = Util.getformattedDate(Util.bytesToDate(tglLahir));
                     PDCData.telepon = Util.bytesToString(Util.trimZeroPadding(telepon));
                     PDCData.hp = Util.bytesToString(Util.trimZeroPadding(hp));
                     PDCData.jenisKelamin = Util.bytesToString(jenisKelamin);

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public class Util {
         return data;
     }
 
-    public static Date bytestoDate(byte[] dateBytes) {
+    public static Date bytesToDate(byte[] dateBytes) {
         String hexDate = bytesToHex(dateBytes);
         int secs = Integer.parseInt(hexDate, 16);
         byte[] bytes = ByteBuffer.allocate(4).putInt(secs).array();
@@ -39,14 +40,6 @@ public class Util {
     public static String getformattedDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(date);
-    }
-
-    public static long getCurrentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
-    public static long hexStringToLong(String hex) {
-        return Long.parseLong(hex, 16);
     }
 
     public static String bytesToHex(byte[] bytes) {
@@ -97,19 +90,6 @@ public class Util {
         return hex.toString();
     }
 
-//    public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
-//        ArrayList<Long> timestamps = new ArrayList<>();
-//        for (int i=0; i<MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
-//            Long ts = new Long(mddArray.get(i).tglPeriksa);
-//            timestamps.add(ts);
-//        }
-//
-//        Long max = Collections.max(timestamps);
-//        int maxIdx = timestamps.indexOf(max);
-//
-//        return (maxIdx+1) % MedrecDinamikData.MEDREC_DINAMIK_SIZE;
-//    }
-
     public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
         ArrayList<Date> dates = new ArrayList<>();
         for (int i=0; i < MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
@@ -121,19 +101,79 @@ public class Util {
         return (maxIdx+1) % 5;
     }
 
-    public static Date bytesToDate(byte[] dateBytes) {
-        int secs = Integer.parseInt(bytesToHex(dateBytes), 16);
-        System.out.println("secs: " + secs);
-        byte[] bytes = ByteBuffer.allocate(4).putInt(secs).array();
+    public static String getFormattedDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
+    }
 
+    public static byte[] intToBytes(int integer) {
+        return ByteBuffer.allocate(4).putInt(integer).array();
+    }
+
+    public static byte[] intToShortToBytes(int integer) {
+        short shortint = (short) integer;
+        return ByteBuffer.allocate(2).putShort(shortint).array();
+    }
+
+    public static byte[] dateToBytes(Date date) {
+        long millis = date.getTime();
+        int secs = (int) (millis/1000);
+        return ByteBuffer.allocate(4).putInt(secs).array();
+    }
+
+    public static Date getCurrentDate() {
+        int dateInSecs = (int) (System.currentTimeMillis()/1000);
+        byte[] bytes = ByteBuffer.allocate(4).putInt(dateInSecs).array();
         int dis = ByteBuffer.wrap(bytes).getInt();
         long l = (long) dis*1000;
         return new Date(l);
     }
 
-    public static String getFormattedDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return sdf.format(date);
+    public static String padVariableText(String str, int totalLength) {
+        String hex = bytesToHex(stringToBytes(str));
+        int padsCharNum = totalLength - str.length();
+        for (int i=0; i<padsCharNum; i++) {
+            hex += "00";
+        }
+        return hex;
+    }
+
+    public static byte[] stringToBytes(String string) {
+        return string.getBytes(Charset.forName("UTF-8"));
+    }
+
+    public static String stringToHex(String string) {
+        return bytesToHex(stringToBytes(string));
+    }
+
+    public static String intToHex(int i) {
+        String hexString = Integer.toHexString(i);
+        String hex = "";
+        int zeroNum = 8 - hexString.length();
+        for (int j = 0; j < zeroNum; j++) {
+            hex += "0";
+        }
+        hex += hexString;
+        return hex;
+    }
+
+    public static byte[] floatToBytes(float floatNum) {
+        return ByteBuffer.allocate(4).putFloat(floatNum).array();
+    }
+
+    public static float bytesToFloat(byte[] floatBytes) {
+        return ByteBuffer.wrap(floatBytes).getFloat();
+    }
+
+    public static String intToHex3(int i) {
+        String hexString = Integer.toHexString(i);
+        String hex = "";
+        int zeroNum = 6 - hexString.length();
+        for (int j = 0; j < zeroNum; j++) {
+            hex += "0";
+        }
+        hex += hexString;
+        return hex;
     }
 
 }

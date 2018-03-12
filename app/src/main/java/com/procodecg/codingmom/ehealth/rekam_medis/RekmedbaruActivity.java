@@ -1,17 +1,21 @@
 package com.procodecg.codingmom.ehealth.rekam_medis;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,12 +27,18 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cielyang.android.clearableedittext.ClearableEditText;
+import com.felhr.usbserial.UsbSerialDevice;
+import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEntry;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.utils.NothingSelectedSpinnerAdapter;
 import com.procodecg.codingmom.ehealth.utils.Validation;
@@ -42,7 +52,7 @@ import java.util.Calendar;
  */
 
 public class RekmedbaruActivity extends AppCompatActivity {
-
+    String TAG = "hpcpdcdummy";
     Typeface fontBold;
 
     private TextView txtTitle;
@@ -558,7 +568,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 ContentValues values = new ContentValues();
                 values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
                 values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
-                values.put(RekamMedisEntry.COLUMN_NIK, "1802280000000001");
+//                values.put(RekamMedisEntry.COLUMN_NIK, "1802280000000001");
+                values.put(RekamMedisEntry.COLUMN_NIK, HPCData.nik);
                 values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
                 values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
                 values.put(RekamMedisEntry.COLUMN_RUJUKAN, mPemberiRujukanString);
@@ -596,6 +607,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_AD_FUNCTIONAM, mAdFunctionam);
                 values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
 
+                Log.i(TAG, "insert command: " + makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex));
+                //TODO add insert command
 
                 // Insert a new row for pet in the database, returning the ID of that new row.
                 long newRowId = db.insert(RekamMedisEntry.TABLE_NAME, null, values);
@@ -637,4 +650,52 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
         return valid;
     }
+
+    private String makeAPDUInsertCommand(ContentValues cv, int writeIndex) {
+        String cmd = "80c5"; // command
+        cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index
+        cmd += "00091e"; // data length
+        cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
+        cmd += Util.bytesToHex(Util.dateToBytes(Util.getCurrentDate()));
+        cmd += Util.stringToHex(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS));
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_POLI)); // byte
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RUJUKAN), 30); // vartext
+        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_SYSTOLE)); // int
+        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_DIASTOLE));
+        cmd += Util.bytesToHex(Util.floatToBytes(cv.getAsFloat(RekamMedisEntry.COLUMN_SUHU)));
+        cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_NADI)); // weird int
+        cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_RESPIRASI));
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KELUHANUTAMA), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
+        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_TINGGI));
+        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_BERAT));
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_KESADARAN));
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KEPALA), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_THORAX), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ABDOMEN), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_GENITALIA), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_EXTREMITAS), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KULIT), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_NEUROLOGI), 50);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_LABORATORIUM), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RADIOLOGI), 200);
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUS_LABRADIO));
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RESEP), 200);
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_CATTRESEP), 50);
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUSRESEP));
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_REPETISIRESEP));
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_TINDAKAN), 200);
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_VITAM));
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
+        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
+
+        return cmd;
+    }
+
+
 }
