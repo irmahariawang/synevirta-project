@@ -1,14 +1,18 @@
 package com.procodecg.codingmom.ehealth.rekam_medis;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -43,8 +47,11 @@ import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.utils.NothingSelectedSpinnerAdapter;
 import com.procodecg.codingmom.ehealth.utils.Validation;
 
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -53,6 +60,7 @@ import java.util.Calendar;
 
 public class RekmedbaruActivity extends AppCompatActivity {
     String TAG = "hpcpdcdummy";
+    public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
     Typeface fontBold;
 
     private TextView txtTitle;
@@ -78,6 +86,20 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
     private ClearableEditText idPuskesmas;
     private SharedPreferences prefs;
+
+    UsbManager usbManager;
+    UsbDevice usbDevice;
+    UsbDeviceConnection usbConn;
+    UsbSerialDevice serialPort;
+
+    String data;
+    int i; // buat increment serial tulis apdu
+
+    ByteBuffer respondData;
+    IntentFilter filter;
+    byte[] selectResponse;
+    byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDU_insert;
 
     Activity mActivity;
 
@@ -219,15 +241,142 @@ public class RekmedbaruActivity extends AppCompatActivity {
         });
 
 
+        respondData = ByteBuffer.allocate(2);
+        i = 0;
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        filter = new IntentFilter();
+        filter.addAction(ACTION_USB_PERMISSION);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        registerReceiver(broadcastReceiver, filter);
 
+        // connect usb device
+        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+        if (!usbDevices.isEmpty()) {
+            boolean keep = true;
+            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                usbDevice = entry.getValue();
+                int deviceID = usbDevice.getVendorId();
+                if (deviceID == 1027 || deviceID == 9025) {
+                    Log.d(TAG, "Device ID " + deviceID);
+                    PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
+                    usbManager.requestPermission(usbDevice, pi);
+                    keep = false;
+                } else {
+                    usbConn = null;
+                    usbDevice = null;
+                }
 
-//menampilkan nama puskesmas
-/*
-        HashMap<String, String> setting = setconfig.getDetail();
-        idpuskes.setText(setting.get(SetConfig.KEY_IDPUSKES));
-        namapuskes.setText(setting.get(SetConfig.KEY_NAMAPUSKES));
-*/
+                if (!keep)
+                    break;
+            }
         }
+
+        //menampilkan nama puskesmas
+        /*
+                HashMap<String, String> setting = setconfig.getDetail();
+                idpuskes.setText(setting.get(SetConfig.KEY_IDPUSKES));
+                namapuskes.setText(setting.get(SetConfig.KEY_NAMAPUSKES));
+        */
+        }
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "intent.getAction() " + intent.getAction());
+
+            if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
+                boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
+                if (granted) {
+                    Log.d(TAG, "Permission granted");
+                    usbConn = usbManager.openDevice(usbDevice);
+                    serialPort = UsbSerialDevice.createUsbSerialDevice(usbDevice, usbConn);
+                    if (serialPort != null) {
+                        if (serialPort.open()) {
+                            // set serial connection parameters
+                            serialPort.setBaudRate(9600);
+                            serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
+                            serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
+                            serialPort.setParity(UsbSerialInterface.PARITY_NONE);
+                            serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+                            serialPort.read(mCallback);
+                            Log.i(TAG, "Serial port opened");
+                            Toast.makeText(getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Ok");
+                            send();
+                        } else {
+                            Log.w(TAG, "PORT NOT OPEN");
+                        }
+                    } else {
+                        Log.w(TAG, "PORT IS NULL");
+                    }
+                } else {
+                    Log.w(TAG, "PERMISSION NOT GRANTED");
+                }
+            }
+        }
+    };
+
+    UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
+        @Override
+        public void onReceivedData(byte[] bytes) {
+            Log.d(TAG, "Received bytes");
+            data = Util.bytesToHex(bytes);
+            Log.d(TAG, "Data " + data);
+
+            if (i == 1) { //select
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
+                        i--;
+                    }
+                }
+            } else if (i == 2) { // insert
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.d(TAG, "GAGAL INSERT");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT");
+                        send(); // close port
+                    }
+                }
+            }
+        }
+    };
+
+    public void send() {
+        if ( i == 0 ) {
+            serialPort.write(APDU_select);
+            i++;
+            Log.i(TAG, "write apdu select");
+        }
+//        else if (i == 1) {
+//            serialPort.write(APDU_insert);
+//            i++;
+//            Log.i(TAG, "write insert medrec");
+//        }
+        else {
+            serialPort.close();
+            Log.i(TAG, "serial port closed");
+            unregisterReceiver(broadcastReceiver);
+        }
+
+    }
 
         private void setupSpinner(){
 
@@ -607,8 +756,15 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_AD_FUNCTIONAM, mAdFunctionam);
                 values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
 
-                Log.i(TAG, "insert command: " + makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex));
                 //TODO add insert command
+                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex);
+                byte[] apdu = Util.hexStringToByteArray(cmd);
+
+                serialPort.write(apdu);
+                i++;
+                Log.d(TAG, "send apdu insert new record");
+
+                Toast.makeText(getApplicationContext(), "Added", Toast.LENGTH_SHORT).show();
 
                 // Insert a new row for pet in the database, returning the ID of that new row.
                 long newRowId = db.insert(RekamMedisEntry.TABLE_NAME, null, values);
@@ -654,7 +810,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private String makeAPDUInsertCommand(ContentValues cv, int writeIndex) {
         String cmd = "80c5"; // command
         cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index
-        cmd += "00091e"; // data length
+//        cmd += "00091e"; // data length
+        cmd += "000045";
         cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
         cmd += Util.bytesToHex(Util.dateToBytes(Util.getCurrentDate()));
         cmd += Util.stringToHex(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS));
@@ -665,34 +822,34 @@ public class RekmedbaruActivity extends AppCompatActivity {
         cmd += Util.bytesToHex(Util.floatToBytes(cv.getAsFloat(RekamMedisEntry.COLUMN_SUHU)));
         cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_NADI)); // weird int
         cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_RESPIRASI));
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KELUHANUTAMA), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
-        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_TINGGI));
-        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_BERAT));
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_KESADARAN));
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KEPALA), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_THORAX), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ABDOMEN), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_GENITALIA), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_EXTREMITAS), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KULIT), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_NEUROLOGI), 50);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_LABORATORIUM), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RADIOLOGI), 200);
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUS_LABRADIO));
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RESEP), 200);
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_CATTRESEP), 50);
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUSRESEP));
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_REPETISIRESEP));
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_TINDAKAN), 200);
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_VITAM));
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KELUHANUTAMA), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
+//        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_TINGGI));
+//        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_BERAT));
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_KESADARAN));
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KEPALA), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_THORAX), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ABDOMEN), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_GENITALIA), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_EXTREMITAS), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KULIT), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_NEUROLOGI), 50);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_LABORATORIUM), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RADIOLOGI), 200);
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUS_LABRADIO));
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RESEP), 200);
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_CATTRESEP), 50);
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUSRESEP));
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_REPETISIRESEP));
+//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_TINDAKAN), 200);
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_VITAM));
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
+//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
 
         return cmd;
     }
