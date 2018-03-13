@@ -238,6 +238,7 @@ public class RekmedFragment extends Fragment {
                 getActivity().unregisterReceiver(broadcastReceiver);
                 Intent activity = new Intent(getActivity(), WelcomeActivity.class);
                 startActivity(activity);
+
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -545,7 +546,7 @@ public class RekmedFragment extends Fragment {
             Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
             showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.writeIndex = Util.getWriteIndex(mddArray);
-            getActivity().unregisterReceiver(broadcastReceiver);
+//            getActivity().unregisterReceiver(broadcastReceiver);
         }
     }
 
@@ -557,6 +558,20 @@ public class RekmedFragment extends Fragment {
                 Toast.makeText(getActivity(), ftext, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "RekmedFragment.onPause() has been called.");
+        try {
+            if (broadcastReceiver != null) {
+                getActivity().unregisterReceiver(broadcastReceiver);
+            }
+        } catch (IllegalArgumentException e) {
+            Log.i(TAG,"epicReciver is already unregistered");
+//            broadcastReceiver = null;
+        }
     }
 
 }
