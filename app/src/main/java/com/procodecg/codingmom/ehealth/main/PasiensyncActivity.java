@@ -501,9 +501,20 @@ public class PasiensyncActivity extends AppCompatActivity {
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
+            showToastOnUi("Baca data PDC BERHASIL!");
             unregisterReceiver(broadcastReceiver);
         }
 
+    }
+
+    private void showToastOnUi(String text) {
+        final String ftext = text;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(PasiensyncActivity.this, ftext, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

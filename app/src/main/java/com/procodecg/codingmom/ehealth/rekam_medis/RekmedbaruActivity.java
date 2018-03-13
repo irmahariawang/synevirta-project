@@ -44,6 +44,7 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
+import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
 import com.procodecg.codingmom.ehealth.utils.NothingSelectedSpinnerAdapter;
 import com.procodecg.codingmom.ehealth.utils.Validation;
 
@@ -314,6 +315,10 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
+            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                i=0;
+                Intent activity = new Intent(getApplicationContext(), WelcomeActivity.class);
+                startActivity(activity);
             }
         }
     };

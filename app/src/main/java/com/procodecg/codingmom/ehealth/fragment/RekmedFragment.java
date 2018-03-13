@@ -26,6 +26,8 @@ import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util.*;
+import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
+import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedStatisFragment;
 
@@ -231,6 +233,11 @@ public class RekmedFragment extends Fragment {
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
+            } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                i=0;
+                getActivity().unregisterReceiver(broadcastReceiver);
+                Intent activity = new Intent(getActivity(), WelcomeActivity.class);
+                startActivity(activity);
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -510,29 +517,46 @@ public class RekmedFragment extends Fragment {
             serialPort.write(APDU_read_medrec_dinamik1);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 1");
+            showToastOnUi("Baca medrec 1...");
         } else if (i == 2) {
             serialPort.write(APDU_read_medrec_dinamik2);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 2");
+            showToastOnUi("Baca medrec 2...");
         } else if (i == 3) {
             serialPort.write(APDU_read_medrec_dinamik3);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 3");
+            showToastOnUi("Baca medrec 3...");
         } else if (i == 4) {
             serialPort.write(APDU_read_medrec_dinamik4);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 4");
+            showToastOnUi("Baca medrec 4...");
         } else if (i == 5) {
             serialPort.write(APDU_read_medrec_dinamik5);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 5");
+            showToastOnUi("Baca medrec 5...");
         }
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
+            showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.writeIndex = Util.getWriteIndex(mddArray);
+            getActivity().unregisterReceiver(broadcastReceiver);
         }
+    }
+
+    private void showToastOnUi(String text) {
+        final String ftext = text;
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), ftext, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }
