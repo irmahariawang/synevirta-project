@@ -372,6 +372,12 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
             editor.apply();
 
             Toast.makeText(BottombarActivity.this, "Generate token success", Toast.LENGTH_SHORT).show();
+            
+            try {
+                getDataAndPost();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
     
