@@ -70,6 +70,7 @@
         android:background="@drawable/button1"
         android:textColor="#fff"
         android:textAllCaps="true"
-        android:onClick="goToProfil"/>
+        android:onClick="goToProfil"
+        android:enabled="false"/>
 
 </LinearLayout>

@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.data.EhealthContract.KartuEntry;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecStatikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCDataActivity;
@@ -50,6 +52,7 @@ public class PasiensyncActivity extends AppCompatActivity {
 
     Typeface font;
     Typeface fontbold;
+    Button btnPdcSync;
     PDCDataActivity pdc;
 
     public static final int SELECTED_PICTURE = 1;
@@ -110,6 +113,7 @@ public class PasiensyncActivity extends AppCompatActivity {
         tv1.setTypeface(fontbold);
         tv2.setTypeface(font);
         tv3.setTypeface(fontbold);
+        btnPdcSync = (Button) findViewById(R.id.btnShowDialog);
 
         // Komunikasi dengan kartu
         i = 0;
@@ -518,9 +522,22 @@ public class PasiensyncActivity extends AppCompatActivity {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             showToastOnUi("Baca data PDC BERHASIL!");
+            MedrecDinamikData.isInDatabase = 0;
+            setButtonState(btnPdcSync, true);
             unregisterReceiver(broadcastReceiver);
         }
 
+    }
+
+    private void setButtonState(Button btn, boolean enabled) {
+        final Button fbtn = btn;
+        final boolean fenabled = enabled;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fbtn.setEnabled(fenabled);
+            }
+        });
     }
 
     private void showToastOnUi(String text) {

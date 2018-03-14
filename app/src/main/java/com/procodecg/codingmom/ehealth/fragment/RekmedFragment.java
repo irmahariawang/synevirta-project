@@ -163,41 +163,44 @@ public class RekmedFragment extends Fragment {
     public void onResume() {
         Log.i(TAG, "Redmed fragment onResume");
         super.onResume();
-        // Komunikasi dengan kartu
-        i = 0;
 
-        // TODO medrec dinamik length baru + status code
-        respondData = ByteBuffer.allocate(2336);
+        if (MedrecDinamikData.isInDatabase == 0) {
+            // Komunikasi dengan kartu
+            i = 0;
 
-        usbManager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
-        filter = new IntentFilter();
-        filter.addAction(ACTION_USB_PERMISSION);
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        getActivity().registerReceiver(broadcastReceiver, filter);
-        // Komunikasi dengan kartu
-        // connect usb device
-        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        if (!usbDevices.isEmpty()) {
-            boolean keep = true;
-            for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
-                usbDevice = entry.getValue();
-                int deviceID = usbDevice.getVendorId();
-                if (deviceID == 1027 || deviceID == 9025) {
-                    Log.d(TAG, "Device ID " + deviceID);
-                    PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
-                    usbManager.requestPermission(usbDevice, pi);
-                    keep = false;
-                } else {
-                    usbConn = null;
-                    usbDevice = null;
+            // TODO medrec dinamik length baru + status code
+            respondData = ByteBuffer.allocate(2336);
+
+            usbManager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
+            filter = new IntentFilter();
+            filter.addAction(ACTION_USB_PERMISSION);
+            filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+            filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+            getActivity().registerReceiver(broadcastReceiver, filter);
+            // Komunikasi dengan kartu
+            // connect usb device
+            HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+            if (!usbDevices.isEmpty()) {
+                boolean keep = true;
+                for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
+                    usbDevice = entry.getValue();
+                    int deviceID = usbDevice.getVendorId();
+                    if (deviceID == 1027 || deviceID == 9025) {
+                        Log.d(TAG, "Device ID " + deviceID);
+                        PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
+                        usbManager.requestPermission(usbDevice, pi);
+                        keep = false;
+                    } else {
+                        usbConn = null;
+                        usbDevice = null;
+                    }
+
+                    if (!keep)
+                        break;
                 }
-
-                if (!keep)
-                    break;
+            } else {
+                Log.d(TAG, "Usb devices empty");
             }
-        } else {
-            Log.d(TAG, "Usb devices empty");
         }
     }
 
@@ -545,6 +548,7 @@ public class RekmedFragment extends Fragment {
             Log.i(TAG, "serial port closed");
             Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
             showToastOnUi("Baca medrec dinamik BERHASIL!");
+            MedrecDinamikData.isInDatabase = 1;
             MedrecDinamikData.writeIndex = Util.getWriteIndex(mddArray);
 //            getActivity().unregisterReceiver(broadcastReceiver);
         }

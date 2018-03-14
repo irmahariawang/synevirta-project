@@ -9,6 +9,7 @@ import java.util.Date;
 public class MedrecDinamikData {
     static final int MEDREC_DINAMIK_SIZE = 5;
     public static int writeIndex;
+    public static int isInDatabase;
 
     String idPuskesmas, pemberiRujukan, keluhanUtama, riwayatPenyakitSekarang,
             riwayatPenyakitDahulu, riwayatPenyakitKeluarga, kepala, thorax, abdomen, genitalia,
