@@ -53,7 +53,7 @@ public class PinActivity extends SessionManagement {
     public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
     public final String ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
-    int i;
+    int i, isCommandReceived;
     String data;
     byte[] selectResponse;
     byte[] authResponse;
@@ -234,6 +234,7 @@ public class PinActivity extends SessionManagement {
          * Komunikasi dengan kartu
          */
         i = 0;
+        isCommandReceived = 0;
         respondData = ByteBuffer.allocate(102);
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -359,9 +360,12 @@ public class PinActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000"))
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
                         showToastOnUi("Koneksi applet gagal");
-//                    send();
+                    } else {
+                        isCommandReceived = 1;
+                    }
+
                 }
             } else if (i == 2) {
                 respondData.put(bytes);
@@ -437,27 +441,34 @@ public class PinActivity extends SessionManagement {
 
     public void send() {
         if (i == 0) {
-            Log.d(TAG, "Write");
-            serialPort.write(APDU_select);
-            Log.d(TAG, "Increment i");
-            i++;
-            Log.d(TAG, "Apdu select");
+            try {
+                serialPort.write(APDU_select);
+                i++;
+                Log.d(TAG, "Apdu select");
+                Thread.sleep(1500);
+                if (isCommandReceived != 1) {
+                    Log.i(TAG, "Koneksi kartu gagal");
+                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
+                    unregisterReceiver(broadcastReceiver);
+                    Intent activity = new Intent(PinActivity.this, WelcomeActivity.class);
+                    startActivity(activity);
+                } else {
+                    showToastOnUi("Berhasil koneksi");
+                    Log.i(TAG, "Berhasil koneksi");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else if (i == 1) {
-            Log.d(TAG, "Write");
             serialPort.write(APDU_owner_auth);
-            Log.d(TAG, "Increment i");
             i++;
             Log.d(TAG, "Apdu owner auth");
         } else if (i == 2) {
-            Log.d(TAG, "Write");
             serialPort.write(APDU_read_HPData);
-            Log.d(TAG, "Increment i");
             i++;
             Log.d(TAG, "Apdu read hp data");
         } else if (i == 3) {
-            Log.d(TAG, "Write");
             serialPort.write(APDU_read_cert);
-            Log.d(TAG, "Increment i");
             i++;
             Log.d(TAG, "Apdu read cert");
         } else {

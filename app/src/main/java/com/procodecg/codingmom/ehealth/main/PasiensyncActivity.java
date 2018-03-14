@@ -67,6 +67,7 @@ public class PasiensyncActivity extends AppCompatActivity {
 
     String data;
     int i; // buat increment serial tulis apdu
+    int isCommandReceived;
 
     ByteBuffer respondData;
     IntentFilter filter;
@@ -112,6 +113,7 @@ public class PasiensyncActivity extends AppCompatActivity {
 
         // Komunikasi dengan kartu
         i = 0;
+        isCommandReceived = 0;
 
         respondData = ByteBuffer.allocate(2469);
 
@@ -334,8 +336,9 @@ public class PasiensyncActivity extends AppCompatActivity {
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
                     if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
-                        i--;
+//                        i--;
                     } else {
+                        isCommandReceived = 1;
                         send();
                     }
                 }
@@ -486,9 +489,22 @@ public class PasiensyncActivity extends AppCompatActivity {
 
     public void send() {
         if ( i == 0 ) {
-            serialPort.write(APDU_select);
-            i++;
-            Log.i(TAG, "write apdu select");
+            try {
+                serialPort.write(APDU_select);
+                i++;
+                Log.i(TAG, "write apdu select");
+                Thread.sleep(1500);
+                if (isCommandReceived != 1) {
+                    i = 0;
+                    Log.i(TAG, "Koneksi kartu gagal");
+                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
+                } else {
+                    showToastOnUi("Berhasil koneksi");
+                    Log.i(TAG, "Berhasil koneksi");
+                }
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
         } else if (i == 1) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
