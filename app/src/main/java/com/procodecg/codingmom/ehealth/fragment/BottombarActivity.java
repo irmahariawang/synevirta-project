@@ -283,7 +283,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 data_param.put("date", out);
                 data_param.put("datetime", cursor.getString(1));
                 data_param.put("nik", cursor.getString(2));
-                data_param.put("kd_puskesmas", "P3273020203");
+                data_param.put("kd_puskesmas", cursor.getString(3));
                 data_param.put("poli", cursor.getString(4));
                 data_param.put("anamnesa", cursor.getString(5));
                 data_param.put("rujukan", cursor.getString(6));
