@@ -42,6 +42,7 @@ import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
@@ -723,7 +724,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
                 values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
 //                values.put(RekamMedisEntry.COLUMN_NIK, "1802280000000001");
-                values.put(RekamMedisEntry.COLUMN_NIK, HPCData.nik);
+                values.put(RekamMedisEntry.COLUMN_NIK, PDCData.nik);
                 values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
                 values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
                 values.put(RekamMedisEntry.COLUMN_RUJUKAN, mPemberiRujukanString);
