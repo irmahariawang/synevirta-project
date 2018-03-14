@@ -250,6 +250,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO,
                 EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA,
                 EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING,
+                EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA,
                 EhealthContract.RekamMedisEntry.COLUMN_RESEP,
                 EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP,
                 EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP,
@@ -294,7 +295,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 pelayanan_array.put(pelayanan);
                 data_param.put("pelayanan", pelayanan_array);
 
-                for(int i=0; i<25; i++){
+                for(int i=0; i<26; i++){
                     pelayanan_ket_tambahan.put(""+i, cursor.getString(i+13));
                 }
                 pelayanan_ket_array.put(pelayanan_ket_tambahan);
@@ -337,6 +338,9 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("LAST_TIMESTAMP", timestamp);
                 editor.apply();
+                
+                SQLiteDatabase db = mDbHelper.getReadableDatabase();
+                db.delete(EhealthContract.RekamMedisEntry.TABLE_NAME, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+"=?", new String[]{timestamp});
 
                 getDataAndPost();
             } catch (ParseException e) {
