@@ -2,9 +2,11 @@ package com.procodecg.codingmom.ehealth.fragment;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -23,7 +25,11 @@ import android.widget.Toast;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
+import com.procodecg.codingmom.ehealth.data.EhealthContract;
+import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util.*;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
@@ -32,6 +38,7 @@ import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedStatisFragment;
 
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -510,6 +517,74 @@ public class RekmedFragment extends Fragment {
                 );
 
         mddArray.add(mdd);
+
+        /*
+         * Masukkan ke internal DB
+         */
+
+        EhealthDbHelper mDbHelper = new EhealthDbHelper(getActivity());
+        mDbHelper.openDB();
+        // Gets the database in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a ContentValues object where column names are the keys,
+        // and pet attributes from the editor are the values.
+        ContentValues values = new ContentValues();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String mTanggalPeriksa = String.valueOf(formatter.format(bytesToDate(date).getTime()));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER, HPCData.nama);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_NIK, PDCData.nik);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS, "123456789012");
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_POLI, poli);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN, bytesToString(pemberiRujukan));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE, systole);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE, diastole);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_SUHU, suhu);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_NADI, ByteBuffer.wrap(nadi).getInt());
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI, ByteBuffer.wrap(respirasi).getInt());
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA, bytesToString(keluhanUtama));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, bytesToString(riwayatPenyakitSekarang));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU, bytesToString(riwayatPenyakitDahulu));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL, bytesToString(riwayatPenyakitKeluarga));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_TINGGI, tinggi);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_BERAT, berat);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_KESADARAN, kesadaran);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_KEPALA, bytesToString(kepala));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_THORAX, bytesToString(thorax));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN, bytesToString(abdomen));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_GENITALIA, bytesToString(genitalia));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS, bytesToString(extremitas));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_KULIT, bytesToString(kulit));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI, bytesToString(neurologi));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM, bytesToString(laboratorium));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI, bytesToString(radiologi));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO, statusLabRadio);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, bytesToString(diagnosisKerja));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, bytesToString(diagnosisBanding));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, bytesToString(icd10));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_RESEP, bytesToString(resep));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP, bytesToString(catatanResep));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP, statusResep);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP, repetisiResep);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN, bytesToString(tindakan));
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM, adVitam);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM, adFunctionam);
+        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM, adSanationam);
+        // Insert a new row for pet in the database, returning the ID of that new row.
+        long newRowId = db.insert(EhealthContract.RekamMedisEntry.TABLE_NAME, null, values);
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (newRowId == -1) {
+            // If the row ID is -1, then there was an error with insertion.
+            //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast with the row ID.
+            //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+            //simpanData();
+//            finish();
+        }
+        mDbHelper.closeDB();
     }
 
     public void send() {

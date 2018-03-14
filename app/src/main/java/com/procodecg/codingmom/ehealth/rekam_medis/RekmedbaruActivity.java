@@ -285,7 +285,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
@@ -304,7 +304,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                             serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                             serialPort.read(mCallback);
                             Log.i(TAG, "Serial port opened");
-                            Toast.makeText(getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Ok");
                             send();
                         } else {
@@ -379,7 +379,14 @@ public class RekmedbaruActivity extends AppCompatActivity {
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
-            unregisterReceiver(broadcastReceiver);
+            try {
+                if (broadcastReceiver != null) {
+                    unregisterReceiver(broadcastReceiver);
+                }
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG,"RekmedBaruActivity:Receiver is already unregistered");
+//            broadcastReceiver = null;
+            }
         }
 
     }

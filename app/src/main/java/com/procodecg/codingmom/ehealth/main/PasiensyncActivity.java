@@ -497,7 +497,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                 serialPort.write(APDU_select);
                 i++;
                 Log.i(TAG, "write apdu select");
-                Thread.sleep(1500);
+                Thread.sleep(2000);
                 if (isCommandReceived != 1) {
                     i = 0;
                     Log.i(TAG, "Koneksi kartu gagal");
