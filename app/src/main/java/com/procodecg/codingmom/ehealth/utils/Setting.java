@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.main.MainActivity;
 
-public class Setting extends AppCompatActivity {
+public class Setting extends SessionManagement {
 
     private EditText settusername;
     private EditText settpassword;

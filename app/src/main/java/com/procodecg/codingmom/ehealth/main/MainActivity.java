@@ -9,7 +9,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.utils.Setting;
@@ -24,6 +26,8 @@ import static com.procodecg.codingmom.ehealth.main.PinActivity.hideKeyboard;
 public class MainActivity extends AppCompatActivity {
 
     Typeface font;
+    SharedPreferences pref;
+    Button goToPin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,30 +67,31 @@ public class MainActivity extends AppCompatActivity {
         //getHPCdata();
     }
 
+    //edit data Puskesmas
       public void showEdit(View view) {
       startActivity(new Intent(getApplicationContext(),Edit.class));
+      }
 
-    //copyDBEhealth();
-        //getHPCdata();
+    //cek isi data Puskesmas sebelum masukin PIN
+        public void goToPin(View view){
+        pref = getSharedPreferences("DATAPUSKES",MODE_PRIVATE);
+        String idpuskes = pref.getString("IDPUSKES","________");
+        String namapuskes = pref.getString("NAMAPUSKES","________");
+        if(idpuskes.equals("") && (namapuskes.equals(""))){
+            Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
+        } else{
+            startActivity(new Intent(getApplicationContext(),PinActivity.class));
+            finish();}
+        }
 
+    //masuk ke Activity setting
+    public void showSett(View view) {
+        startActivity(new Intent(getApplicationContext(), Setting.class));
     }
 
     private static boolean doesDatabaseExist(Context context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
-    }
-
-
-    public void goToPin(View v){
-
-        Intent activity = new Intent(this, PinActivity.class);
-        startActivity(activity);
-        finish();
-    }
-
-    //tambahan untuk masuk ke menu setting
-    public void showSett(View view) {
-        startActivity(new Intent(getApplicationContext(), Setting.class));
     }
 
     public void copyDBEhealth(){
@@ -107,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
         //mDBHelper.createTableKartu();
         mDBHelper.close();
     }
-
-
 }
 
 

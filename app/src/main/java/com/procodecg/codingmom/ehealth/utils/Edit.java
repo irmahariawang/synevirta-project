@@ -11,7 +11,7 @@ import android.widget.EditText;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.main.MainActivity;
 
-public class Edit extends AppCompatActivity {
+public class Edit extends SessionManagement {
 
     private EditText idPuskesmas;
     private EditText namaPuskesmas;
