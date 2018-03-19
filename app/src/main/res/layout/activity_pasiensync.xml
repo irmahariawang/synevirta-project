@@ -73,4 +73,18 @@
         android:onClick="goToProfil"
         android:enabled="false"/>
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="20dp"
+        android:indeterminate="false"
+        android:max="50"
+        android:minHeight="50dp"
+        android:minWidth="200dp"
+        android:progress="1" />
+
 </LinearLayout>

@@ -329,11 +329,11 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         String username = settings.getString("USERNAME", "");
         String password = settings.getString("PASSWORD", "");
 
-        if(code.equals("0x23")){
+        if(code.equals("203")){
 //            callLoginDialog();
             Toast.makeText(BottombarActivity.this, "Generating new token ... ", Toast.LENGTH_SHORT).show();
             new TokenRequest(this).execute(username, password);
-        } else if(code.equals("1x26")){
+        } else if(code.equals("216")){
             try {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("LAST_TIMESTAMP", timestamp);
@@ -342,12 +342,14 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 SQLiteDatabase db = mDbHelper.getReadableDatabase();
                 db.delete(EhealthContract.RekamMedisEntry.TABLE_NAME, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+"=?", new String[]{timestamp});
 
+
+
                 getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             Toast.makeText(BottombarActivity.this, "Update data berhasil", Toast.LENGTH_SHORT).show();
-        } else if(code.equals("0x26")){
+        } else if(code.equals("206")){
             Toast.makeText(BottombarActivity.this, "Update data gagal", Toast.LENGTH_SHORT).show();
         }
     }
@@ -365,7 +367,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
             e.printStackTrace();
         }
 
-        if(code.equals("1x11")){
+        if(code.equals("111")){
             SharedPreferences sp = getSharedPreferences("TOKEN", MODE_PRIVATE);
             SharedPreferences.Editor editor=sp.edit();
             editor.putString("ACCESS_TOKEN", accessToken);

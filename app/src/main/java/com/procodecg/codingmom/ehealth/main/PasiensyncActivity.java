@@ -17,6 +17,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,6 +55,7 @@ public class PasiensyncActivity extends AppCompatActivity {
     Typeface font;
     Typeface fontbold;
     Button btnPdcSync;
+    ProgressBar progressBar;
     PDCDataActivity pdc;
 
     public static final int SELECTED_PICTURE = 1;
@@ -71,6 +74,9 @@ public class PasiensyncActivity extends AppCompatActivity {
     String data;
     int i; // buat increment serial tulis apdu
     int isCommandReceived;
+
+    int progressStatus = 0;
+    Handler handler = new Handler();
 
     ByteBuffer respondData;
     IntentFilter filter;
@@ -114,6 +120,8 @@ public class PasiensyncActivity extends AppCompatActivity {
         tv2.setTypeface(font);
         tv3.setTypeface(fontbold);
         btnPdcSync = (Button) findViewById(R.id.btnShowDialog);
+        btnPdcSync.setVisibility(View.INVISIBLE);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         // Komunikasi dengan kartu
         i = 0;
@@ -360,12 +368,19 @@ public class PasiensyncActivity extends AppCompatActivity {
 
                     golodar = medrecStatikResponse[0];
                     int g = golodar;
+                    setProgressBar(1);
                     al = Arrays.copyOfRange(medrecStatikResponse, 1, 101);
+                    setProgressBar(2);
                     operasi = Arrays.copyOfRange(medrecStatikResponse, 103, 358);
+                    setProgressBar(3);
                     rawatrs = Arrays.copyOfRange(medrecStatikResponse, 360, 615);
+                    setProgressBar(4);
                     kronis = Arrays.copyOfRange(medrecStatikResponse, 617, 872);
+                    setProgressBar(5);
                     bawaan = Arrays.copyOfRange(medrecStatikResponse, 874, 1129);
+                    setProgressBar(6);
                     resiko = Arrays.copyOfRange(medrecStatikResponse, 1131, 1386);
+                    setProgressBar(7);
 
                     Log.i(TAG, "Goldar: " + g);
                     Log.i(TAG, "alergi: " + Util.bytesToString(Util.trimZeroPadding(al)));
@@ -439,48 +454,91 @@ public class PasiensyncActivity extends AppCompatActivity {
                     hpKantor = Arrays.copyOfRange(biodataResponse, 806, 822);
 
                     PDCData.nik = Util.bytesToString(Util.trimZeroPadding(nik));
+                    setProgressBar(8);
                     PDCData.kategoriPasien = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
+                    setProgressBar(9);
                     PDCData.noAsuransi = Util.bytesToString(noAsuransi);
+                    setProgressBar(10);
                     PDCData.tglDaftar = Util.getformattedDate(Util.bytesToDate(tglDaftar));
+                    setProgressBar(11);
                     PDCData.namaPasien = Util.bytesToString(Util.trimZeroPadding(namaPasien));
+                    setProgressBar(12);
                     PDCData.namaKK = Util.bytesToString(Util.trimZeroPadding(namaKK));
+                    setProgressBar(13);
                     PDCData.hubunganKeluarga = Util.bytesToString(hubunganKeluarga);
+                    setProgressBar(14);
                     PDCData.alamat = Util.bytesToString(Util.trimZeroPadding(alamat));
+                    setProgressBar(15);
                     PDCData.rt = Util.bytesToHex(rt);
+                    setProgressBar(16);
                     PDCData.rw = Util.bytesToHex(rw);
+                    setProgressBar(17);
                     PDCData.kelurahanDesa = Util.bytesToHex(kelurahanDesa);
+                    setProgressBar(18);
                     PDCData.kecamatan = Util.bytesToHex(kecamatan);
+                    setProgressBar(19);
                     PDCData.kotaKabupaten = Util.bytesToHex(kotaKabupaten);
+                    setProgressBar(20);
                     PDCData.provinsi = Util.bytesToHex(provinsi);
+                    setProgressBar(21);
                     PDCData.kodepos = Util.bytesToString(kodepos);
+                    setProgressBar(22);
                     PDCData.isDalamWilayahKerja = Util.bytesToHex(isDalamWilayahKerja);
+                    setProgressBar(23);
                     PDCData.tempatLahir = Util.bytesToString(Util.trimZeroPadding(tempatLahir));
+                    setProgressBar(24);
                     PDCData.tglLahir = Util.getformattedDate(Util.bytesToDate(tglLahir));
+                    setProgressBar(25);
                     PDCData.telepon = Util.bytesToString(Util.trimZeroPadding(telepon));
+                    setProgressBar(26);
                     PDCData.hp = Util.bytesToString(Util.trimZeroPadding(hp));
+                    setProgressBar(27);
                     PDCData.jenisKelamin = Util.bytesToString(jenisKelamin);
+                    setProgressBar(28);
                     PDCData.agama = Util.bytesToHex(agama);
+                    setProgressBar(29);
                     PDCData.pendidikan = Util.bytesToHex(pendidikan);
+                    setProgressBar(30);
                     PDCData.pekerjaan = Util.bytesToHex(pekerjaan);
+                    setProgressBar(31);
                     PDCData.kelasPerawatan = Util.bytesToHex(kelasPerawatan);
+                    setProgressBar(32);
                     PDCData.email = Util.bytesToString(Util.trimZeroPadding(email));
+                    setProgressBar(33);
                     PDCData.statusPernikahan = Util.bytesToHex(statusPernikahan);
+                    setProgressBar(34);
                     PDCData.kewarganegaraan = Util.bytesToHex(kewarganegaraan);
+                    setProgressBar(35);
                     PDCData.namaKerabat = Util.bytesToString(Util.trimZeroPadding(namaKerabat));
+                    setProgressBar(36);
                     PDCData.hubunganKerabat = Util.bytesToHex(hubunganKerabat);
+                    setProgressBar(37);
                     PDCData.alamatKerabat = Util.bytesToString(Util.trimZeroPadding(alamatKerabat));
+                    setProgressBar(38);
                     PDCData.kelurahanDesaKerabat = Util.bytesToHex(kelurahanDesaKerabat);
+                    setProgressBar(39);
                     PDCData.kecamatanKerabat = Util.bytesToHex(kecamatanKerabat);
+                    setProgressBar(40);
                     PDCData.kotaKabupatenKerabat = Util.bytesToHex(kotaKabupatenKerabat);
+                    setProgressBar(41);
                     PDCData.provinsiKerabat = Util.bytesToHex(provinsiKerabat);
+                    setProgressBar(42);
                     PDCData.kodeposKerabat = Util.bytesToString(kodeposKerabat);
+                    setProgressBar(43);
                     PDCData.teleponKerabat = Util.bytesToString(Util.trimZeroPadding(teleponKerabat));
+                    setProgressBar(44);
                     PDCData.hpKerabat =  Util.bytesToString(Util.trimZeroPadding(hpKerabat));
+                    setProgressBar(45);
                     PDCData.namaKantor = Util.bytesToString(Util.trimZeroPadding(namaKantor));
+                    setProgressBar(46);
                     PDCData.alamatKantor = Util.bytesToString(Util.trimZeroPadding(alamatKantor));
+                    setProgressBar(47);
                     PDCData.kotaKabupatenKantor = Util.bytesToHex(kotaKabupatenKantor);
+                    setProgressBar(48);
                     PDCData.teleponKantor = Util.bytesToString(Util.trimZeroPadding(teleponKantor));
+                    setProgressBar(49);
                     PDCData.hpKantor = Util.bytesToString(Util.trimZeroPadding(hpKantor));
+                    setProgressBar(50);
 
                     send();
                 }
@@ -527,6 +585,31 @@ public class PasiensyncActivity extends AppCompatActivity {
             unregisterReceiver(broadcastReceiver);
         }
 
+    }
+
+    private void setProgressBar(final int max){
+        new Thread(new Runnable() {
+            public void run() {
+                while (progressStatus < max) {
+                    progressStatus += 1;
+                    handler.post(new Runnable() {
+                        public void run() {
+                            progressBar.setProgress(progressStatus);
+
+                            if(progressStatus == 50){
+                                btnPdcSync.setVisibility(View.VISIBLE);
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     private void setButtonState(Button btn, boolean enabled) {
