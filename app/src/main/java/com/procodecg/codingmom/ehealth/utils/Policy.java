@@ -10,13 +10,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.procodecg.codingmom.ehealth.R;
-import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 
 /**
  * Created by macbookpro on 8/9/17.
  */
 
-public class PolicyActivity extends AppCompatActivity {
+public class Policy extends AppCompatActivity {
 
     private TextView txtTitle;
     Typeface fontBold;
@@ -29,7 +28,7 @@ public class PolicyActivity extends AppCompatActivity {
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_policy);
+        setContentView(R.layout.policy);
 
         txtTitle = (TextView) findViewById(R.id.txt_title);
         txtTitle.setText("Privacy Policy");
@@ -48,7 +47,7 @@ public class PolicyActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),BottombarActivity.class));
+                startActivity(new Intent(getApplicationContext(), Setting.class));
             }
         });
 

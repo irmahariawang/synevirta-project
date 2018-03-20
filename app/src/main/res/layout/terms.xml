@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:orientation="vertical"
+android:layout_width="325dp"
+android:layout_height="wrap_content"
+android:layout_gravity="center_horizontal"
+android:layout_marginTop="15dp"
+tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
+
+
+<ImageButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/btnClose"
+    android:src="@drawable/ic_close1"
+    android:background="@null"
+    android:onClick="closeToMain"
+    android:layout_gravity="start" />
+
+<TextView
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:text="Terms Of Service"
+    android:textSize="20sp"
+    android:gravity="center"
+    android:layout_marginBottom="25dp" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_"
+        android:text="test"
+        android:textSize="14sp"
+        android:textColor="@color/dark_grey"/>
+
+
+</LinearLayout>

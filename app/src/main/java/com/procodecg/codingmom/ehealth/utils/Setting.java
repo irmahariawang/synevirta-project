@@ -3,7 +3,6 @@ package com.procodecg.codingmom.ehealth.utils;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.EditText;
@@ -42,6 +41,27 @@ public class Setting extends SessionManagement {
         ((TextView) findViewById(R.id.SetPass)).setText(password);
         ((TextView) findViewById(R.id.SetIp)).setText(address);
         ((TextView) findViewById(R.id.Settime)).setText(time);
+
+        //privacy policy and terms of service
+        TextView tv1 = (TextView) findViewById(R.id.text_Policy);
+        TextView tv2 = (TextView) findViewById(R.id.text_Terms);
+
+        tv1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Setting.this, Policy.class);
+                startActivity(intent);
+            }
+        });
+
+        tv2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Setting.this, Terms.class);
+                startActivity(intent);
+            }
+        });
+
 
         //set popup window
         DisplayMetrics dm = new DisplayMetrics();
