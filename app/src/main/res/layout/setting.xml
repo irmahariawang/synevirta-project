@@ -6,7 +6,7 @@ android:orientation="vertical"
 android:layout_width="325dp"
 android:layout_height="wrap_content"
 android:layout_gravity="center_horizontal"
-android:layout_marginTop="15dp">
+android:layout_marginTop="15dp"
 tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
 
 
@@ -96,6 +96,38 @@ tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
     android:layout_gravity="center_horizontal"
     android:onClick="SaveSett" />
 
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="50dp"
+    android:gravity="center_horizontal">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_Policy"
+        android:text="Privacy Policy"
+        android:textSize="12sp"
+        android:textColor="@color/dark_grey"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_Terms"
+        android:text="Terms Of Services"
+        android:textSize="12sp"
+        android:textColor="@color/dark_grey"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_Copyright"
+        android:text="Copyright 2018 CodingMum"
+        android:textSize="12sp"
+        android:textColor="@color/dark_grey"/>
+
+
+</LinearLayout>
 
 </LinearLayout>
