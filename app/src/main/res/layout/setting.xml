@@ -109,6 +109,7 @@ tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
         android:id="@+id/text_Policy"
         android:text="Privacy Policy"
         android:textSize="12sp"
+        android:textStyle="bold"
         android:textColor="@color/dark_grey"/>
 
     <TextView
@@ -117,13 +118,14 @@ tools:context="com.procodecg.codingmom.ehealth.utils.Setting">
         android:id="@+id/text_Terms"
         android:text="Terms Of Services"
         android:textSize="12sp"
+        android:textStyle="bold"
         android:textColor="@color/dark_grey"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/text_Copyright"
-        android:text="Copyright 2018 CodingMum"
+        android:text="Copyright 2018 CodingMum Bandung"
         android:textSize="12sp"
         android:textColor="@color/dark_grey"/>
 
