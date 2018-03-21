@@ -70,7 +70,7 @@ public class Setting extends SessionManagement {
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
-        getWindow().setLayout((int)(width*.80),(int)(height*.60));
+        getWindow().setLayout((int)(width*.80),(int)(height*.80));
 
     }
 
