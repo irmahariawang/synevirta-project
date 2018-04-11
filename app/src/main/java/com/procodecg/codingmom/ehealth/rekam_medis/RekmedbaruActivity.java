@@ -827,7 +827,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
         cmd += "000045";
         cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
         cmd += Util.bytesToHex(Util.dateToBytes(Util.getCurrentDate()));
-        cmd += Util.stringToHex(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS));
+        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS), 12);
         cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_POLI)); // byte
         cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RUJUKAN), 30); // vartext
         cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_SYSTOLE)); // int
@@ -864,6 +864,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
 //        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
 //        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
 
+        Log.i("APDU", cmd);
         return cmd;
     }
 

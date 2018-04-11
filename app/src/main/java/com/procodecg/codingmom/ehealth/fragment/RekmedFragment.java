@@ -45,6 +45,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToDate;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToHex;
@@ -283,7 +285,12 @@ public class RekmedFragment extends Fragment {
                     respondData.position(0);
 //                    Log.i(TAG, "Medrec dinamik string: " + Util.bytesToHex(medrecDinamikResponse));
 
-                    processDinamikData(medrecDinamikResponse);
+                    byte[] response = Arrays.copyOfRange(medrecDinamikResponse, 0, 2334);
+
+                    if(allZero(Util.bytesToHex(response))) {
+                        processDinamikData(medrecDinamikResponse);
+                    }
+
                     send();
                 }
             }
@@ -292,6 +299,17 @@ public class RekmedFragment extends Fragment {
             }
         }
     };
+
+    private boolean allZero(String response){
+        Pattern pattern = Pattern.compile("[1-9]");
+        Matcher matcher = pattern.matcher(response);
+
+        return matcher.find();
+    }
+
+    public boolean dataExistInDb(){
+        return true;
+    }
 
     public void processDinamikData(byte[] data) {
         //TODO
@@ -622,9 +640,11 @@ public class RekmedFragment extends Fragment {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
+//            int index = mddArray.size()%5;
+//            Log.d(TAG, "Write index = " + index);
             showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.isInDatabase = 1;
-            MedrecDinamikData.writeIndex = Util.getWriteIndex(mddArray);
+            MedrecDinamikData.writeIndex =  Util.getWriteIndex(mddArray);
 //            getActivity().unregisterReceiver(broadcastReceiver);
         }
     }

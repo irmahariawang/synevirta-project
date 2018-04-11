@@ -256,4 +256,5 @@ public class RekmedDinamisFragment extends Fragment {
             //Toast.makeText(getActivity(), "Table not exist", Toast.LENGTH_SHORT).show();
         }
     }
+
 }

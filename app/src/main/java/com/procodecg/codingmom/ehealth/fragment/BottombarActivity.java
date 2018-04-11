@@ -24,6 +24,7 @@ import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
+import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -263,7 +264,10 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
 
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
         if(cursor.getCount()==0){
-            Toast.makeText(BottombarActivity.this, "Sinkronisasi selesai "+cursor.getCount(), Toast.LENGTH_LONG).show();
+            Toast.makeText(BottombarActivity.this, "Sinkronisasi selesai", Toast.LENGTH_LONG).show();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("LAST_TIMESTAMP", "0000-00-00 00:00:00");
+            editor.apply();
         } else {
             cursor.moveToFirst();
 
@@ -333,7 +337,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
 //            callLoginDialog();
             Toast.makeText(BottombarActivity.this, "Generating new token ... ", Toast.LENGTH_SHORT).show();
             new TokenRequest(this).execute(username, password);
-        } else if(code.equals("216")){
+        } else if(code.equals("216") || code.equals("207")){
             try {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("LAST_TIMESTAMP", timestamp);
@@ -341,8 +345,6 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 
                 SQLiteDatabase db = mDbHelper.getReadableDatabase();
                 db.delete(EhealthContract.RekamMedisEntry.TABLE_NAME, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+"=?", new String[]{timestamp});
-
-
 
                 getDataAndPost();
             } catch (ParseException e) {
@@ -404,7 +406,7 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         }
 
     }
-    
+
 //    public void setSubTitleText(String title){
 //            txtSubTitle.setText(title);
 //        }

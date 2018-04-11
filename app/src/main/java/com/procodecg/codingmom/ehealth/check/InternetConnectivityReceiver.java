@@ -28,10 +28,10 @@ public class InternetConnectivityReceiver extends BroadcastReceiver {
 
         // Check internet connection and accrding to state change the
         // text of activity by calling method
-        if (networkInfo != null && networkInfo.isConnected()) {
-            ba.changeTextStatus(true);
-        } else {
-            ba.changeTextStatus(false);
-        }
+//        if (networkInfo != null && networkInfo.isConnected()) {
+//            ba.changeTextStatus(true);
+//        } else {
+//            ba.changeTextStatus(false);
+//        }
     }
 }
