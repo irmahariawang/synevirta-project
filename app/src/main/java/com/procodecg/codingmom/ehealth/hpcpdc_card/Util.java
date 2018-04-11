@@ -91,8 +91,9 @@ public class Util {
     }
 
     public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
+        int arraysize = mddArray.size();
         ArrayList<Date> dates = new ArrayList<>();
-        for (int i=0; i < MedrecDinamikData.MEDREC_DINAMIK_SIZE; i++) {
+        for (int i=0; i < arraysize; i++) {
             dates.add(mddArray.get(i).tglPeriksa);
         }
 
