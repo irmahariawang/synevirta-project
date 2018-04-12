@@ -88,7 +88,7 @@ public class ProfilpasienFragment extends Fragment {
             namaPasienTv.setText(PDCData.namaPasien);
 
             TextView tglLahirTv = (TextView) getView().findViewById(R.id.textTglLahir);
-            tglLahirTv.setText(PDCData.tglLahir);
+            tglLahirTv.setText(PDCData.tglLahir.toString());
 
             TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
             //umurTv.setText();

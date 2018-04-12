@@ -461,7 +461,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     setProgressBar(9);
                     PDCData.noAsuransi = Util.bytesToString(noAsuransi);
                     setProgressBar(10);
-                    PDCData.tglDaftar = Util.getformattedDate(Util.bytesToDate(tglDaftar));
+                    PDCData.tglDaftar = Util.bytesToDate(tglDaftar);
                     setProgressBar(11);
                     PDCData.namaPasien = Util.bytesToString(Util.trimZeroPadding(namaPasien));
                     setProgressBar(12);
@@ -489,7 +489,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     setProgressBar(23);
                     PDCData.tempatLahir = Util.bytesToString(Util.trimZeroPadding(tempatLahir));
                     setProgressBar(24);
-                    PDCData.tglLahir = Util.getformattedDate(Util.bytesToDate(tglLahir));
+                    PDCData.tglLahir = Util.bytesToDate(tglLahir);
                     setProgressBar(25);
                     PDCData.telepon = Util.bytesToString(Util.trimZeroPadding(telepon));
                     setProgressBar(26);

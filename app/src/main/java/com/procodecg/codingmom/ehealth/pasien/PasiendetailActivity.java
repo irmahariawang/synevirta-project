@@ -73,7 +73,7 @@ public class PasiendetailActivity extends AppCompatActivity {
         nomerAsuransiTv.setText(PDCData.noAsuransi);
 
         TextView tanggalDaftarTv = (TextView) findViewById(R.id.textTglDaftar);
-        tanggalDaftarTv.setText(PDCData.tglDaftar);
+        tanggalDaftarTv.setText(PDCData.tglDaftar.toString());
 
         TextView kelasPerawatanTv = (TextView) findViewById(R.id.textKelasPerawatan);
         kelasPerawatanTv.setText(PDCData.kelasPerawatan);
