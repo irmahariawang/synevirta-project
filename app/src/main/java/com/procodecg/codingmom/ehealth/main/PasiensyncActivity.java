@@ -46,6 +46,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
+
 /**
  * Created by macbookpro on 7/27/17.
  */
@@ -541,6 +543,48 @@ public class PasiensyncActivity extends AppCompatActivity {
                     setProgressBar(50);
 
                     send();
+
+                    String namaString = Util.bytesToHex(namaPasien);
+                    //String tglLahirString =
+                    //String jenisKelaminString =
+
+                    //--pasiendetail--
+                    //String noPDC
+                    String kategoriPasienString = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
+                    String noAsuransiString = Util.bytesToString(Util.trimZeroPadding(noAsuransi));
+                    String tglDaftarString = Util.bytesToString(Util.trimZeroPadding(tglDaftar));
+                    //String kelasPerawatanString =
+                    String namaKkString = Util.bytesToHex(namaKK);
+                    String hubKeluargaString = Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga));
+                    String alamatString = Util.bytesToHex(alamat);
+                    //String RTRWString
+                    //String kelurahanDesaString =
+                    //String kecamatanString =
+                    //String kotaKabupatenString =
+                    //String propinsiString =
+                    //String kodeposString =
+                    //String wilayahKerjaString =
+                    //String teleponString =
+                    //String hpString =
+                    //String agamaString =
+                    //String pendidikanString =
+                    //String pekerjaanString =
+                    //String surelString =
+                    //String statusPerkawinanString =
+                    //String kewarganegaraanString =
+                    //String alamatKeluargaString =
+                    //String kelurahanKeluargaString =
+                    //String kecamatanKeluargaString =
+                    //String kotaKeluargaString =
+                    //String propinsiKeluargaString =
+                    //String kodeposKeluargaString =
+                    //String teleponKeluargaString =
+                    //String hpKeluargaString =
+                    //String namaKantorString =
+                    //String alamatKantorString =
+                    //String kotaKantorString =
+                    //String teleponKantorString =
+
                 }
             }
             else {
