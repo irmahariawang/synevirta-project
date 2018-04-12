@@ -86,6 +86,15 @@ public class ProfilpasienFragment extends Fragment {
             // TODO data pasien diambil data PDCData
             TextView namaPasienTv = (TextView) getView().findViewById(R.id.textNamaPasien);
             namaPasienTv.setText(PDCData.namaPasien);
+
+            TextView tglLahirTv = (TextView) getView().findViewById(R.id.textTglLahir);
+            tglLahirTv.setText(PDCData.tglLahir);
+
+            TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
+            //umurTv.setText();
+
+            TextView jenisKlmnTv = (TextView) getView().findViewById(R.id.textJenisKlmn);
+            jenisKlmnTv.setText(PDCData.jenisKelamin);
         }
 
 

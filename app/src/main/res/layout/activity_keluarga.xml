@@ -57,6 +57,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textNamaKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Lukman Hakim"
@@ -81,6 +82,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textHubunganKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ayah"
@@ -105,6 +107,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textAlamatKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Jalan Kuningan 10"
@@ -129,6 +132,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textKelurahanDesaKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Kebon Jeruk"
@@ -153,6 +157,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textKecamatanKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Andir"
@@ -177,6 +182,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textKotaKebupatenKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bandung"
@@ -201,6 +207,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textPropinsiKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Jawa Barat"
@@ -225,6 +232,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textKodePosKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="40123"
@@ -249,6 +257,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textTeleponKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0224231234"
@@ -273,6 +282,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textHpKerabat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0818532121"
@@ -297,6 +307,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textNamaKantor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PT. Maju Bersama"
@@ -321,6 +332,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textAlamatKantor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Jalan Surapati no 55"
@@ -345,6 +357,7 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textKotaKabupatenKantor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bandung"
@@ -369,9 +382,35 @@
                 android:layout_marginTop="9dp"/>
 
             <TextView
+                android:id="@+id/textTeleponKantor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0225018888"
+                android:textSize="14sp"
+                android:layout_marginBottom="9dp"
+                android:layout_marginLeft="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No HP"
+                android:textSize="16sp"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="9dp"/>
+
+            <TextView
+                android:id="@+id/textHpKantor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0813225018888"
                 android:textSize="14sp"
                 android:layout_marginBottom="9dp"
                 android:layout_marginLeft="20dp"/>
