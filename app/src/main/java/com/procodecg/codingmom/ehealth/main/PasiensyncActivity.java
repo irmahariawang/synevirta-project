@@ -124,6 +124,7 @@ public class PasiensyncActivity extends AppCompatActivity {
         btnPdcSync = (Button) findViewById(R.id.btnShowDialog);
         btnPdcSync.setVisibility(View.INVISIBLE);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
         // Komunikasi dengan kartu
         i = 0;
@@ -605,6 +606,7 @@ public class PasiensyncActivity extends AppCompatActivity {
                     Log.i(TAG, "Koneksi kartu gagal");
                     showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
+                    progressBar.setVisibility(View.VISIBLE);
                     showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
@@ -641,8 +643,10 @@ public class PasiensyncActivity extends AppCompatActivity {
                             progressBar.setProgress(progressStatus);
 
                             if(progressStatus == 50){
-                                btnPdcSync.setVisibility(View.VISIBLE);
+//                                btnPdcSync.setVisibility(View.VISIBLE);
                                 progressBar.setVisibility(View.INVISIBLE);
+                                Intent activity = new Intent(PasiensyncActivity.this, BottombarActivity.class);
+                                startActivity(activity);
                             }
                         }
                     });

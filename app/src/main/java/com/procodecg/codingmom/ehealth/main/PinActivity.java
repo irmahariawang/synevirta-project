@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -171,6 +172,8 @@ public class PinActivity extends SessionManagement {
         tv4.setTypeface(fontbold);
 
         pinview = (Pinview) findViewById(R.id.pinView);
+//        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(pinview.getWindowToken(), 0);
 
 //        getHPCdata();
 
@@ -455,6 +458,11 @@ public class PinActivity extends SessionManagement {
                 } else {
                     showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
+
+//                    InputMethodManager imm = (InputMethodManager)
+//                            getSystemService(Context.INPUT_METHOD_SERVICE);
+//                    imm.showSoftInput(pinview ,
+//                            InputMethodManager.SHOW_IMPLICIT);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
