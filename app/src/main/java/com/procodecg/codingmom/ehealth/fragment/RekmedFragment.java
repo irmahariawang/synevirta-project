@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -287,7 +288,7 @@ public class RekmedFragment extends Fragment {
 
                     byte[] response = Arrays.copyOfRange(medrecDinamikResponse, 0, 2334);
 
-                    if(allZero(Util.bytesToHex(response))) {
+                    if(responseVerifier(Util.bytesToHex(response))) {
                         processDinamikData(medrecDinamikResponse);
                     }
 
@@ -300,15 +301,11 @@ public class RekmedFragment extends Fragment {
         }
     };
 
-    private boolean allZero(String response){
+    private boolean responseVerifier(String response){
         Pattern pattern = Pattern.compile("[1-9]");
         Matcher matcher = pattern.matcher(response);
 
         return matcher.find();
-    }
-
-    public boolean dataExistInDb(){
-        return true;
     }
 
     public void processDinamikData(byte[] data) {
@@ -550,57 +547,62 @@ public class RekmedFragment extends Fragment {
         ContentValues values = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String mTanggalPeriksa = String.valueOf(formatter.format(bytesToDate(date).getTime()));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER, HPCData.nama);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_NIK, PDCData.nik);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS, "123456789012");
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_POLI, poli);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN, bytesToString(pemberiRujukan));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE, systole);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE, diastole);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_SUHU, suhu);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_NADI, ByteBuffer.wrap(nadi).getInt());
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI, ByteBuffer.wrap(respirasi).getInt());
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA, bytesToString(keluhanUtama));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, bytesToString(riwayatPenyakitSekarang));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU, bytesToString(riwayatPenyakitDahulu));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL, bytesToString(riwayatPenyakitKeluarga));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_TINGGI, tinggi);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_BERAT, berat);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_KESADARAN, kesadaran);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_KEPALA, bytesToString(kepala));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_THORAX, bytesToString(thorax));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN, bytesToString(abdomen));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_GENITALIA, bytesToString(genitalia));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS, bytesToString(extremitas));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_KULIT, bytesToString(kulit));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI, bytesToString(neurologi));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM, bytesToString(laboratorium));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI, bytesToString(radiologi));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO, statusLabRadio);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, bytesToString(diagnosisKerja));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, bytesToString(diagnosisBanding));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, bytesToString(icd10));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_RESEP, bytesToString(resep));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP, bytesToString(catatanResep));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP, statusResep);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP, repetisiResep);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN, bytesToString(tindakan));
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM, adVitam);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM, adFunctionam);
-        values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM, adSanationam);
-        // Insert a new row for pet in the database, returning the ID of that new row.
-        long newRowId = db.insert(EhealthContract.RekamMedisEntry.TABLE_NAME, null, values);
 
-        // Show a toast message depending on whether or not the insertion was successful
-        if (newRowId == -1) {
-            // If the row ID is -1, then there was an error with insertion.
-            //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
-        } else {
-            // Otherwise, the insertion was successful and we can display a toast with the row ID.
-            //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
-            //simpanData();
-//            finish();
+        Cursor cursor = db.rawQuery("SELECT * FROM "+EhealthContract.RekamMedisEntry.TABLE_NAME+" WHERE "+EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+" = '"+mTanggalPeriksa+"';", null);
+        if(cursor.getCount()==0) {
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER, HPCData.nama);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_NIK, PDCData.nik);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS, bytesToString(idpuskesmas));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_POLI, poli);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN, bytesToString(pemberiRujukan));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE, systole);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE, diastole);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_SUHU, suhu);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_NADI, ByteBuffer.wrap(nadi).getInt());
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI, ByteBuffer.wrap(respirasi).getInt());
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA, bytesToString(keluhanUtama));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, bytesToString(riwayatPenyakitSekarang));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU, bytesToString(riwayatPenyakitDahulu));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL, bytesToString(riwayatPenyakitKeluarga));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_TINGGI, tinggi);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_BERAT, berat);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_KESADARAN, kesadaran);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_KEPALA, bytesToString(kepala));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_THORAX, bytesToString(thorax));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN, bytesToString(abdomen));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_GENITALIA, bytesToString(genitalia));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS, bytesToString(extremitas));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_KULIT, bytesToString(kulit));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI, bytesToString(neurologi));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM, bytesToString(laboratorium));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI, bytesToString(radiologi));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO, statusLabRadio);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, bytesToString(diagnosisKerja));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, bytesToString(diagnosisBanding));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, bytesToString(icd10));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_RESEP, bytesToString(resep));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP, bytesToString(catatanResep));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP, statusResep);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP, repetisiResep);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN, bytesToString(tindakan));
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM, adVitam);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM, adFunctionam);
+            values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM, adSanationam);
+
+            // Insert a new row for pet in the database, returning the ID of that new row.
+            long newRowId = db.insert(EhealthContract.RekamMedisEntry.TABLE_NAME, null, values);
+
+            // Show a toast message depending on whether or not the insertion was successful
+            if (newRowId == -1) {
+                // If the row ID is -1, then there was an error with insertion.
+                //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast with the row ID.
+                //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+                //simpanData();
+                //finish();
+            }
         }
         mDbHelper.closeDB();
     }
@@ -639,12 +641,16 @@ public class RekmedFragment extends Fragment {
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
-            Log.d(TAG, "Write index = " + Util.getWriteIndex(mddArray));
-//            int index = mddArray.size()%5;
-//            Log.d(TAG, "Write index = " + index);
+            int index;
+//            if(mddArray.size()>=5) {
+                index = Util.getWriteIndex(mddArray);
+//            } else {
+//                index = mddArray.size() % 5;
+//            }
+            Log.d(TAG, "Write index = " + index);
             showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.isInDatabase = 1;
-            MedrecDinamikData.writeIndex =  Util.getWriteIndex(mddArray);
+            MedrecDinamikData.writeIndex =  index;
 //            getActivity().unregisterReceiver(broadcastReceiver);
         }
     }

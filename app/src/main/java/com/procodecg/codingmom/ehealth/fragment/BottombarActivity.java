@@ -203,19 +203,9 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
         String timestamp;
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        //mengambil last timestamp yang dikirim
-        settings = getSharedPreferences("SETTING", MODE_PRIVATE);
-        String ts = settings.getString("LAST_TIMESTAMP", "");
-
         //mengambil token yang sudah ada pada app
         jwt = getSharedPreferences("TOKEN", MODE_PRIVATE);
         String token = jwt.getString("ACCESS_TOKEN", "");
-
-        if(ts.isEmpty()){
-            timestamp = "0";
-        } else {
-            timestamp = ts;
-        }
 
         String[] columns = {
                 //0-6 json object luar
@@ -262,12 +252,9 @@ public class BottombarActivity extends AppCompatActivity implements AsyncRespons
                 EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM
         };
 
-        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, ""+ EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + "> ?", new String[]{timestamp} , null, null, null, "1");
+        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, null, null , null, null, null, "1");
         if(cursor.getCount()==0){
             Toast.makeText(BottombarActivity.this, "Sinkronisasi selesai", Toast.LENGTH_LONG).show();
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("LAST_TIMESTAMP", "0000-00-00 00:00:00");
-            editor.apply();
         } else {
             cursor.moveToFirst();
 
