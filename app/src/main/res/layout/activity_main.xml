@@ -102,16 +102,6 @@
             android:textColor="@color/black"
             android:textSize="20sp"/>
 
-        <Button
-            android:id="@+id/btnShowDialog"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="..."
-            android:background="@drawable/button1"
-            android:textColor="#fff"
-            android:textAllCaps="true"
-            android:onClick="goToPin" />
-
     </LinearLayout>
 
     <ImageButton

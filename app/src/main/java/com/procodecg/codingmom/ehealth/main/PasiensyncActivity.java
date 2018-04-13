@@ -56,7 +56,6 @@ public class PasiensyncActivity extends AppCompatActivity {
 
     Typeface font;
     Typeface fontbold;
-    Button btnPdcSync;
     ProgressBar progressBar;
     PDCDataActivity pdc;
 
@@ -121,8 +120,6 @@ public class PasiensyncActivity extends AppCompatActivity {
         tv1.setTypeface(fontbold);
         tv2.setTypeface(font);
         tv3.setTypeface(fontbold);
-        btnPdcSync = (Button) findViewById(R.id.btnShowDialog);
-        btnPdcSync.setVisibility(View.INVISIBLE);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
@@ -627,7 +624,6 @@ public class PasiensyncActivity extends AppCompatActivity {
             Log.i(TAG, "serial port closed");
             showToastOnUi("Baca data PDC BERHASIL!");
             MedrecDinamikData.isInDatabase = 0;
-            setButtonState(btnPdcSync, true);
             unregisterReceiver(broadcastReceiver);
         }
 
@@ -643,7 +639,6 @@ public class PasiensyncActivity extends AppCompatActivity {
                             progressBar.setProgress(progressStatus);
 
                             if(progressStatus == 50){
-//                                btnPdcSync.setVisibility(View.VISIBLE);
                                 progressBar.setVisibility(View.INVISIBLE);
                                 Intent activity = new Intent(PasiensyncActivity.this, BottombarActivity.class);
                                 startActivity(activity);
