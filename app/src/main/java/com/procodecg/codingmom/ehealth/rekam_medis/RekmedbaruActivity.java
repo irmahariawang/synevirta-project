@@ -65,6 +65,9 @@ public class RekmedbaruActivity extends AppCompatActivity {
     public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
     Typeface fontBold;
 
+    private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
+                    chunk11, chunk12, chunk13;
+
     private TextView txtTitle;
     private int mPoli = RekamMedisEntry.POLI_UMUM;
     private int mKesadaran = RekamMedisEntry.KESADARAN_COMPOSMENTIS;
@@ -371,11 +374,71 @@ public class RekmedbaruActivity extends AppCompatActivity {
             i++;
             Log.i(TAG, "write apdu select");
         }
-//        else if (i == 1) {
-//            serialPort.write(APDU_insert);
-//            i++;
-//            Log.i(TAG, "write insert medrec");
-//        }
+        else if (i == 1) {
+            serialPort.write(chunk1);
+            i++;
+            Log.i(TAG, "write insert medrec: c1");
+        }
+        else if (i == 2) {
+            serialPort.write(chunk2);
+            i++;
+            Log.i(TAG, "write insert medrec: c2");
+        }
+        else if (i == 3) {
+            serialPort.write(chunk3);
+            i++;
+            Log.i(TAG, "write insert medrec: c3");
+        }
+        else if (i == 4) {
+            serialPort.write(chunk4);
+            i++;
+            Log.i(TAG, "write insert medrec: c4");
+        }
+        else if (i == 5) {
+            serialPort.write(chunk5);
+            i++;
+            Log.i(TAG, "write insert medrec: c5");
+        }
+        else if (i == 6) {
+            serialPort.write(chunk6);
+            i++;
+            Log.i(TAG, "write insert medrec: c6");
+        }
+        else if (i == 7) {
+            serialPort.write(chunk7);
+            i++;
+            Log.i(TAG, "write insert medrec: c7");
+        }
+        else if (i == 8) {
+            serialPort.write(chunk8);
+            i++;
+            Log.i(TAG, "write insert medrec: c8");
+        }
+        else if (i == 9) {
+            serialPort.write(chunk9);
+            i++;
+            Log.i(TAG, "write insert medrec: c9");
+        }
+        else if (i == 10) {
+            serialPort.write(chunk10);
+            i++;
+            Log.i(TAG, "write insert medrec: c10");
+        }
+        else if (i == 11) {
+            serialPort.write(chunk11);
+            i++;
+            Log.i(TAG, "write insert medrec: c11");
+        }
+        else if (i == 12) {
+            serialPort.write(chunk12);
+            i++;
+            Log.i(TAG, "write insert medrec: c12");
+        }
+        else if (i == 13) {
+            serialPort.write(chunk13);
+            i++;
+            Log.i(TAG, "write insert medrec: c13");
+        }
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
@@ -385,10 +448,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 }
             } catch (IllegalArgumentException e) {
                 Log.i(TAG,"RekmedBaruActivity:Receiver is already unregistered");
-//            broadcastReceiver = null;
             }
         }
-
     }
 
         private void setupSpinner(){
@@ -769,12 +830,27 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
 
                 //TODO add insert command
-                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1);
-                byte[] apdu = Util.hexStringToByteArray(cmd);
+//                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1);
+//                byte[] apdu = Util.hexStringToByteArray(cmd);
+//
+//                serialPort.write(apdu);
+//                i++;
+//                Log.d(TAG, "send apdu insert new record: 1");
 
-                serialPort.write(apdu);
-                i++;
-                Log.d(TAG, "send apdu insert new record: 1");
+                chunk1 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1));
+                chunk2 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 2));
+                chunk3 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 3));
+                chunk4 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 4));
+                chunk5 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 5));
+                chunk6 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 6));
+                chunk7 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 7));
+                chunk8 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 8));
+                chunk9 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 9));
+                chunk10 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 10));
+                chunk11 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 11));
+                chunk12 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 12));
+                chunk13 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 13));
+                send();
 
                 Toast.makeText(getApplicationContext(), "Added", Toast.LENGTH_SHORT).show();
 
