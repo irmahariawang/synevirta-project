@@ -133,18 +133,6 @@ public class PinActivity extends SessionManagement {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    // fungsi sembunyikan keyboard
-    public static void showKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(activity);
-        }
-        imm.hideSoftInputFromWindow((IBinder) view, InputMethodManager.SHOW_IMPLICIT);
-    }
-
 //  fungsi menghapus pin input yang salah
     private void clearPin(ViewGroup group)
     {
@@ -185,10 +173,6 @@ public class PinActivity extends SessionManagement {
         tv4.setTypeface(fontbold);
 
         pinview = (Pinview) findViewById(R.id.pinView);
-        InputMethodManager imm = (
-                InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(
-                pinview.getWindowToken(), 0);
 
 //        getHPCdata();
 
@@ -473,8 +457,6 @@ public class PinActivity extends SessionManagement {
                 } else {
                     showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
-
-//                    showKeyboard(PinActivity.this);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
