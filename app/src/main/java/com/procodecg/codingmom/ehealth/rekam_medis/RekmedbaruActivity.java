@@ -355,9 +355,9 @@ public class RekmedbaruActivity extends AppCompatActivity {
                     Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
                     if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
                         i--;
-                        Log.d(TAG, "GAGAL INSERT");
+                        Log.e(TAG, "GAGAL INSERT: 1");
                     } else {
-                        Log.d(TAG, "Berhasil INSERT");
+                        Log.d(TAG, "Berhasil INSERT: 1");
                         send(); // close port
                     }
                 }
@@ -769,12 +769,12 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
 
                 //TODO add insert command
-                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex);
+                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1);
                 byte[] apdu = Util.hexStringToByteArray(cmd);
 
                 serialPort.write(apdu);
                 i++;
-                Log.d(TAG, "send apdu insert new record");
+                Log.d(TAG, "send apdu insert new record: 1");
 
                 Toast.makeText(getApplicationContext(), "Added", Toast.LENGTH_SHORT).show();
 
@@ -819,53 +819,173 @@ public class RekmedbaruActivity extends AppCompatActivity {
         return valid;
     }
 
-    private String makeAPDUInsertCommand(ContentValues cv, int writeIndex) {
-        String cmd = "80c5"; // command
-        cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index
-//        cmd += "00091e"; // data length
-        cmd += "000045";
-        cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
-        cmd += Util.bytesToHex(Util.dateToBytes(Util.getCurrentDate()));
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS), 12);
-        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_POLI)); // byte
-        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RUJUKAN), 30); // vartext
-        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_SYSTOLE)); // int
-        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_DIASTOLE));
-        cmd += Util.bytesToHex(Util.floatToBytes(cv.getAsFloat(RekamMedisEntry.COLUMN_SUHU)));
-        cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_NADI)); // weird int
-        cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_RESPIRASI));
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KELUHANUTAMA), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
-//        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_TINGGI));
-//        cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_BERAT));
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_KESADARAN));
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KEPALA), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_THORAX), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ABDOMEN), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_GENITALIA), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_EXTREMITAS), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KULIT), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_NEUROLOGI), 50);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_LABORATORIUM), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RADIOLOGI), 200);
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUS_LABRADIO));
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RESEP), 200);
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_CATTRESEP), 50);
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUSRESEP));
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_REPETISIRESEP));
-//        cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_TINDAKAN), 200);
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_VITAM));
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
-//        cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
-
-        Log.i("APDU", cmd);
-        return cmd;
+    private String makeAPDUInsertCommand(ContentValues cv, int writeIndex, int chunk) {
+        switch(chunk) {
+            case 1:
+                String cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00"; // 00
+                cmd += "007b"; // Total length
+                cmd += "0000"; // Start pointer
+                cmd += "0077"; // actual data length
+                cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
+                cmd += Util.bytesToHex(Util.dateToBytes(Util.getCurrentDate())); // tglperiksa
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ID_PUSKESMAS), 12); // idpuskesmas
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_POLI)); // poli
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RUJUKAN), 30); // pemberi rujukan
+                cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_SYSTOLE)); // systole
+                cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_DIASTOLE)); // diastole
+                cmd += Util.bytesToHex(Util.floatToBytes(cv.getAsFloat(RekamMedisEntry.COLUMN_SUHU))); // suhu
+                cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_NADI)); // nadi
+                cmd += Util.intToHex3(cv.getAsInteger(RekamMedisEntry.COLUMN_RESPIRASI)); // respirasi
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KELUHANUTAMA), 50); // keluhan utama
+                assert cmd.length() == 260;
+                return cmd;
+            case 2:
+                // cmd is declared during compiled time
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0077"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200); // riwayat penyakit sekarang
+                assert cmd.length() == 422;
+                return cmd;
+            case 3:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "013F"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
+                assert cmd.length() == 422;
+                return cmd;
+            case 4:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00A3"; // total length
+                cmd += "0207"; // start pointer
+                cmd += "009F"; // actual data length
+                cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_TINGGI));
+                cmd += Util.intToHex(cv.getAsInteger(RekamMedisEntry.COLUMN_BERAT));
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_KESADARAN));
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KEPALA), 50);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_THORAX), 50);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ABDOMEN), 50);
+                assert cmd.length() == 340;
+                return cmd;
+            case 5:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "02A6"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_GENITALIA), 50);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_EXTREMITAS), 50);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_KULIT), 50);
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_NEUROLOGI), 50);
+                assert cmd.length() == 422;
+                return cmd;
+            case 6:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "036E"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_LABORATORIUM), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 7:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0436"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RADIOLOGI), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 8:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CD"; // total length
+                cmd += "04FE"; // start pointer
+                cmd += "00C9"; // actual data length
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUS_LABRADIO));
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
+                assert cmd.length() == 424;
+                return cmd;
+            case 9:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "05C7"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 10:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "068F"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 11:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0757"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_RESEP), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 12:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "0036"; // total length
+                cmd += "081F"; // start pointer
+                cmd += "0034"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_CATTRESEP), 50);
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_STATUSRESEP));
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_REPETISIRESEP));
+                assert cmd.length() == 126;
+                return cmd;
+            case 13:
+                cmd = "80c5"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CF"; // total length
+                cmd += "0853"; // start pointer
+                cmd += "00CB"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(RekamMedisEntry.COLUMN_TINDAKAN), 200);
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_VITAM));
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
+                cmd += String.format("%02X", cv.getAsByte(RekamMedisEntry.COLUMN_AD_SANATIONAM));
+                assert cmd.length() == 428;
+                return cmd;
+            default:
+                throw new WrongInputException("Wrong medrec chunk number");
+        }
     }
 
+    class WrongInputException extends RuntimeException {
+        public WrongInputException(String message) {
+            super(message);
+        }
+    }
 
 }
