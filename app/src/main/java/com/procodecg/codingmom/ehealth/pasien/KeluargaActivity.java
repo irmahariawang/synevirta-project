@@ -67,7 +67,20 @@ public class KeluargaActivity extends AppCompatActivity {
         namaKerabatTv.setText(PDCData.namaKerabat);
 
         TextView hubunganKerabatTv = (TextView) findViewById(R.id.textHubunganKerabat);
-        hubunganKerabatTv.setText(PDCData.hubunganKerabat);
+        String hubunganKerabatS = "Orang Tua";
+        if (PDCData.hubunganKerabat == "2"){
+            hubunganKerabatS = "Kakek/Nenek"; }
+            else if (PDCData.hubunganKerabat == "3"){
+            hubunganKerabatS = "Anak";}
+            else if (PDCData.hubunganKerabat == "4"){
+            hubunganKerabatS = "Saudara Kandung";}
+            else if (PDCData.hubunganKerabat == "5"){
+            hubunganKerabatS = "Saudara Ayah";}
+            else if (PDCData.hubunganKerabat == "6"){
+            hubunganKerabatS = "Saudara Ibu";}
+            else if (PDCData.hubunganKerabat == "7"){
+            hubunganKerabatS = "Suami/Istri";}
+        hubunganKerabatTv.setText(hubunganKerabatS);
 
         TextView alamatKerabatTv = (TextView) findViewById(R.id.textAlamatKerabat);
         alamatKerabatTv.setText(PDCData.alamatKerabat);

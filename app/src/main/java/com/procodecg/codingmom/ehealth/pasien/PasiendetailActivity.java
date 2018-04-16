@@ -110,7 +110,9 @@ public class PasiendetailActivity extends AppCompatActivity {
         kodePosTv.setText(PDCData.kodepos);
 
         TextView isDalamWilayahKerjaTv = (TextView) findViewById(R.id.textIsDalamWilayahKerja);
-        isDalamWilayahKerjaTv.setText(PDCData.isDalamWilayahKerja);
+        String isDalamWilayahKerjaS = "Didalam";
+        if ( PDCData.isDalamWilayahKerja== "2"){isDalamWilayahKerjaS = "Diluar";}
+        isDalamWilayahKerjaTv.setText(isDalamWilayahKerjaS);
 
         TextView tempatTglLahirTv = (TextView) findViewById(R.id.textTempatTanggalLahir);
         String tempatTglLahir = PDCData.tempatLahir + "-" + PDCData.tglLahir;
@@ -126,25 +128,74 @@ public class PasiendetailActivity extends AppCompatActivity {
         NIKTv.setText(PDCData.nik);
 
         TextView jenisKelaminTv = (TextView) findViewById(R.id.textJenisKlmnDetail);
-        jenisKelaminTv.setText(PDCData.jenisKelamin);
+        String jenisKelaminS = "Pria";
+        if (PDCData.jenisKelamin == "2"){
+            jenisKelaminS = "Wanita"; }
+        jenisKelaminTv.setText(jenisKelaminS);
 
         TextView agamaTv = (TextView) findViewById(R.id.textAgama);
         agamaTv.setText(PDCData.agama);
 
         TextView pendidikanTv = (TextView) findViewById(R.id.textPendidikan);
-        pendidikanTv.setText(PDCData.pendidikan);
+        String pendidikanS = "Tidak Sekolah";
+        if (PDCData.pendidikan == "2"){
+            pendidikanS = "Belum/Tidak tamat SD"; }
+        else if (PDCData.pendidikan == "3"){
+            pendidikanS = "Tamat SD";}
+        else if (PDCData.pendidikan == "4"){
+            pendidikanS = "Tamat SMP";}
+        else if (PDCData.pendidikan == "5"){
+            pendidikanS = "Tamat SMA";}
+        else if (PDCData.pendidikan == "6"){
+            pendidikanS = "Tamat Diploma";}
+        else if (PDCData.pendidikan == "7"){
+            pendidikanS = "Tamat S1";}
+        pendidikanTv.setText(pendidikanS);
 
         TextView pekerjaanTv = (TextView) findViewById(R.id.textPekerjaan);
-        pekerjaanTv.setText(PDCData.pekerjaan);
+        String pekerjaanS = "PNS";
+        if (PDCData.pekerjaan == "2"){
+            pekerjaanS = "TNI/POLRI"; }
+        else if (PDCData.pekerjaan == "3"){
+            pekerjaanS = "Pensiunan";}
+        else if (PDCData.pekerjaan == "4"){
+            pekerjaanS = "Swasta";}
+        else if (PDCData.pekerjaan == "5"){
+            pekerjaanS = "Pedagang";}
+        else if (PDCData.pekerjaan == "6"){
+            pekerjaanS = "Nelayan";}
+        else if (PDCData.pekerjaan == "7"){
+            pekerjaanS = "Petani";}
+        else if (PDCData.pekerjaan == "8"){
+            pekerjaanS = "Wiraswasta";}
+        else if (PDCData.pekerjaan == "9"){
+            pekerjaanS = "Ibu rumah tangga";}
+        else if (PDCData.pekerjaan == "10"){
+            pekerjaanS = "Pelajar";}
+        else if (PDCData.pekerjaan == "11"){
+            pekerjaanS = "Mahasiswa";}
+        else if (PDCData.pekerjaan == "12"){
+            pekerjaanS = "Dibawah umur";}
+        else if (PDCData.pekerjaan == "13"){
+            pekerjaanS = "TIdak bekerja";}
+        pekerjaanTv.setText(pekerjaanS);
 
         TextView emailTv = (TextView) findViewById(R.id.textEmail);
         emailTv.setText(PDCData.email);
 
         TextView statusPernikahanTv = (TextView) findViewById(R.id.textStatusPernikahan);
-        statusPernikahanTv.setText(PDCData.statusPernikahan);
+        String statusPernikahanS = "Menikah";
+        if (PDCData.statusPernikahan == "2"){
+            statusPernikahanS = "Belum menikah";
+        } else if (PDCData.statusPernikahan == "3")
+            {statusPernikahanS = "Janda/Duda";}
+        statusPernikahanTv.setText(statusPernikahanS);
 
         TextView kewarganegaraanTv = (TextView) findViewById(R.id.textKewarganegaraan);
-        kewarganegaraanTv.setText(PDCData.kewarganegaraan);
+        String kewarganegaraanS = "WNI";
+        if (PDCData.kewarganegaraan == "2"){
+            kewarganegaraanS = "WNA"; }
+        kewarganegaraanTv.setText(kewarganegaraanS);
 
 
     }

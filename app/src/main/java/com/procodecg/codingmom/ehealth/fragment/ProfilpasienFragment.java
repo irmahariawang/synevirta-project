@@ -14,6 +14,9 @@ import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.pasien.KeluargaActivity;
 import com.procodecg.codingmom.ehealth.pasien.PasiendetailActivity;
+import com.procodecg.codingmom.ehealth.utils.FunctionSupport;
+
+import java.util.Date;
 
 /**
  * Created by macbookpro on 7/30/17.
@@ -83,6 +86,8 @@ public class ProfilpasienFragment extends Fragment {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+
+
             // TODO data pasien diambil data PDCData
             TextView namaPasienTv = (TextView) getView().findViewById(R.id.textNamaPasien);
             namaPasienTv.setText(PDCData.namaPasien);
@@ -91,10 +96,16 @@ public class ProfilpasienFragment extends Fragment {
             tglLahirTv.setText(PDCData.tglLahir.toString());
 
             TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
-            //umurTv.setText();
+            Date tglLahir = (PDCData.tglLahir);
+            FunctionSupport hitungUmur = new FunctionSupport();
+            String umurS = hitungUmur.getAge(2013, 8,5);
+            umurTv.setText(umurS);
 
-            TextView jenisKlmnTv = (TextView) getView().findViewById(R.id.textJenisKlmn);
-            jenisKlmnTv.setText(PDCData.jenisKelamin);
+            TextView jenisKelaminTv = (TextView) getView().findViewById(R.id.textJenisKlmn);
+            String jenisKelaminS = "Pria";
+            if (PDCData.jenisKelamin == "2"){
+                jenisKelaminS = "Wanita"; }
+            jenisKelaminTv.setText(jenisKelaminS);
         }
 
 
