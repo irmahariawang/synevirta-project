@@ -64,7 +64,7 @@ public class KeluargaActivity extends AppCompatActivity {
         getWindow().setLayout((int)(width*.92),(int)(height*.85));
 
         TextView namaKerabatTv = (TextView) findViewById(R.id.textNamaKerabat);
-        namaKerabatTv.setText(PDCData.kewarganegaraan);
+        namaKerabatTv.setText(PDCData.namaKerabat);
 
         TextView hubunganKerabatTv = (TextView) findViewById(R.id.textHubunganKerabat);
         hubunganKerabatTv.setText(PDCData.hubunganKerabat);

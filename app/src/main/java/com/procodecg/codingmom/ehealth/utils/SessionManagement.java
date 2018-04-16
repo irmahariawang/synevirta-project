@@ -6,11 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 
 import com.procodecg.codingmom.ehealth.main.MainActivity;
 
 
-public class SessionManagement extends Activity {
+public class SessionManagement extends AppCompatActivity {
 
     public static final long DISCONNECT_TIMEOUT = 30000; // 30 sec = 30 * 1000 ms
 
@@ -19,7 +20,7 @@ public class SessionManagement extends Activity {
         }
     };
 
-    private Runnable disconnectCallback = new Runnable() {
+    public Runnable disconnectCallback = new Runnable() {
         @Override
         public void run() {
 

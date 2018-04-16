@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:id="@+id/text_cari"
         android:layout_marginTop="100dp"
-        android:text="Masukkan kata kunci"
+        android:text="Pencarian Diagnosis Kerja"
         android:textSize="18sp"/>
 
     <android.support.v7.widget.SearchView
@@ -25,6 +25,7 @@
         android:layout_marginTop="10dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
+        android:clickable="true"
         android:background="@drawable/pencarian" />
 
     <!--<Button-->

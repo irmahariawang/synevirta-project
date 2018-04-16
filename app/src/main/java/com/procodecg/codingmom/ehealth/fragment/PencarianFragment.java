@@ -1,15 +1,16 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.app.Fragment;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
@@ -64,7 +65,18 @@ public class PencarianFragment extends Fragment {
 
         dbHelper = new EhealthDbHelper(getActivity());
 
-        SearchView sView= (SearchView) view.findViewById(R.id.inputPencarian);
+        final SearchView sView= (SearchView) view.findViewById(R.id.inputPencarian);
+        sView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sView.setIconified(false);
+            }
+        });
+        int searchCloseButtonId = sView.getContext().getResources()
+                .getIdentifier("android:id/search_close_btn", null, null);
+
+        ImageView closeButton = (ImageView) sView.findViewById(searchCloseButtonId);
+
 
         //sView.setOnQueryTextListener((SearchView.OnQueryTextListener) this);
 
