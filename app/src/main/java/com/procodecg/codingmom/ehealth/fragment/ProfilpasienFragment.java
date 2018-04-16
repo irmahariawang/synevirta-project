@@ -16,6 +16,7 @@ import com.procodecg.codingmom.ehealth.pasien.KeluargaActivity;
 import com.procodecg.codingmom.ehealth.pasien.PasiendetailActivity;
 import com.procodecg.codingmom.ehealth.utils.FunctionSupport;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -97,8 +98,11 @@ public class ProfilpasienFragment extends Fragment {
 
             TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
             Date tglLahir = (PDCData.tglLahir);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(tglLahir);
+            //cal.get(Calendar.YEAR);
             FunctionSupport hitungUmur = new FunctionSupport();
-            String umurS = hitungUmur.getAge(2013, 8,5);
+            String umurS = hitungUmur.getAge(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
             umurTv.setText(umurS);
 
             TextView jenisKelaminTv = (TextView) getView().findViewById(R.id.textJenisKlmn);
