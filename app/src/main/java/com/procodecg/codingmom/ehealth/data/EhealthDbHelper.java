@@ -14,9 +14,6 @@ import java.util.List;
 import static com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER;
 import static com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA;
 
-/**
- * Created by neo on 11/21/17.
- */
 
 public class EhealthDbHelper extends SQLiteOpenHelper {
     private SQLiteDatabase db;
