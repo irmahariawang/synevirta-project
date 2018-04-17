@@ -18,6 +18,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -706,7 +707,7 @@ public class RekmedFragment extends Fragment {
 
                             if(progressStatus == 50){
                                 myDialog.cancel();
-                                getFragmentManager().beginTransaction().detach(RekmedDinamisFragment.newInstance()).attach(RekmedDinamisFragment.newInstance()).commit();
+                                getFragmentManager().beginTransaction().detach(RekmedFragment.this).attach(RekmedFragment.this).commit();
                             }
                         }
                     });
