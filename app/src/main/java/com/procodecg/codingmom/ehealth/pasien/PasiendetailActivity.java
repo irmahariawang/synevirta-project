@@ -63,8 +63,8 @@ public class PasiendetailActivity extends AppCompatActivity {
         getWindow().setLayout((int)(width*.92),(int)(height*.88));
 
 
-        //TextView namaPasienTv = (TextView) findViewById(R.id.textNoSmartCard);
-        //namaPasienTv.setText(PDCData.noSmartcard);
+        TextView noSmartCardTv = (TextView) findViewById(R.id.textNoSmartCard);
+        //noSmartCardTv.setText(PDCData.noSmartCard);
 
         TextView kategoriPasienTv = (TextView) findViewById(R.id.textKategoriPasien);
         kategoriPasienTv.setText(PDCData.kategoriPasien);
@@ -79,7 +79,7 @@ public class PasiendetailActivity extends AppCompatActivity {
         kelasPerawatanTv.setText(PDCData.kelasPerawatan);
 
         TextView namaPasienTv = (TextView) findViewById(R.id.textNamaPasienDetail);
-        kategoriPasienTv.setText(PDCData.kategoriPasien);
+        namaPasienTv.setText(PDCData.namaPasien);
 
         TextView namaKKTv = (TextView) findViewById(R.id.textNamaKK);
         namaKKTv.setText(PDCData.namaKK);

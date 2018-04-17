@@ -4,20 +4,20 @@ import android.util.Log;
 
 import java.util.Calendar;
 
-public class FunctionSupport {
+public  class FunctionSupport {
 
     final String TAG = "umur";
 
         //Log.d(TAG, "hasil umur : " + getAge(2013, 8, 12));
 
-    public String getAge(int DOByear, int DOBmonth, int DOBday) {
+    public static String getAge(int DOByear, int DOBmonth, int DOBday) {
 
         int age;
         int ageMonth;
 
         final Calendar calenderToday = Calendar.getInstance();
         int currentYear = calenderToday.get(Calendar.YEAR);
-        int currentMonth = 1 + calenderToday.get(Calendar.MONTH);
+        int currentMonth = calenderToday.get(Calendar.MONTH);
         int todayDay = calenderToday.get(Calendar.DAY_OF_MONTH);
 
         age = currentYear - DOByear;

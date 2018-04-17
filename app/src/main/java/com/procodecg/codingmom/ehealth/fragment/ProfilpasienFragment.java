@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.pasien.KeluargaActivity;
 import com.procodecg.codingmom.ehealth.pasien.PasiendetailActivity;
 import com.procodecg.codingmom.ehealth.utils.FunctionSupport;
@@ -94,15 +95,14 @@ public class ProfilpasienFragment extends Fragment {
             namaPasienTv.setText(PDCData.namaPasien);
 
             TextView tglLahirTv = (TextView) getView().findViewById(R.id.textTglLahir);
-            tglLahirTv.setText(PDCData.tglLahir.toString());
+            String tglLahirS = Util.getFormattedDate(PDCData.tglLahir);
+            tglLahirTv.setText(tglLahirS);
 
             TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
             Date tglLahir = (PDCData.tglLahir);
             Calendar cal = Calendar.getInstance();
             cal.setTime(tglLahir);
-            //cal.get(Calendar.YEAR);
-            FunctionSupport hitungUmur = new FunctionSupport();
-            String umurS = hitungUmur.getAge(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
+            String umurS = FunctionSupport.getAge(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
             umurTv.setText(umurS);
 
             TextView jenisKelaminTv = (TextView) getView().findViewById(R.id.textJenisKlmn);

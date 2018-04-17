@@ -103,7 +103,7 @@ public class Util {
     }
 
     public static String getFormattedDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         return sdf.format(date);
     }
 
