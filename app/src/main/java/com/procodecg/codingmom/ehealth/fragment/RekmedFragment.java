@@ -1,5 +1,6 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -12,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,6 +23,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.felhr.usbserial.UsbSerialDevice;
@@ -59,6 +65,13 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.trimZeroPadding;
  */
 
 public class RekmedFragment extends Fragment {
+
+    Dialog myDialog;
+    ProgressBar progressBar;
+    TextView textView;
+
+    int progressStatus = 0;
+    Handler handler = new Handler();
 
     /*
      * Komunikasi dengan kartu
@@ -173,8 +186,11 @@ public class RekmedFragment extends Fragment {
     public void onResume() {
         Log.i(TAG, "Redmed fragment onResume");
         super.onResume();
+//        getFragmentManager().beginTransaction().detach(RekmedDinamisFragment.newInstance()).attach(RekmedDinamisFragment.newInstance()).commit();
 
         if (MedrecDinamikData.isInDatabase == 0) {
+            bacaMedrekDinamik();
+
             // Komunikasi dengan kartu
             i = 0;
 
@@ -287,6 +303,9 @@ public class RekmedFragment extends Fragment {
 //                    Log.i(TAG, "Medrec dinamik string: " + Util.bytesToHex(medrecDinamikResponse));
 
                     byte[] response = Arrays.copyOfRange(medrecDinamikResponse, 0, 2334);
+
+                    int x = (i-1)*10;
+                    setProgressBar(x);
 
                     if(responseVerifier(Util.bytesToHex(response))) {
                         processDinamikData(medrecDinamikResponse);
@@ -663,6 +682,42 @@ public class RekmedFragment extends Fragment {
                 Toast.makeText(getActivity(), ftext, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void bacaMedrekDinamik(){
+        myDialog = new Dialog(getActivity());
+        myDialog.setContentView(R.layout.progress_bar);
+        myDialog.setCancelable(false);
+
+        textView = (TextView) myDialog.findViewById(R.id.textView);
+        progressBar = (ProgressBar) myDialog.findViewById(R.id.progressBar);
+
+        myDialog.show();
+    }
+
+    private void setProgressBar(final int max){
+        new Thread(new Runnable() {
+            public void run() {
+                while (progressStatus < max) {
+                    progressStatus += 1;
+                    handler.post(new Runnable() {
+                        public void run() {
+                            progressBar.setProgress(progressStatus);
+
+                            if(progressStatus == 50){
+                                myDialog.cancel();
+                                getFragmentManager().beginTransaction().detach(RekmedDinamisFragment.newInstance()).attach(RekmedDinamisFragment.newInstance()).commit();
+                            }
+                        }
+                    });
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
