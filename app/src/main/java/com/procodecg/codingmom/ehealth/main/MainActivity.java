@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         pref = getSharedPreferences("DATAPUSKES",MODE_PRIVATE);
         String idpuskes = pref.getString("IDPUSKES","________");
         String namapuskes = pref.getString("NAMAPUSKES","________");
-        if(idpuskes.equals("") && (namapuskes.equals(""))){
+        if(idpuskes.equals("") || namapuskes.equals("") || idpuskes.equals("________") || namapuskes.equals("________")){
             Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
         } else{
             startActivity(new Intent(getApplicationContext(),PinActivity.class));

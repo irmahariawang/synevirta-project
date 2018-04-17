@@ -30,6 +30,9 @@ public class Edit extends AppCompatActivity {
         idPuskesmas=(EditText)findViewById(R.id.inputId);
         namaPuskesmas=(EditText)findViewById(R.id.inputNama);
 
+        idPuskesmas.setText(idpuskes);
+        namaPuskesmas.setText(namapuskes);
+
         //set popup window
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
