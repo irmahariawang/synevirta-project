@@ -95,7 +95,7 @@ public class ProfilpasienFragment extends Fragment {
             namaPasienTv.setText(PDCData.namaPasien);
 
             TextView tglLahirTv = (TextView) getView().findViewById(R.id.textTglLahir);
-            String tglLahirS = Util.getFormattedDate(PDCData.tglLahir);
+            String tglLahirS = Util.getformattedDate(PDCData.tglLahir);
             tglLahirTv.setText(tglLahirS);
 
             TextView umurTv = (TextView) getView().findViewById(R.id.textUmur);
