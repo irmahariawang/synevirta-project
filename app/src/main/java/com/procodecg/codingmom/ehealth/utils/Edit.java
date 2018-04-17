@@ -16,7 +16,7 @@ public class Edit extends AppCompatActivity {
     private EditText idPuskesmas;
     private EditText namaPuskesmas;
     private SharedPreferences prefs;
-    private SessionManagement sessionManagement;
+    //private SessionManagement sessionManagement;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +43,8 @@ public class Edit extends AppCompatActivity {
         getWindow().setLayout((int)(width*.70),(int)(height*.40));
 
 
-        sessionManagement = new SessionManagement();
-        sessionManagement.resetDisconnectTimer();
+        //sessionManagement = new SessionManagement();
+        //sessionManagement.resetDisconnectTimer();
     }
 
     //set close button

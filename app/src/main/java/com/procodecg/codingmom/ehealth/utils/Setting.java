@@ -3,6 +3,8 @@ package com.procodecg.codingmom.ehealth.utils;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.EditText;
@@ -11,7 +13,7 @@ import android.widget.TextView;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.main.MainActivity;
 
-public class Setting extends SessionManagement {
+public class Setting extends AppCompatActivity {
 
     private EditText settusername;
     private EditText settpassword;
@@ -86,6 +88,12 @@ public class Setting extends SessionManagement {
         String password= settpassword.getText().toString();
         String address= setip.getText().toString();
         String time= settimeout.getText().toString();
+
+        if(TextUtils.isEmpty(time)){
+            settimeout.setError("Timeout tidak boleh kosong!");
+            settimeout.setText("30000");
+            return;
+        }
 
         //simpan data
         SharedPreferences.Editor editor =preferences.edit();

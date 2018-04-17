@@ -40,6 +40,7 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecStatikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCDataActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
+import com.procodecg.codingmom.ehealth.utils.SessionManagement;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
  * Created by macbookpro on 7/27/17.
  */
 
-public class PasiensyncActivity extends AppCompatActivity {
+public class PasiensyncActivity extends SessionManagement {
 
     Typeface font;
     Typeface fontbold;
