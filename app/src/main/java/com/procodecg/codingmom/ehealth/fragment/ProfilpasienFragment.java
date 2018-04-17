@@ -16,6 +16,7 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.pasien.KeluargaActivity;
 import com.procodecg.codingmom.ehealth.pasien.PasiendetailActivity;
 import com.procodecg.codingmom.ehealth.utils.FunctionSupport;
+import com.procodecg.codingmom.ehealth.utils.SessionManagement;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +28,7 @@ import java.util.Date;
 public class ProfilpasienFragment extends Fragment {
 
 //    Typeface font;
+    private SessionManagement sessionManagement;
 
     public static Fragment newInstance() {
             ProfilpasienFragment fragment = new ProfilpasienFragment();
@@ -36,7 +38,10 @@ public class ProfilpasienFragment extends Fragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            //sessionManagement = new SessionManagement();
+            //sessionManagement.resetDisconnectTimer();
         }
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -25,6 +25,7 @@ import com.procodecg.codingmom.ehealth.data.EhealthContract;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
+import com.procodecg.codingmom.ehealth.utils.SessionManagement;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +40,7 @@ import java.util.Date;
  * Created by macbookpro on 7/31/17.
  */
 
-public class BottombarActivity extends AppCompatActivity implements AsyncResponse{
+public class BottombarActivity extends SessionManagement implements AsyncResponse{
 
 //    private void displayFragment(int position) {
 //        // update the main content by replacing fragments
