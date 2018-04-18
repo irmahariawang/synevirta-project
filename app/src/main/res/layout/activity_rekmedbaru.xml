@@ -297,7 +297,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:maxLength="3"/>
 
                 </LinearLayout>
 
@@ -337,7 +338,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:maxLength="3"/>
 
                 </LinearLayout>
             </LinearLayout>
@@ -373,7 +375,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="numberDecimal"
+                        android:maxLength="5"/>
 
                 </LinearLayout>
 
@@ -401,7 +404,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:maxLength="3"/>
 
                 </LinearLayout>
 
@@ -429,7 +433,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:maxLength="3"/>
 
                 </LinearLayout>
 
@@ -614,7 +619,8 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="number" />
+                        android:inputType="numberDecimal"
+                        android:maxLength="6"/>
 
                 </LinearLayout>
 
