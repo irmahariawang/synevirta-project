@@ -334,6 +334,9 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
                 SQLiteDatabase db = mDbHelper.getReadableDatabase();
                 db.delete(EhealthContract.RekamMedisEntry.TABLE_NAME, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+"=?", new String[]{timestamp});
 
+                RekmedDinamisFragment rdf = new RekmedDinamisFragment();
+                rdf.refresh();
+
                 getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();

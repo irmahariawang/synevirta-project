@@ -248,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
                         showToastOnUi("Koneksi applet gagal");
                     } else {
                         isCommandReceived = 1;
+                        send();
                     }
 
                 }
@@ -270,8 +271,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
-
-                    goToPin();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -280,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             unregisterReceiver(broadcastReceiver);
+            goToPin();
         }
     }
 

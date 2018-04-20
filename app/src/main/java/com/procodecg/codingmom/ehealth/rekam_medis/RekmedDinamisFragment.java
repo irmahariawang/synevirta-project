@@ -242,6 +242,10 @@ public class RekmedDinamisFragment extends Fragment {
         dbHelper.closeDB();
     }
 
+    public void refresh(){
+        rAdapter.notifyDataSetChanged();
+        loadTable(getView());
+    }
 
     @Override
     public void onResume() {
