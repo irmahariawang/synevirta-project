@@ -276,13 +276,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
                     break;
             }
         }
-
-        //menampilkan nama puskesmas
-        /*
-                HashMap<String, String> setting = setconfig.getDetail();
-                idpuskes.setText(setting.get(SetConfig.KEY_IDPUSKES));
-                namapuskes.setText(setting.get(SetConfig.KEY_NAMAPUSKES));
-        */
         }
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -333,6 +326,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
             Log.d(TAG, "Received bytes");
             data = Util.bytesToHex(bytes);
             Log.d(TAG, "Data " + data);
+            Log.i(TAG, "i: " + i);
 
             if (i == 1) { //select
                 respondData.put(bytes);
@@ -347,7 +341,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                         i--;
                     }
                 }
-            } else if (i == 2) { // insert
+            } else if (i == 2) { // insert chunk 1
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     selectResponse = new byte[2];
@@ -361,9 +355,225 @@ public class RekmedbaruActivity extends AppCompatActivity {
                         Log.e(TAG, "GAGAL INSERT: 1");
                     } else {
                         Log.d(TAG, "Berhasil INSERT: 1");
-                        send(); // close port
+                        send();
                     }
                 }
+            } else if (i == 3) { // insert chunk 2
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 2");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 2");
+                        send();
+                    }
+                }
+            } else if (i == 4) { // insert chunk 3
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 3");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 3");
+                        send();
+                    }
+                }
+            } else if (i == 5) { // insert chunk 4
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 4");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 4");
+                        send();
+                    }
+                }
+            }
+            else if (i == 6) { // insert chunk 5
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 5");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 5");
+                        send();
+                    }
+                }
+            }
+            else if (i == 7) { // insert chunk 6
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 6");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 6");
+                        send();
+                    }
+                }
+            }
+            else if (i == 8) { // insert chunk 7
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 7");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 7");
+                        send();
+                    }
+                }
+            }
+            else if (i == 9) { // insert chunk 8
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 8");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 8");
+                        send();
+                    }
+                }
+            }
+            else if (i == 10) { // insert chunk 9
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 9");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 9");
+                        send();
+                    }
+                }
+            }
+            else if (i == 11) { // insert chunk 10
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 10");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 10");
+                        send();
+                    }
+                }
+            }
+            else if (i == 12) { // insert chunk 11
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 11");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 11");
+                        send();
+                    }
+                }
+            }
+            else if (i == 13) { // insert chunk 12
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 12");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 12");
+                        send();
+                    }
+                }
+            }
+            else if (i == 14) { // insert chunk 13
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: 13");
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: 13");
+                        send();
+                    }
+                }
+            }
+            else {
+                Log.e(TAG, "i: " + i);
             }
         }
     };
@@ -865,7 +1075,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                     // Otherwise, the insertion was successful and we can display a toast with the row ID.
                     //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
                     //simpanData();
-                    finish();
+//                    finish();
                 }
                 mDbHelper.closeDB();
             }
