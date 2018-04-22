@@ -2,6 +2,7 @@ package com.procodecg.codingmom.ehealth.rekam_medis;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -91,6 +92,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
     private ClearableEditText idPuskesmas;
     private SharedPreferences prefs;
+
+    private ProgressDialog progressDialog;
 
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -568,6 +571,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                         Log.e(TAG, "GAGAL INSERT: 13");
                     } else {
                         Log.d(TAG, "Berhasil INSERT: 13");
+//                        progressDialog.dismiss();
                         send();
                     }
                 }
@@ -655,9 +659,11 @@ public class RekmedbaruActivity extends AppCompatActivity {
             try {
                 if (broadcastReceiver != null) {
                     unregisterReceiver(broadcastReceiver);
+                    finish();
                 }
             } catch (IllegalArgumentException e) {
                 Log.i(TAG,"RekmedBaruActivity:Receiver is already unregistered");
+                finish();
             }
         }
     }
@@ -1040,14 +1046,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 values.put(RekamMedisEntry.COLUMN_AD_FUNCTIONAM, mAdFunctionam);
                 values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
 
-                //TODO add insert command
-//                String cmd = makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1);
-//                byte[] apdu = Util.hexStringToByteArray(cmd);
-//
-//                serialPort.write(apdu);
-//                i++;
-//                Log.d(TAG, "send apdu insert new record: 1");
-
                 chunk1 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1));
                 chunk2 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 2));
                 chunk3 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 3));
@@ -1062,8 +1060,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 chunk12 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 12));
                 chunk13 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 13));
                 send();
-
-                Toast.makeText(getApplicationContext(), "Added", Toast.LENGTH_SHORT).show();
+                showLoader();
 
                 // Insert a new row for pet in the database, returning the ID of that new row.
                 long newRowId = db.insert(RekamMedisEntry.TABLE_NAME, null, values);
@@ -1273,6 +1270,11 @@ public class RekmedbaruActivity extends AppCompatActivity {
         public WrongInputException(String message) {
             super(message);
         }
+    }
+
+    private void showLoader() {
+        progressDialog = ProgressDialog.show(this, "E-health",
+                "Menulis medrec dinamik, harap tunggu", true);
     }
 
 }
