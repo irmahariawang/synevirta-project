@@ -96,10 +96,13 @@ public class Util {
         for (int i=0; i < arraysize; i++) {
             dates.add(mddArray.get(i).tglPeriksa);
         }
-
-        Date mostRecent = Collections.max(dates);
-        int maxIdx = dates.indexOf(mostRecent);
-        return (maxIdx+1) % 5;
+        if (dates.isEmpty()) {
+            return 0;
+        } else {
+            Date mostRecent = Collections.max(dates);
+            int maxIdx = dates.indexOf(mostRecent);
+            return (maxIdx+1) % 5;
+        }
     }
 
     public static String getFormattedDate(Date date) {
