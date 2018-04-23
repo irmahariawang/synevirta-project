@@ -121,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
         String idpuskes = pref.getString("IDPUSKES","________");
         String namapuskes = pref.getString("NAMAPUSKES","________");
         if(idpuskes.equals("") || namapuskes.equals("") || idpuskes.equals("________") || namapuskes.equals("________")){
-            Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
+            showToastOnUi("DATA PUSKESMAS HARUS DIISI");
+
         } else{
             startActivity(new Intent(getApplicationContext(),PinActivity.class));
             finish();

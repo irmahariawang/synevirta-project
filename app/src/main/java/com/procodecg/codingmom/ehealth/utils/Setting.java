@@ -31,7 +31,7 @@ public class Setting extends AppCompatActivity {
         String username= preferences.getString("USERNAME","");
         String password= preferences.getString("PASSWORD","");
         String address= preferences.getString("ADDRESS","");
-        String time= preferences.getString("TIME","");
+        Integer time= preferences.getInt("TIME",0);
 
 
         settusername=(EditText)findViewById(R.id.SetUser);
@@ -42,7 +42,9 @@ public class Setting extends AppCompatActivity {
         ((TextView) findViewById(R.id.SetUser)).setText(username);
         ((TextView) findViewById(R.id.SetPass)).setText(password);
         ((TextView) findViewById(R.id.SetIp)).setText(address);
-        ((TextView) findViewById(R.id.Settime)).setText(time);
+        if(time != 0 ) {
+            ((TextView) findViewById(R.id.Settime)).setText(String.valueOf(time));
+        }
 
         //privacy policy and terms of service
         TextView tv1 = (TextView) findViewById(R.id.text_Policy);
@@ -100,7 +102,7 @@ public class Setting extends AppCompatActivity {
         editor.putString("USERNAME",username);
         editor.putString("PASSWORD",password);
         editor.putString("ADDRESS",address);
-        editor.putString("TIME",time);
+        editor.putInt("TIME",Integer.valueOf(time));
         editor.apply();
 
 

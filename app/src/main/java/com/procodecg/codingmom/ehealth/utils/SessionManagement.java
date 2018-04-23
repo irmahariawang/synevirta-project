@@ -53,10 +53,10 @@ public class SessionManagement extends AppCompatActivity {
 
     public void resetDisconnectTimer() {
         disconnectHandler.removeCallbacks(disconnectCallback);
-        preferences = getSharedPreferences("Setting", MODE_PRIVATE);
+        preferences = getSharedPreferences("SETTING", MODE_PRIVATE);
         DISCONNECT_TIMEOUT = preferences.getInt("TIME",0);
         if (DISCONNECT_TIMEOUT == 0) {
-            DISCONNECT_TIMEOUT = 90;
+            DISCONNECT_TIMEOUT = 30;
         }
         disconnectHandler.postDelayed(disconnectCallback, DISCONNECT_TIMEOUT*1000);
     }
