@@ -177,7 +177,7 @@ public class RekmedDinamisFragment extends Fragment {
                 COLUMN_TGL_PERIKSA,
                 //RekamMedisEntry.COLUMN_ID_PUSKESMAS
         };
-        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, null, null, null, null, EhealthContract.RekamMedisEntry._ID+" DESC");
+        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, RekamMedisEntry.COLUMN_NIK, null, null, null, EhealthContract.RekamMedisEntry._ID+" DESC");
 
 //        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, null, null, null, null, null);
         try {

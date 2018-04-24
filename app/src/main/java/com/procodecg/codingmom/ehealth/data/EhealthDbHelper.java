@@ -192,7 +192,7 @@ public class EhealthDbHelper extends SQLiteOpenHelper {
 
         if(searchTerm != null && searchTerm.length()>0)
         {
-            String sql="SELECT * FROM "+EhealthContract.RekamMedisEntry.TABLE_NAME+" WHERE "+RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA+" LIKE '%"+searchTerm+"%'";
+            String sql="SELECT * FROM "+EhealthContract.RekamMedisEntry.TABLE_NAME+" WHERE "+RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA+" LIKE '%"+searchTerm+"%' ORDER BY "+COLUMN_TGL_PERIKSA+" DESC";
             context=db.rawQuery(sql,null);
             return context;
 

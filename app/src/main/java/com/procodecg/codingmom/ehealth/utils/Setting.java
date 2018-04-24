@@ -42,7 +42,7 @@ public class Setting extends AppCompatActivity {
         ((TextView) findViewById(R.id.SetUser)).setText(username);
         ((TextView) findViewById(R.id.SetPass)).setText(password);
         ((TextView) findViewById(R.id.SetIp)).setText(address);
-        if(time != 0 ) {
+        if(time != 0) {
             ((TextView) findViewById(R.id.Settime)).setText(String.valueOf(time));
         }
 

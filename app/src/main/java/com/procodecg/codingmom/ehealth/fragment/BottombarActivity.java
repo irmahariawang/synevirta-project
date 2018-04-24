@@ -398,6 +398,11 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
 
     }
 
+    @Override
+    public void onBackPressed(){
+
+    }
+
 //    public void setSubTitleText(String title){
 //            txtSubTitle.setText(title);
 //        }

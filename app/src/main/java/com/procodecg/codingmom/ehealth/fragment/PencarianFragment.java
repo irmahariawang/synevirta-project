@@ -79,17 +79,17 @@ public class PencarianFragment extends Fragment {
                 .getIdentifier("android:id/search_close_btn", null, null);
 
         ImageView closeButton = (ImageView) sView.findViewById(searchCloseButtonId);
-/*
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(getActivity(), "Clear", Toast.LENGTH_SHORT);
 
-                Intent pencarian = new Intent (getActivity(),PencarianFragment.class);
-                startActivity(pencarian);
+//        closeButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                Toast.makeText(getActivity(), "Clear", Toast.LENGTH_SHORT);
 
-            }
-        });
-*/
+//                Intent pencarian = new Intent (getActivity(),PencarianFragment.class);
+//                startActivity(pencarian);
+
+//            }
+//        });
+
         //sView.setOnQueryTextListener((SearchView.OnQueryTextListener) this);
 
         sView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

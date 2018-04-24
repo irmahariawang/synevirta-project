@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:id="@+id/text_cari"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="10dp"
         android:text="Pencarian Diagnosis Kerja"
         android:textSize="18sp"/>
 

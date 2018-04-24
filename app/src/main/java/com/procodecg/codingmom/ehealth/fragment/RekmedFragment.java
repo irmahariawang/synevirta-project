@@ -310,6 +310,9 @@ public class RekmedFragment extends Fragment {
 
                     if(responseVerifier(Util.bytesToHex(response))) {
                         processDinamikData(medrecDinamikResponse);
+                    } else {
+                        i = 6;
+                        setProgressBar(50);
                     }
 
                     send();
@@ -636,37 +639,32 @@ public class RekmedFragment extends Fragment {
             serialPort.write(APDU_read_medrec_dinamik1);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 1");
-            showToastOnUi("Baca medrec 1...");
         } else if (i == 2) {
             serialPort.write(APDU_read_medrec_dinamik2);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 2");
-            showToastOnUi("Baca medrec 2...");
+            showToastOnUi("Baca medrec 1 selesai");
         } else if (i == 3) {
             serialPort.write(APDU_read_medrec_dinamik3);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 3");
-            showToastOnUi("Baca medrec 3...");
+            showToastOnUi("Baca medrec 2 selesai");
         } else if (i == 4) {
             serialPort.write(APDU_read_medrec_dinamik4);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 4");
-            showToastOnUi("Baca medrec 4...");
+            showToastOnUi("Baca medrec 3 selesai");
         } else if (i == 5) {
             serialPort.write(APDU_read_medrec_dinamik5);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 5");
-            showToastOnUi("Baca medrec 5...");
+            showToastOnUi("Baca medrec 4 selesai");
         }
         else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             int index;
-//            if(mddArray.size()>=5) {
-                index = Util.getWriteIndex(mddArray);
-//            } else {
-//                index = mddArray.size() % 5;
-//            }
+            index = Util.getWriteIndex(mddArray);
             Log.d(TAG, "Write index = " + index);
             showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.isInDatabase = 1;
