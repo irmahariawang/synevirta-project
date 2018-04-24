@@ -56,7 +56,7 @@ public class SessionManagement extends AppCompatActivity {
         preferences = getSharedPreferences("SETTING", MODE_PRIVATE);
         DISCONNECT_TIMEOUT = preferences.getInt("TIME",0);
         if (DISCONNECT_TIMEOUT == 0) {
-            DISCONNECT_TIMEOUT = 30;
+            DISCONNECT_TIMEOUT = 90;
         }
         disconnectHandler.postDelayed(disconnectCallback, DISCONNECT_TIMEOUT*1000);
     }

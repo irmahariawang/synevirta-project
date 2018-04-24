@@ -1,5 +1,6 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -77,6 +78,13 @@ public class PencarianFragment extends Fragment {
 
         ImageView closeButton = (ImageView) sView.findViewById(searchCloseButtonId);
 
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pencarian = new Intent (getActivity(),PencarianFragment.class);
+                startActivity(pencarian);
+            }
+        });
 
         //sView.setOnQueryTextListener((SearchView.OnQueryTextListener) this);
 

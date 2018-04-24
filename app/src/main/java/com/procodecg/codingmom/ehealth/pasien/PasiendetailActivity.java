@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 
 /**
  * Created by macbookpro on 8/9/17.
@@ -73,7 +74,8 @@ public class PasiendetailActivity extends AppCompatActivity {
         nomerAsuransiTv.setText(PDCData.noAsuransi);
 
         TextView tanggalDaftarTv = (TextView) findViewById(R.id.textTglDaftar);
-        tanggalDaftarTv.setText(PDCData.tglDaftar.toString());
+        String tglDaftarS = Util.getformattedDate(PDCData.tglDaftar);
+        tanggalDaftarTv.setText(tglDaftarS);
 
         TextView kelasPerawatanTv = (TextView) findViewById(R.id.textKelasPerawatan);
         kelasPerawatanTv.setText(PDCData.kelasPerawatan);
@@ -85,7 +87,20 @@ public class PasiendetailActivity extends AppCompatActivity {
         namaKKTv.setText(PDCData.namaKK);
 
         TextView hubunganKeluargaTv = (TextView) findViewById(R.id.textHubKeluarga);
-        hubunganKeluargaTv.setText(PDCData.hubunganKeluarga);
+        String hubunganKeluargaS = "Orang Tua";
+        if (PDCData.hubunganKeluarga == "2"){
+            hubunganKeluargaS = "Kakek/Nenek"; }
+        else if (PDCData.hubunganKeluarga == "3"){
+            hubunganKeluargaS = "Anak";}
+        else if (PDCData.hubunganKeluarga == "4"){
+            hubunganKeluargaS = "Saudara Kandung";}
+        else if (PDCData.hubunganKeluarga == "5"){
+            hubunganKeluargaS = "Saudara Ayah";}
+        else if (PDCData.hubunganKeluarga == "6"){
+            hubunganKeluargaS = "Saudara Ibu";}
+        else if (PDCData.hubunganKeluarga == "7"){
+            hubunganKeluargaS = "Suami/Istri";}
+        hubunganKeluargaTv.setText(hubunganKeluargaS);
 
         TextView alamatTv = (TextView) findViewById(R.id.textAlamat);
         alamatTv.setText(PDCData.alamat);
@@ -115,7 +130,8 @@ public class PasiendetailActivity extends AppCompatActivity {
         isDalamWilayahKerjaTv.setText(isDalamWilayahKerjaS);
 
         TextView tempatTglLahirTv = (TextView) findViewById(R.id.textTempatTanggalLahir);
-        String tempatTglLahir = PDCData.tempatLahir + "-" + PDCData.tglLahir;
+        String tglLahirS = Util.getformattedDate(PDCData.tglLahir);
+        String tempatTglLahir = PDCData.tempatLahir + " / " + tglLahirS;
         tempatTglLahirTv.setText(tempatTglLahir);
 
         TextView teleponTv = (TextView) findViewById(R.id.textTelepon);
@@ -134,7 +150,18 @@ public class PasiendetailActivity extends AppCompatActivity {
         jenisKelaminTv.setText(jenisKelaminS);
 
         TextView agamaTv = (TextView) findViewById(R.id.textAgama);
-        agamaTv.setText(PDCData.agama);
+        String agamaS = "Islam";
+        if (PDCData.agama == "2"){
+            agamaS = "Kristen"; }
+        else if (PDCData.agama == "3"){
+            agamaS = "Katolik";}
+        else if (PDCData.agama == "4"){
+            agamaS = "Hindu";}
+        else if (PDCData.agama == "5"){
+            agamaS = "Buddha";}
+        else if (PDCData.agama == "6"){
+            agamaS = "Kong Hu Cu";}
+        agamaTv.setText(agamaS);
 
         TextView pendidikanTv = (TextView) findViewById(R.id.textPendidikan);
         String pendidikanS = "Tidak Sekolah";
