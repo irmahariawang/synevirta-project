@@ -1,5 +1,6 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
@@ -77,15 +79,17 @@ public class PencarianFragment extends Fragment {
                 .getIdentifier("android:id/search_close_btn", null, null);
 
         ImageView closeButton = (ImageView) sView.findViewById(searchCloseButtonId);
-
+/*
         closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
+                Toast.makeText(getActivity(), "Clear", Toast.LENGTH_SHORT);
+
                 Intent pencarian = new Intent (getActivity(),PencarianFragment.class);
                 startActivity(pencarian);
+
             }
         });
-
+*/
         //sView.setOnQueryTextListener((SearchView.OnQueryTextListener) this);
 
         sView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -115,14 +119,17 @@ public class PencarianFragment extends Fragment {
                     }
 
                     Tableexist = dbHelper.isTableExists(EhealthContract.RekamMedisEntry.TABLE_NAME, true);
-                    if (Tableexist == true) {
+                    if (Tableexist) {
                         //Toast.makeText(getActivity(), "Table exist", Toast.LENGTH_SHORT).show();
                         loadTable(view, searchInput);
 
-                    } else {
-                        //Toast.makeText(getActivity(), "Table not exist", Toast.LENGTH_SHORT).show();
                     }
                     //Toast.makeText(getActivity(), newText, Toast.LENGTH_SHORT).show();
+                } else
+                {
+                    clearTable(view);
+                    Toast.makeText(getActivity(),"clear",Toast.LENGTH_SHORT).show();
+
                 }
 //                getRekmedFilter(newText);
                 return false;
@@ -133,6 +140,12 @@ public class PencarianFragment extends Fragment {
     }
 
     private void getRekmedFilter(String searchTerm){
+
+    }
+
+    private void clearTable(View view){
+        RecyclerView rView = (RecyclerView) view.findViewById(R.id.listPencarian);
+        rView.removeAllViewsInLayout();
 
     }
 
