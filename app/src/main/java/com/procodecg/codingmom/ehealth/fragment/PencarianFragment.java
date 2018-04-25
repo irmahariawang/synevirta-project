@@ -127,8 +127,8 @@ public class PencarianFragment extends Fragment {
                     //Toast.makeText(getActivity(), newText, Toast.LENGTH_SHORT).show();
                 } else
                 {
-                    clearTable(view);
-                    Toast.makeText(getActivity(),"clear",Toast.LENGTH_SHORT).show();
+                    //clearTable(view);
+                    //Toast.makeText(getActivity(),"clear",Toast.LENGTH_SHORT).show();
 
                 }
 //                getRekmedFilter(newText);
