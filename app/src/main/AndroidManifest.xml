@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".main.MainActivity"
             android:windowSoftInputMode="stateHidden"
-            />
+            android:screenOrientation="portrait"/>
 
 
             <!-- <intent-filter> -->
@@ -29,21 +29,28 @@
             <!-- </intent-filter> -->
 
 
-        <activity android:name=".main.PasiensyncActivity" />
-
-        <activity android:name=".fragment.BottombarActivity" />
+        <activity android:name=".main.PasiensyncActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".fragment.BottombarActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".pasien.PasiendetailActivity"
-            android:theme="@style/AppTheme.CustomTheme" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".pasien.KeluargaActivity"
-            android:theme="@style/AppTheme.CustomTheme" />
-        <activity android:name=".main.PinActivity" />
-        <activity android:name=".rekam_medis.RekmedlamaActivity" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".main.PinActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".rekam_medis.RekmedlamaActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".rekam_medis.RekmedbaruActivity"
-            android:exported="true" />
-        <activity android:name=".main.WelcomeActivity">
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".main.WelcomeActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,10 +59,12 @@
         </activity>
         <activity
             android:name=".utils.Setting"
-            android:theme="@style/AppTheme.CustomTheme" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".utils.Edit"
-            android:theme="@style/AppTheme.CustomTheme" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
         <receiver
             android:name=".check.InternetConnectivityReceiver"
             android:enabled="true">
@@ -67,10 +76,12 @@
         </receiver>
         <activity
             android:name=".utils.Policy"
-            android:theme="@style/AppTheme.CustomTheme" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".utils.Terms"
-            android:theme="@style/AppTheme.CustomTheme" />
+            android:theme="@style/AppTheme.CustomTheme"
+            android:screenOrientation="portrait"/>
 
     </application>
 

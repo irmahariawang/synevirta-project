@@ -1,5 +1,6 @@
 package com.procodecg.codingmom.ehealth.main;
 
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
+import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.utils.Setting;
@@ -39,6 +41,12 @@ import java.util.Map;
 import static com.procodecg.codingmom.ehealth.main.PinActivity.hideKeyboard;
 
 public class MainActivity extends AppCompatActivity {
+
+    int click = 0;
+    Dialog myDialog;
+    TextView message;
+    Button button1, button2;
+    private static long back_pressed;
 
     final String TAG = "HPCPDCDUMMY";
     public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
@@ -293,6 +301,42 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, ftext, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed(){
+        if (back_pressed + 2000 > System.currentTimeMillis()){
+            myDialog = new Dialog(this);
+            myDialog.setContentView(R.layout.confirmation);
+            myDialog.setCancelable(false);
+
+            message = (TextView) myDialog.findViewById(R.id.textView);
+            message.setText("Anda yakin untuk keluar dari aplikasi?");
+            button1 = (Button) myDialog.findViewById(R.id.button);
+            button1.setText("YA");
+            button2 = (Button) myDialog.findViewById(R.id.button2);
+            button2.setText("TIDAK");
+
+            myDialog.show();
+
+            button1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    finish();
+                }
+            });
+
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    myDialog.cancel();
+                }
+            });
+        } else {
+            Toast.makeText(MainActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
+        }
+
+        back_pressed = System.currentTimeMillis();
     }
 }
 

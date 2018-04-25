@@ -1,5 +1,7 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,6 +16,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,8 +85,12 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
     
     private SharedPreferences jwt, settings;
     int i = 1;
-    
+    int click = 0;
     EhealthDbHelper mDbHelper;
+    Dialog myDialog;
+    TextView message;
+    Button button1, button2;
+    private static long back_pressed;
 
     Typeface fontBold;
 
@@ -400,7 +409,41 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
 
     @Override
     public void onBackPressed(){
+        click++;
+        if (back_pressed + 2000 > System.currentTimeMillis()){
+            myDialog = new Dialog(this);
+            myDialog.setContentView(R.layout.confirmation);
+            myDialog.setCancelable(false);
 
+            message = (TextView) myDialog.findViewById(R.id.textView);
+            message.setText("Anda yakin untuk keluar dari profil pasien?");
+            button1 = (Button) myDialog.findViewById(R.id.button);
+            button1.setText("YA");
+            button2 = (Button) myDialog.findViewById(R.id.button2);
+            button2.setText("TIDAK");
+
+            myDialog.show();
+
+            button1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(BottombarActivity.this, PasiensyncActivity.class);
+                    startActivity(i);
+                    finish();
+                }
+            });
+
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    myDialog.cancel();
+                }
+            });
+        } else {
+            Toast.makeText(BottombarActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
+        }
+
+        back_pressed = System.currentTimeMillis();
     }
 
 //    public void setSubTitleText(String title){
