@@ -27,6 +27,7 @@ import com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEntry;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.fragment.RecycleListAdapter;
+import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -177,7 +178,7 @@ public class RekmedDinamisFragment extends Fragment {
                 COLUMN_TGL_PERIKSA,
                 //RekamMedisEntry.COLUMN_ID_PUSKESMAS
         };
-        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, RekamMedisEntry.COLUMN_NIK, null, null, null, EhealthContract.RekamMedisEntry._ID+" DESC");
+        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, RekamMedisEntry.COLUMN_TGL_PERIKSA+" DESC");
 
 //        Cursor cursor = db.query(RekamMedisEntry.TABLE_NAME, projection, null, null, null, null, null);
         try {
@@ -240,11 +241,6 @@ public class RekmedDinamisFragment extends Fragment {
         rAdapter=new RecycleListAdapter(getActivity(), listTanggal, listNamaDokter, icons);
         rView.setAdapter(rAdapter);
         dbHelper.closeDB();
-    }
-
-    public void refresh(){
-        rAdapter.notifyDataSetChanged();
-        loadTable(getView());
     }
 
     @Override
