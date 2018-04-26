@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +29,7 @@ import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
+import com.procodecg.codingmom.ehealth.rekam_medis.RekmedbaruActivity;
 import com.procodecg.codingmom.ehealth.utils.Setting;
 import com.procodecg.codingmom.ehealth.data.CopyDBHelper;
 import com.procodecg.codingmom.ehealth.utils.Edit;
@@ -42,10 +45,6 @@ import static com.procodecg.codingmom.ehealth.main.PinActivity.hideKeyboard;
 
 public class MainActivity extends AppCompatActivity {
 
-    int click = 0;
-    Dialog myDialog;
-    TextView message;
-    Button button1, button2;
     private static long back_pressed;
 
     final String TAG = "HPCPDCDUMMY";
@@ -306,32 +305,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed(){
         if (back_pressed + 2000 > System.currentTimeMillis()){
-            myDialog = new Dialog(this);
-            myDialog.setContentView(R.layout.confirmation);
-            myDialog.setCancelable(false);
-
-            message = (TextView) myDialog.findViewById(R.id.textView);
-            message.setText("Anda yakin untuk keluar dari aplikasi?");
-            button1 = (Button) myDialog.findViewById(R.id.button);
-            button1.setText("YA");
-            button2 = (Button) myDialog.findViewById(R.id.button2);
-            button2.setText("TIDAK");
-
-            myDialog.show();
-
-            button1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    finish();
-                }
-            });
-
-            button2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    myDialog.cancel();
-                }
-            });
+            finish();
         } else {
             Toast.makeText(MainActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
         }

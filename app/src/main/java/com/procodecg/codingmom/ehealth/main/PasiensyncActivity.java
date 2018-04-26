@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -20,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -56,16 +58,12 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
 
 public class PasiensyncActivity extends SessionManagement {
 
-    int click = 0;
 
     Typeface font;
     Typeface fontbold;
     ProgressBar progressBar;
     PDCDataActivity pdc;
 
-    Dialog myDialog;
-    TextView message;
-    Button button1, button2;
     private static long back_pressed;
 
     public static final int SELECTED_PICTURE = 1;
@@ -687,36 +685,28 @@ public class PasiensyncActivity extends SessionManagement {
 
     @Override
     public void onBackPressed(){
-        click++;
         if (back_pressed + 2000 > System.currentTimeMillis()){
-            myDialog = new Dialog(this);
-            myDialog.setContentView(R.layout.confirmation);
-            myDialog.setCancelable(false);
-
-            message = (TextView) myDialog.findViewById(R.id.textView);
-            message.setText("Anda yakin untuk keluar dari profil dokter?");
-            button1 = (Button) myDialog.findViewById(R.id.button);
-            button1.setText("YA");
-            button2 = (Button) myDialog.findViewById(R.id.button2);
-            button2.setText("TIDAK");
-
-            myDialog.show();
-
-            button1.setOnClickListener(new View.OnClickListener() {
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(PasiensyncActivity.this);
+            mBuilder.setIcon(R.drawable.logo2);
+            mBuilder.setTitle("Konfirmasi");
+            mBuilder.setMessage("Apakah Anda ingin keluar dari profil dokter?");
+            mBuilder.setCancelable(false);
+            mBuilder.setPositiveButton("Tidak", new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    Intent i = new Intent(PasiensyncActivity.this, MainActivity.class);
-                    startActivity(i);
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+            mBuilder.setNegativeButton("Ya", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(PasiensyncActivity.this, MainActivity.class);
+                    startActivity(intent);
                     finish();
                 }
             });
-
-            button2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    myDialog.cancel();
-                }
-            });
+            AlertDialog alertDialog = mBuilder.create();
+            alertDialog.show();
         } else {
             Toast.makeText(PasiensyncActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
         }

@@ -1,6 +1,7 @@
 package com.procodecg.codingmom.ehealth.fragment;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -28,6 +30,7 @@ import com.procodecg.codingmom.ehealth.asynctask.TokenRequest;
 import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
+import com.procodecg.codingmom.ehealth.main.MainActivity;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.utils.SessionManagement;
@@ -84,12 +87,7 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
     public static BottombarActivity instance;
     
     private SharedPreferences jwt, settings;
-    int i = 1;
-    int click = 0;
     EhealthDbHelper mDbHelper;
-    Dialog myDialog;
-    TextView message;
-    Button button1, button2;
     private static long back_pressed;
 
     Typeface fontBold;
@@ -409,36 +407,28 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
 
     @Override
     public void onBackPressed(){
-        click++;
         if (back_pressed + 2000 > System.currentTimeMillis()){
-            myDialog = new Dialog(this);
-            myDialog.setContentView(R.layout.confirmation);
-            myDialog.setCancelable(false);
-
-            message = (TextView) myDialog.findViewById(R.id.textView);
-            message.setText("Anda yakin untuk keluar dari profil pasien?");
-            button1 = (Button) myDialog.findViewById(R.id.button);
-            button1.setText("YA");
-            button2 = (Button) myDialog.findViewById(R.id.button2);
-            button2.setText("TIDAK");
-
-            myDialog.show();
-
-            button1.setOnClickListener(new View.OnClickListener() {
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(BottombarActivity.this);
+            mBuilder.setIcon(R.drawable.logo2);
+            mBuilder.setTitle("Konfirmasi");
+            mBuilder.setMessage("Apakah Anda ingin keluar dari profil pasien?");
+            mBuilder.setCancelable(false);
+            mBuilder.setPositiveButton("Tidak", new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    Intent i = new Intent(BottombarActivity.this, PasiensyncActivity.class);
-                    startActivity(i);
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+            mBuilder.setNegativeButton("Ya", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(BottombarActivity.this, PasiensyncActivity.class);
+                    startActivity(intent);
                     finish();
                 }
             });
-
-            button2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    myDialog.cancel();
-                }
-            });
+            AlertDialog alertDialog = mBuilder.create();
+            alertDialog.show();
         } else {
             Toast.makeText(BottombarActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
         }
