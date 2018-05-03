@@ -93,7 +93,7 @@ public class Setting extends AppCompatActivity {
 
         if(TextUtils.isEmpty(time)){
             settimeout.setError("Timeout tidak boleh kosong!");
-            settimeout.setText("30");
+            settimeout.setText("90");
             return;
         }
 
