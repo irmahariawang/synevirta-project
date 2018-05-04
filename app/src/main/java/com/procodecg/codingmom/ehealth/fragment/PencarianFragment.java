@@ -125,9 +125,8 @@ public class PencarianFragment extends Fragment {
 
                     }
                     //Toast.makeText(getActivity(), newText, Toast.LENGTH_SHORT).show();
-                } else
-                {
-                    //clearTable(view);
+                } else {
+                    clearTable(view);
                     //Toast.makeText(getActivity(),"clear",Toast.LENGTH_SHORT).show();
 
                 }
@@ -139,13 +138,9 @@ public class PencarianFragment extends Fragment {
         return view;
     }
 
-    private void getRekmedFilter(String searchTerm){
-
-    }
-
     private void clearTable(View view){
         RecyclerView rView = (RecyclerView) view.findViewById(R.id.listPencarian);
-        rView.removeAllViewsInLayout();
+        rView.setAdapter(null);
 
     }
 
@@ -167,49 +162,53 @@ public class PencarianFragment extends Fragment {
 
         //Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, projection, null, null, null, null, null);
         Cursor cursor = dbHelper.retrieve(query);
-        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // table in the database).
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry._ID);
-            int namaDokterIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER);
-            int tanggalPeriksaIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA);
-            //int IDPuskesmasIndex = cursor.getColumnIndex(RekamMedisEntry.COLUMN_ID_PUSKESMAS);
-            listNamaDokter = new ArrayList<>();
-            //listIDPuskesmas = new ArrayList<>();
-            listTanggal = new ArrayList<>();
+        if(cursor.getCount() > 0) {
+            try {
+                // Display the number of rows in the Cursor (which reflects the number of rows in the
+                // table in the database).
+                // Figure out the index of each column
+                int idColumnIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry._ID);
+                int namaDokterIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER);
+                int tanggalPeriksaIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA);
+                //int IDPuskesmasIndex = cursor.getColumnIndex(RekamMedisEntry.COLUMN_ID_PUSKESMAS);
+                listNamaDokter = new ArrayList<>();
+                //listIDPuskesmas = new ArrayList<>();
+                listTanggal = new ArrayList<>();
 
-            // Iterate through all the returned rows in the cursor
-            if (cursor.moveToFirst()) {
-                do {
-                    // Use that index to extract the String or Int value of the word
-                    // at the current row the cursor is on.
-                    int currentID = cursor.getInt(idColumnIndex);
-                    String currentNamaDokter = cursor.getString(namaDokterIndex);
-                    String currentTanggalPeriksa = cursor.getString(tanggalPeriksaIndex);
-                    //String currentIDPuskesmas = cursor.getString(IDPuskesmasIndex);
-                    //Toast.makeText(getActivity(), currentID, Toast.LENGTH_SHORT).show();
+                // Iterate through all the returned rows in the cursor
+                if (cursor.moveToFirst()) {
+                    do {
+                        // Use that index to extract the String or Int value of the word
+                        // at the current row the cursor is on.
+                        int currentID = cursor.getInt(idColumnIndex);
+                        String currentNamaDokter = cursor.getString(namaDokterIndex);
+                        String currentTanggalPeriksa = cursor.getString(tanggalPeriksaIndex);
+                        //String currentIDPuskesmas = cursor.getString(IDPuskesmasIndex);
+                        //Toast.makeText(getActivity(), currentID, Toast.LENGTH_SHORT).show();
 
-                    //list tanggal folder dan nama dokter pemeriksanya
+                        //list tanggal folder dan nama dokter pemeriksanya
 
-                    listTanggal.add(currentTanggalPeriksa);
-                    //listTanggal.add("6-02-2017");
+                        listTanggal.add(currentTanggalPeriksa);
+                        //listTanggal.add("6-02-2017");
 
-                    listNamaDokter.add(currentNamaDokter);
-                    //listNamaDokter.add("dr Susan");
+                        listNamaDokter.add(currentNamaDokter);
+                        //listNamaDokter.add("dr Susan");
 
-                    //listIDPuskesmas.add(currentIDPuskesmas);
+                        //listIDPuskesmas.add(currentIDPuskesmas);
 
-                    rAdapter = new RecycleListAdapter(getActivity(), listTanggal, listNamaDokter, icons);
-                    rView.setAdapter(rAdapter);
+                        rAdapter = new RecycleListAdapter(getActivity(), listTanggal, listNamaDokter, icons);
+                        rView.setAdapter(rAdapter);
 
-                } while (cursor.moveToNext());
+                    } while (cursor.moveToNext());
 
+                }
+            } finally {
+                // Always close the cursor when you're done reading from it. This releases all its
+                // resources and makes it invalid.
+                cursor.close();
             }
-        }finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
+        } else {
+            rView.setAdapter(null);
         }
 
 

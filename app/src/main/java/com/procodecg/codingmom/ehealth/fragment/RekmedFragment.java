@@ -187,7 +187,6 @@ public class RekmedFragment extends Fragment {
     public void onResume() {
         Log.i(TAG, "Redmed fragment onResume");
         super.onResume();
-//        getFragmentManager().beginTransaction().detach(RekmedDinamisFragment.newInstance()).attach(RekmedDinamisFragment.newInstance()).commit();
 
         if (MedrecDinamikData.isInDatabase == 0) {
             bacaMedrekDinamik();

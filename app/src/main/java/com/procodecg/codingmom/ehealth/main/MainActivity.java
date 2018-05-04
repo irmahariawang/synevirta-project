@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
 
+    TextView tv1, tv2, tv3, tv4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,10 +88,10 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txt_namaPuskesmas)).setText(namapuskes);
 
         font = Typeface.createFromAsset(getAssets(), "font1.ttf");
-        TextView tv1 = (TextView) findViewById(R.id.textView1);
-        TextView tv2 = (TextView) findViewById(R.id.textView2);
-        TextView tv3 = (TextView) findViewById(R.id.textIdPuskes);
-        TextView tv4 = (TextView) findViewById(R.id.textNamaPuskes);
+        tv1 = (TextView) findViewById(R.id.textView1);
+        tv2 = (TextView) findViewById(R.id.textView2);
+        tv3 = (TextView) findViewById(R.id.textIdPuskes);
+        tv4 = (TextView) findViewById(R.id.textNamaPuskes);
         tv1.setTypeface(font);
         tv2.setTypeface(font);
         tv3.setTypeface(font);
@@ -172,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
+
+//                boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 if (granted) {
                     Log.d(TAG, "Permission granted");
@@ -200,6 +204,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
 
+                tv2.setText("Pengecekan kartu");
+
                 // connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
                 if (!usbDevices.isEmpty()) {
@@ -208,10 +214,12 @@ public class MainActivity extends AppCompatActivity {
                         usbDevice = entry.getValue();
                         int deviceID = usbDevice.getVendorId();
                         if (deviceID == 1027 || deviceID == 9025) {
-                            Log.d(TAG, "Device ID " + deviceID);
-                            PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-                            usbManager.requestPermission(usbDevice, pi);
-                            keep = false;
+//                            if(!usbManager.hasPermission(usbDevice)) {
+                                Log.d(TAG, "Device ID " + deviceID);
+                                PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                                usbManager.requestPermission(usbDevice, pi);
+                                keep = false;
+//                            }
                         } else {
                             usbConn = null;
                             usbDevice = null;
@@ -226,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 i=0;
+                tv2.setText("Masukkan kartu HPC Anda");
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -275,10 +284,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Apdu select");
                 Thread.sleep(1500);
                 if (isCommandReceived != 1) {
+                    tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
-                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
+//                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
-                    showToastOnUi("Berhasil koneksi");
+                    tv2.setText("Koneksi kartu berhasil");
+//                    showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e) {
@@ -307,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         if (back_pressed + 2000 > System.currentTimeMillis()){
             finish();
         } else {
-            Toast.makeText(MainActivity.this, "Tekan lagi untuk keluar dari profil pasien", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Tekan lagi untuk keluar aplikasi", Toast.LENGTH_SHORT).show();
         }
 
         back_pressed = System.currentTimeMillis();

@@ -58,6 +58,7 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
 
 public class PasiensyncActivity extends SessionManagement {
 
+    TextView tv1, tv2, tv3;
 
     Typeface font;
     Typeface fontbold;
@@ -121,9 +122,9 @@ public class PasiensyncActivity extends SessionManagement {
 
         font = Typeface.createFromAsset(getAssets(), "font1.ttf");
         fontbold = Typeface.createFromAsset(getAssets(), "font1bold.ttf");
-        TextView tv1 = (TextView) findViewById(R.id.textView1);
-        TextView tv2 = (TextView) findViewById(R.id.textView2);
-        TextView tv3 = (TextView) findViewById(R.id.textNamaDokter);
+        tv1 = (TextView) findViewById(R.id.textView1);
+        tv2 = (TextView) findViewById(R.id.textView2);
+        tv3 = (TextView) findViewById(R.id.textNamaDokter);
         tv1.setTypeface(fontbold);
         tv2.setTypeface(font);
         tv3.setTypeface(fontbold);
@@ -306,6 +307,8 @@ public class PasiensyncActivity extends SessionManagement {
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
 
+                tv2.setText("Pengecekan kartu");
+
                 // connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
                 if (!usbDevices.isEmpty()) {
@@ -331,6 +334,7 @@ public class PasiensyncActivity extends SessionManagement {
                 }
 
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                tv2.setText("Silahkan masukkan kartu PDC Pasien");
                 i = 0;
             } else {
                 Log.w(TAG, "NO INTENT?");
@@ -607,11 +611,13 @@ public class PasiensyncActivity extends SessionManagement {
                 Thread.sleep(2000);
                 if (isCommandReceived != 1) {
                     i = 0;
+                    tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
-                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
+//                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
-                    showToastOnUi("Berhasil koneksi");
+                    tv2.setText("Berhasil koneksi");
+//                    showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e){
