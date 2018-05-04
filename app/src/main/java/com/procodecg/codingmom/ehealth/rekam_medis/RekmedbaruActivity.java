@@ -1092,6 +1092,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
 //        if (!Validation.hasText(mRiwayatPenyakitDulu, "Riwayat Penyakit Dahulu")) valid = false;
 //        if (!Validation.hasText(mRiwayatPenyakitKel, "Riwayat Penyakit Kelaurga")) valid = false;
         if (!Validation.hasText(mBerat, "Berat")) valid = false;
+        if (!Validation.hasText(mTinggi, "Tinggi")) valid = false;
         if (!Validation.hasText(mKepala, "Kepala")) valid = false;
         if (!Validation.hasText(mThorax, "Thorax")) valid = false;
         if (!Validation.hasText(mAbdomen, "Abdomen")) valid = false;
