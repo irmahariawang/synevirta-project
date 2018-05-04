@@ -619,7 +619,7 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/field_box"
-                        android:inputType="numberDecimal"
+                        android:inputType="number"
                         android:maxLength="6"/>
 
                 </LinearLayout>
