@@ -95,6 +95,10 @@ public class Setting extends AppCompatActivity {
             settimeout.setError("Timeout tidak boleh kosong!");
             settimeout.setText("90");
             return;
+        } else if(Integer.valueOf(time)<90){
+            settimeout.setError("Timeout tidak boleh kurang dari 90!");
+            settimeout.setText("90");
+            return;
         }
 
         //simpan data

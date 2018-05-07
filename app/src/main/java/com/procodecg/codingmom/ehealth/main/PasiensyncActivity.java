@@ -613,11 +613,9 @@ public class PasiensyncActivity extends SessionManagement {
                     i = 0;
                     tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
-//                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     tv2.setText("Berhasil koneksi");
-//                    showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e){
@@ -626,10 +624,12 @@ public class PasiensyncActivity extends SessionManagement {
         } else if (i == 1) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
+            setText("Membaca redmek statik");
             Log.i(TAG, "write apdu read medrec statik");
         } else if (i == 2) {
             serialPort.write(APDU_read_biodata);
             i++;
+            setText("Membaca biodata pasien");
             Log.i(TAG, "write apdu read biodata");
         }
         else {
@@ -668,23 +668,22 @@ public class PasiensyncActivity extends SessionManagement {
         }).start();
     }
 
-    private void setButtonState(Button btn, boolean enabled) {
-        final Button fbtn = btn;
-        final boolean fenabled = enabled;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                fbtn.setEnabled(fenabled);
-            }
-        });
-    }
-
     private void showToastOnUi(String text) {
         final String ftext = text;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(PasiensyncActivity.this, ftext, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setText(final String text){
+        final String ftext = text;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tv2.setText(ftext);
             }
         });
     }

@@ -1233,25 +1233,6 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@color/separator" />
-
-            <Button
-                android:id="@+id/btnShowDialog"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/button1"
-                android:padding="15dp"
-                android:text="Selesai dan Simpan"
-                android:textAllCaps="true"
-                android:textColor="#fff" />
-
         </LinearLayout>
 
     </ScrollView>
