@@ -2,6 +2,9 @@ package com.procodecg.codingmom.ehealth.utils;
 
 import android.widget.EditText;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by macbookpro on 12/16/17.
  */
@@ -48,18 +51,35 @@ public class Validation {
 
     // check the input field has any text or not
     // return true if it contains text otherwise false
-    public static boolean hasText(EditText editText, String kolom) {
+    public static boolean hasText(EditText editText) {
 
         String text = editText.getText().toString().trim();
-        editText.setError(null);
+//        editText.setError(null);
 
         // length 0 means there is no text
         if (text.length() == 0) {
-            editText.setError(kolom + " " + REQUIRED_MSG);
+            editText.setError("Kolom " + REQUIRED_MSG);
             return false;
         }
 
         return true;
+    }
+
+    //check apakah input mengadung karakter unik seperti ~`!@#$%^&*()_-+={}[]|\/?:;"'<>
+    public static boolean hasSpecialCharacter(EditText editText){
+
+        String text = editText.getText().toString().trim();
+//        editText.setError(null);
+
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9,. -]*");
+        Matcher matcher = pattern.matcher(text);
+
+        if (!matcher.matches()) {
+            editText.setError("Kolom tidak boleh mengandung spesial karakter");
+            return true;
+        }
+
+        return false;
     }
 
 }

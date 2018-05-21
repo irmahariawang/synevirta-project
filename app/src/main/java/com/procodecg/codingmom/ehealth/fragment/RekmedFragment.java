@@ -265,7 +265,7 @@ public class RekmedFragment extends Fragment {
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 i=0;
                 getActivity().unregisterReceiver(broadcastReceiver);
-                Intent activity = new Intent(getActivity(), WelcomeActivity.class);
+                Intent activity = new Intent(getActivity(), PasiensyncActivity.class);
                 startActivity(activity);
 
             } else {

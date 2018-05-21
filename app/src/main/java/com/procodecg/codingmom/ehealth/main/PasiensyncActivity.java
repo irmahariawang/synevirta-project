@@ -624,7 +624,7 @@ public class PasiensyncActivity extends SessionManagement {
         } else if (i == 1) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
-            setText("Membaca redmek statik");
+            setText("Membaca rekmed statik");
             Log.i(TAG, "write apdu read medrec statik");
         } else if (i == 2) {
             serialPort.write(APDU_read_biodata);

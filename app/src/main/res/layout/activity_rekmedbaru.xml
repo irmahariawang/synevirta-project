@@ -465,7 +465,7 @@
                 android:text="Keluhan Utama"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/keluhanUtama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -473,7 +473,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -491,7 +490,7 @@
                 android:text="Riwayat Penyakit Sekarang"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/rps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -499,7 +498,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -517,7 +515,7 @@
                 android:text="Riwayat Penyakit Dahulu"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/rpd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -525,7 +523,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -543,7 +540,7 @@
                 android:text="Riwayat Penyakit Keluarga"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/rpk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -551,7 +548,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -671,7 +667,7 @@
                 android:text="Kepala"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanKepala"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -679,7 +675,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -697,7 +692,7 @@
                 android:text="Thorax"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanThorax"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -705,7 +700,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -723,7 +717,7 @@
                 android:text="Abdomen"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanAbdomen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -731,7 +725,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -749,7 +742,7 @@
                 android:text="Genitalia"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanGenitalia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -757,7 +750,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -775,7 +767,7 @@
                 android:text="Extremitas"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanExtremitas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -783,7 +775,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -801,7 +792,7 @@
                 android:text="Kulit"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanKulit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -809,7 +800,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -827,7 +817,7 @@
                 android:text="Neurologi"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/pemeriksaanNeuro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -835,7 +825,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -863,7 +852,7 @@
                 android:text="Laboratorium"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/laboratorium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -871,7 +860,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -890,7 +878,7 @@
                 android:textSize="14sp" />
 
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/radiologi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -898,7 +886,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -955,7 +942,7 @@
                 android:text="Diagnosis Kerja"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/diagnosisKerja"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -963,7 +950,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -981,7 +967,7 @@
                 android:text="Diagnosis Banding"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/diagnosisBanding"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -1058,7 +1044,7 @@
                 android:textColor="#A7ADB2"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/resep"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -1066,7 +1052,6 @@
                 android:layout_marginRight="25dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -1085,7 +1070,7 @@
                 android:textColor="#A7ADB2"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/catatanResep"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -1093,7 +1078,6 @@
                 android:layout_marginRight="25dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View
@@ -1191,7 +1175,7 @@
                 android:text="Tindakan"
                 android:textSize="14sp" />
 
-            <com.cielyang.android.clearableedittext.ClearableEditText
+            <EditText
                 android:id="@+id/tindakan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -1199,7 +1183,6 @@
                 android:layout_marginRight="20dp"
                 android:padding="5dp"
                 android:background="@drawable/noborder"
-                app:clearIconDrawable="@drawable/ic_xclear"
                 android:textSize="16sp" />
 
             <View

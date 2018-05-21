@@ -47,6 +47,7 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
+import com.procodecg.codingmom.ehealth.utils.Edit;
 import com.procodecg.codingmom.ehealth.utils.NothingSelectedSpinnerAdapter;
 import com.procodecg.codingmom.ehealth.utils.Validation;
 
@@ -80,17 +81,15 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private int mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
     private int mAdSanationam = RekamMedisEntry.SANATIONAM_ADBONAM;
 
-    private EditText mIDPuskesmas; private Spinner mPoliSpinner; private EditText mPemberiRujukan;
-    private EditText mSystole; private EditText mDiastole; private EditText mSuhu; private EditText mNadi; private EditText mRespirasi;
-    private EditText mKeluhanUtama; private EditText mRiwayatPenyakitSkr; private EditText mRiwayatPenyakitDulu; private EditText mRiwayatPenyakitKel;
-    private EditText mTinggi; private EditText mBerat; private Spinner mKesadaranSpinner;
-    private EditText mKepala; private EditText mThorax; private EditText mAbdomen;private EditText mGenitalia; private EditText mExtremitas; private EditText mKulit; private EditText mNeurologi;
-    private EditText mLaboratorium; private EditText mRadiologi; private Spinner mStatusLabRadioSpinner;
-    private EditText mDiagnosisKerja; private EditText mDiagnosisBanding; private AutoCompleteTextView mICD10;
-    private EditText mResep; private EditText mCatatanResep; private Spinner mStatusResepSpinner; private RadioGroup mRepetisiResepBtn; private ClearableEditText mTindakan;
-    private Spinner mAdVitamSpinner; private Spinner mAdFunctionamSpinner; private Spinner mAdSanationamSpinner;
+    private EditText mIDPuskesmas, mPemberiRujukan, mSystole, mDiastole, mSuhu, mNadi, mRespirasi, mKeluhanUtama, mRiwayatPenyakitSkr,
+            mRiwayatPenyakitDulu, mRiwayatPenyakitKel, mTinggi, mBerat, mKepala, mThorax, mAbdomen, mGenitalia, mExtremitas,
+            mKulit, mNeurologi, mLaboratorium, mRadiologi, mDiagnosisKerja, mDiagnosisBanding, mResep, mCatatanResep;
+    private Spinner mPoliSpinner, mKesadaranSpinner, mStatusLabRadioSpinner, mStatusResepSpinner, mAdVitamSpinner, mAdFunctionamSpinner, mAdSanationamSpinner;
+    private AutoCompleteTextView mICD10;
+    private RadioGroup mRepetisiResepBtn;
+    private EditText mTindakan;
 
-    private ClearableEditText idPuskesmas;
+    private EditText idPuskesmas;
     private SharedPreferences prefs;
 
     private ProgressDialog progressDialog;
@@ -205,7 +204,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
         mCatatanResep = (EditText) findViewById(R.id.catatanResep);
         mStatusResepSpinner = (Spinner) findViewById(R.id.statusResep);
         mRepetisiResepBtn = (RadioGroup) findViewById(R.id.repetisiResep);
-        mTindakan = (ClearableEditText) findViewById(R.id.tindakan);
+        mTindakan = (EditText) findViewById(R.id.tindakan);
         mAdVitamSpinner = (Spinner) findViewById(R.id.adVitam);
         mAdFunctionamSpinner = (Spinner) findViewById(R.id.adFunctionam);
         mAdSanationamSpinner = (Spinner) findViewById(R.id.adSanationam);
@@ -317,8 +316,9 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 i=0;
-                Intent activity = new Intent(getApplicationContext(), WelcomeActivity.class);
+                Intent activity = new Intent(getApplicationContext(), PasiensyncActivity.class);
                 startActivity(activity);
+                finish();
             }
         }
     };
@@ -1006,7 +1006,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 ContentValues values = new ContentValues();
                 values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
                 values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
-//                values.put(RekamMedisEntry.COLUMN_NIK, "1802280000000001");
                 values.put(RekamMedisEntry.COLUMN_NIK, PDCData.nik);
                 values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
                 values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
@@ -1082,23 +1081,35 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private boolean validateData(){
         boolean valid = true;
 
-        if (!Validation.hasText(mSystole, "Systole")) valid = false;
-        if (!Validation.hasText(mDiastole, "Diastole")) valid = false;
-        if (!Validation.hasText(mSuhu, "Suhu")) valid = false;
-        if (!Validation.hasText(mNadi, "Nadi")) valid = false;
-        if (!Validation.hasText(mRespirasi, "Respirasi")) valid = false;
-        if (!Validation.hasText(mKeluhanUtama, "Keluhan Utama")) valid = false;
-//        if (!Validation.hasText(mRiwayatPenyakitSkr, "Riwayat Penyakit Sekarang ")) valid = false;
-//        if (!Validation.hasText(mRiwayatPenyakitDulu, "Riwayat Penyakit Dahulu")) valid = false;
-//        if (!Validation.hasText(mRiwayatPenyakitKel, "Riwayat Penyakit Kelaurga")) valid = false;
-        if (!Validation.hasText(mBerat, "Berat")) valid = false;
-        if (!Validation.hasText(mTinggi, "Tinggi")) valid = false;
-        if (!Validation.hasText(mKepala, "Kepala")) valid = false;
-        if (!Validation.hasText(mThorax, "Thorax")) valid = false;
-        if (!Validation.hasText(mAbdomen, "Abdomen")) valid = false;
-        if (!Validation.hasText(mDiagnosisKerja, "Diagnosis Kerja")) valid = false;
-        if (!Validation.hasText(mICD10, "ICD10")) valid = false;
-        if (!Validation.hasText(mResep, "Resep")) valid = false;
+        EditText[] editTextMandatory = {mSystole, mDiastole, mSuhu, mNadi, mRespirasi, mKeluhanUtama,
+                mBerat, mTinggi, mKepala, mThorax, mAbdomen, mDiagnosisKerja, mICD10, mResep};
+
+        EditText[] allEditText = {mIDPuskesmas, mPemberiRujukan, mSystole, mDiastole, mSuhu, mNadi, mRespirasi, mKeluhanUtama, mRiwayatPenyakitSkr,
+                mRiwayatPenyakitDulu, mRiwayatPenyakitKel, mTinggi, mBerat, mKepala, mThorax, mAbdomen, mGenitalia, mExtremitas,
+                mKulit, mNeurologi, mLaboratorium, mRadiologi, mDiagnosisKerja, mDiagnosisBanding, mResep, mCatatanResep};
+
+        for(int i=0; i<editTextMandatory.length; i++){
+            if (!Validation.hasText(editTextMandatory[i])) valid  = false;
+        }
+
+        for(int i=0; i<allEditText.length; i++){
+            if (Validation.hasSpecialCharacter(allEditText[i])) valid  = false;
+        }
+
+//        if (!Validation.hasText(mSystole, "Systole") || Validation.hasSpecialCharacter(mSystole)) valid = false;
+//        if (!Validation.hasText(mDiastole, "Diastole") || Validation.hasSpecialCharacter(mDiastole)) valid = false;
+//        if (!Validation.hasText(mSuhu, "Suhu") || Validation.hasSpecialCharacter(mSuhu)) valid = false;
+//        if (!Validation.hasText(mNadi, "Nadi") || Validation.hasSpecialCharacter(mNadi)) valid = false;
+//        if (!Validation.hasText(mRespirasi, "Respirasi") || Validation.hasSpecialCharacter(mRespirasi)) valid = false;
+//        if (!Validation.hasText(mKeluhanUtama, "Keluhan Utama") || Validation.hasSpecialCharacter(mKeluhanUtama)) valid = false;
+//        if (!Validation.hasText(mBerat, "Berat") || Validation.hasSpecialCharacter(mBerat)) valid = false;
+//        if (!Validation.hasText(mTinggi, "Tinggi") || Validation.hasSpecialCharacter(mTinggi)) valid = false;
+//        if (!Validation.hasText(mKepala, "Kepala") || Validation.hasSpecialCharacter(mKepala)) valid = false;
+//        if (!Validation.hasText(mThorax, "Thorax") || Validation.hasSpecialCharacter(mThorax)) valid = false;
+//        if (!Validation.hasText(mAbdomen, "Abdomen") || Validation.hasSpecialCharacter(mAbdomen)) valid = false;
+//        if (!Validation.hasText(mDiagnosisKerja, "Diagnosis Kerja") || Validation.hasSpecialCharacter(mDiagnosisBanding)) valid = false;
+//        if (!Validation.hasText(mICD10, "ICD10") || Validation.hasSpecialCharacter(mICD10)) valid = false;
+//        if (!Validation.hasText(mResep, "Resep") || Validation.hasSpecialCharacter(mResep)) valid = false;
 
         return valid;
     }
