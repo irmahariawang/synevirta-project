@@ -132,6 +132,13 @@ public class RekmedDinamisFragment extends Fragment {
 
                     if(hostDetected){
                         SQLiteDatabase db = dbHelper.getReadableDatabase();
+                        Cursor lastTimestamp = db.query(EhealthContract.SyncEntry.TABLE_NAME, new String[]{EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP}, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, null);
+
+//                        Cursor cursor;
+//                        if(lastTimestamp.getCount()==1){
+//                            cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, ""+RekamMedisEntry.COLUMN_TGL_PERIKSA+">?", new String[]{PDCData.nik} , null, null, null, "1");
+//                        }
+
                         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, null, null , null, null, null, "1");
                         if(cursor.getCount()==0){
                             Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
@@ -144,7 +151,7 @@ public class RekmedDinamisFragment extends Fragment {
                                 new TokenRequest(getActivity()).execute(username, password);
                             } else {
                                 try {
-                                    ((BottombarActivity) getActivity()).getDataAndPost();
+                                    ((BottombarActivity) getActivity()).getDataAndPost(true);
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,11 +92,12 @@ public class Util {
         return hex.toString();
     }
 
-    public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
-        int arraysize = mddArray.size();
+//    public static int getWriteIndex(ArrayList<MedrecDinamikData> mddArray) {
+    public static int getWriteIndex(ArrayList<Date> timestamp) {
+        int arraysize = timestamp.size();
         ArrayList<Date> dates = new ArrayList<>();
         for (int i=0; i < arraysize; i++) {
-            dates.add(mddArray.get(i).tglPeriksa);
+            dates.add(timestamp.get(i));
         }
         if (dates.isEmpty()) {
             return 0;
@@ -128,6 +130,22 @@ public class Util {
 
     public static Date getCurrentDate() {
         int dateInSecs = (int) (System.currentTimeMillis()/1000);
+        byte[] bytes = ByteBuffer.allocate(4).putInt(dateInSecs).array();
+        int dis = ByteBuffer.wrap(bytes).getInt();
+        long l = (long) dis*1000;
+        return new Date(l);
+    }
+
+    public static Date getTimeMilisDate(String tanggal) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = sdf.parse(tanggal);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        int dateInSecs = (int) (date.getTime()/1000);
         byte[] bytes = ByteBuffer.allocate(4).putInt(dateInSecs).array();
         int dis = ByteBuffer.wrap(bytes).getInt();
         long l = (long) dis*1000;

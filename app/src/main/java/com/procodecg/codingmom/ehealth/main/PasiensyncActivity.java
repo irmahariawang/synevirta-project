@@ -631,8 +631,7 @@ public class PasiensyncActivity extends SessionManagement {
             i++;
             setText("Membaca biodata pasien");
             Log.i(TAG, "write apdu read biodata");
-        }
-        else {
+        } else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             showToastOnUi("Baca data PDC BERHASIL!");

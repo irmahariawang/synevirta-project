@@ -34,7 +34,6 @@ public class EhealthDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         createTableKartu();
-
     }
 
     @Override
@@ -144,6 +143,17 @@ public class EhealthDbHelper extends SQLiteOpenHelper {
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_KARTU_TABLE);
+    }
+
+    public void createTableSync(){
+        String SQL_CREATE_SYNC_TABLE =  "CREATE TABLE IF NOT EXISTS " + EhealthContract.SyncEntry.TABLE_NAME + " ("
+                + EhealthContract.SyncEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + EhealthContract.SyncEntry.COLUMN_NIK + " TEXT, "
+                + EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP + " TEXT, "
+                + EhealthContract.SyncEntry.COLUMN_DOKTER + " TEXT);";
+
+        // Execute the SQL statement
+        db.execSQL(SQL_CREATE_SYNC_TABLE);
     }
 
     public boolean isTableExists(String tableName, boolean openDb) {

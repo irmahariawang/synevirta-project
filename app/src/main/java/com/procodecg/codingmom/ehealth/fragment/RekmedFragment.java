@@ -2,11 +2,14 @@ package com.procodecg.codingmom.ehealth.fragment;
 
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.usb.UsbDevice;
@@ -20,6 +23,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,8 +48,10 @@ import com.procodecg.codingmom.ehealth.main.PasiensyncActivity;
 import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedDinamisFragment;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedStatisFragment;
+import com.procodecg.codingmom.ehealth.rekam_medis.RekmedbaruActivity;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,12 +59,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToDate;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToHex;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToLong;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.bytesToString;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.hexStringToByteArray;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.padVariableText;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.trimZeroPadding;
 
 /**
@@ -71,8 +82,14 @@ public class RekmedFragment extends Fragment {
     ProgressBar progressBar;
     TextView textView;
 
+    int index;
+
     int progressStatus = 0;
     Handler handler = new Handler();
+
+    EhealthDbHelper mDbHelper;
+
+    private ProgressDialog progressDialog;
 
     /*
      * Komunikasi dengan kartu
@@ -81,15 +98,20 @@ public class RekmedFragment extends Fragment {
     final String TAG = "HPCPDCDUMMY";
     public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
 
+    private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
+            chunk11, chunk12, chunk13;
+
     ArrayList<MedrecDinamikData> mddArray = new ArrayList<>();
+    ArrayList<Date> timestamp = new ArrayList<>();
+    ArrayList<String> tanggalPeriksa = new ArrayList<>();
     MedrecDinamikData mdd;
-    String data;
+    String data, puskesmasID;
     int i; // buat increment serial tulis apdu
 
     ByteBuffer respondData;
     IntentFilter filter;
 
-    byte[] selectResponse, medrecDinamikResponse;
+    byte[] selectResponse, indexResponse, medrecDinamikResponse, checkingResponse, timestampResponse, initTulisResponse;
 
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -98,11 +120,15 @@ public class RekmedFragment extends Fragment {
 
     //00 A4 04 00 08 50 44 43 44 55 4D 4D 59
     byte[] APDU_select = {0x00, (byte)0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDU_card_checking = {(byte)0x80, (byte)0xB2, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] APDU_read_index = {(byte)0x80, (byte)0xD7, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] APDU_read_medrec_timestamp = {(byte)0x80, (byte)0xD6, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik1 = {(byte)0x80, (byte)0xD5, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik2 = {(byte)0x80, (byte)0xD5, 0x00, 0x01, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik3 = {(byte)0x80, (byte)0xD5, 0x00, 0x02, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik4 = {(byte)0x80, (byte)0xD5, 0x00, 0x03, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik5 = {(byte)0x80, (byte)0xD5, 0x00, 0x04, 0x00, 0x00, 0x00};
+    byte[] APDU_finish = {(byte)0x80, (byte)0xC7, 0x00, 0x00, 0x00, 0x00, 0x00};
     /*
      * Komunikasi dengan kartu
      */
@@ -115,7 +141,12 @@ public class RekmedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        mDbHelper = new EhealthDbHelper(getActivity());
+        mDbHelper.openDB();
         Log.i(TAG, "Redmed fragment onCreate");
+
+        SharedPreferences prefs = getContext().getSharedPreferences("DATAPUSKES", MODE_PRIVATE);
+        puskesmasID = prefs.getString("IDPUSKES", "");
     }
 
     @Override
@@ -263,6 +294,8 @@ public class RekmedFragment extends Fragment {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+                Log.i(TAG,"ACTION_USB_DEVICE_DETACHED");
+
                 i=0;
                 getActivity().unregisterReceiver(broadcastReceiver);
                 Intent activity = new Intent(getActivity(), PasiensyncActivity.class);
@@ -291,7 +324,130 @@ public class RekmedFragment extends Fragment {
                     Log.i(TAG, "Select response string: " + bytesToHex(selectResponse));
                     send();
                 }
-            } else if (i == 2 || i == 3 || i == 4 || i == 5 || i == 6) { //medrec dinamik
+            } else if (i == 2) {
+                respondData.put(bytes);
+                if (respondData.position() == 3) {
+                    byte[] recordIndex;
+                    indexResponse = new byte[3];
+                    respondData.rewind();
+                    respondData.get(indexResponse);
+                    respondData.position(0);
+
+                    recordIndex = Arrays.copyOfRange(indexResponse, 0, 1);
+                    index = Integer.valueOf(bytesToHex(recordIndex));
+                    Log.i(TAG, "Select record index string: " + bytesToHex(indexResponse));
+                    send();
+                }
+            } else if (i == 3) {
+                respondData.put(bytes);
+                byte[] response;
+                if (index == 0 && respondData.position() == 2) {
+                    timestampResponse = new byte[6];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    send();
+                } else if (index == 1 && respondData.position() == 6) {
+                    timestampResponse = new byte[6];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    response = Arrays.copyOfRange(timestampResponse, 0, 4);
+                    processTimestamp(response);
+                    send();
+                } else if (index == 2 && respondData.position() == 10) {
+                    timestampResponse = new byte[10];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    response = Arrays.copyOfRange(timestampResponse, 0, 8);
+                    processTimestamp(response);
+                    send();
+                } else if (index == 3 && respondData.position() == 14) {
+                    timestampResponse = new byte[14];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    response = Arrays.copyOfRange(timestampResponse, 0, 12);
+                    processTimestamp(response);
+                    send();
+                } else if (index == 4 && respondData.position() == 18) {
+                    timestampResponse = new byte[18];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    response = Arrays.copyOfRange(timestampResponse, 0, 16);
+                    processTimestamp(response);
+                    send();
+                } else if (index == 5 && respondData.position() == 22) {
+                    timestampResponse = new byte[22];
+                    respondData.rewind();
+                    respondData.get(timestampResponse);
+                    respondData.position(0);
+
+                    response = Arrays.copyOfRange(timestampResponse, 0, 20);
+                    processTimestamp(response);
+                    send();
+                }
+            } else if (i == 4) {
+                respondData.put(bytes);
+                if (respondData.position() == 15) {
+                    checkingResponse = new byte[15];
+                    respondData.rewind();
+                    respondData.get(checkingResponse);
+                    respondData.position(0);
+
+                    byte[] flag = Arrays.copyOfRange(checkingResponse, 0, 1);
+                    byte[] puskesID = Arrays.copyOfRange(checkingResponse, 1, 12);
+
+                    Log.i(TAG, "Checking flag: " + Integer.valueOf(bytesToHex(flag)) + "Puskesmas ID: " + bytesToString(puskesID));
+
+                    if (Integer.valueOf(bytesToHex(flag)) != 2 && bytesToString(puskesID).equals(puskesmasID)) {
+                        recoveryPermission();
+                    } else {
+                        i = 19;
+                        send();
+                    }
+                }
+            } else if (i == 5) {
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    initTulisResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(initTulisResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Init response: " + Util.bytesToHex(initTulisResponse));
+                    if (!Util.bytesToHex(initTulisResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "Init tulis gagal" + i);
+                    } else {
+                        send();
+                    }
+                }
+            } else if (i > 5 && i < 20) { // insert chunk 1-14 dan ins_final_tulis_medrec_dinamik
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    selectResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(selectResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
+                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "GAGAL INSERT: " + i);
+                    } else {
+                        Log.d(TAG, "Berhasil INSERT: " + i);
+                        send();
+                    }
+                }
+            } else if (i > 19 && i < 25) { //medrec dinamik
                 respondData.put(bytes);
 
                 // TODO medrec dinamik length baru + status code
@@ -304,13 +460,13 @@ public class RekmedFragment extends Fragment {
 
                     byte[] response = Arrays.copyOfRange(medrecDinamikResponse, 0, 2334);
 
-                    int x = (i-1)*10;
+                    int x = (i-19)*10;
                     setProgressBar(x);
 
                     if(responseVerifier(Util.bytesToHex(response))) {
                         processDinamikData(medrecDinamikResponse);
                     } else {
-                        i = 6;
+                        i = 24;
                         setProgressBar(50);
                     }
 
@@ -328,6 +484,31 @@ public class RekmedFragment extends Fragment {
         Matcher matcher = pattern.matcher(response);
 
         return matcher.find();
+    }
+
+    public void processTimestamp(byte[] data) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        
+        ByteBuffer bb = ByteBuffer.wrap(data);
+        bb.rewind();
+
+        int mod = data.length/4;
+        byte[] date = new byte[4];
+
+        for(int i=0; i<mod; i++){
+            bb.get(date, 0, 4);
+            String mTanggalPeriksa = String.valueOf(formatter.format(bytesToDate(date).getTime()));
+            tanggalPeriksa.add(mTanggalPeriksa);
+            try {
+                Date tanggalPeriksa = formatter.parse(mTanggalPeriksa);
+                timestamp.add(tanggalPeriksa);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        Log.i(TAG, timestamp.toString());
+        Log.i(TAG, tanggalPeriksa.toString());
     }
 
     public void processDinamikData(byte[] data) {
@@ -551,16 +732,13 @@ public class RekmedFragment extends Fragment {
                 adVitam,
                 adFunctionam,
                 adSanationam
-                );
+        );
 
         mddArray.add(mdd);
 
         /*
          * Masukkan ke internal DB
          */
-
-        EhealthDbHelper mDbHelper = new EhealthDbHelper(getActivity());
-        mDbHelper.openDB();
         // Gets the database in write mode
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -630,44 +808,123 @@ public class RekmedFragment extends Fragment {
     }
 
     public void send() {
-        if ( i == 0 ) {
+        if (i == 0) {
             serialPort.write(APDU_select);
             i++;
             Log.i(TAG, "write apdu select");
         } else if (i == 1) {
+            serialPort.write(APDU_read_index);
+            i++;
+            Log.i(TAG, "get record index");
+        } else if (i == 2) {
+            serialPort.write(APDU_read_medrec_timestamp);
+            i++;
+            Log.i(TAG, "get timestamp medrec");
+        } else if (i == 3) {
+            serialPort.write(APDU_card_checking);
+            i++;
+            Log.i(TAG, "pengecekan flag pada kartu");
+
+            int index;
+            index = Util.getWriteIndex(timestamp);
+            MedrecDinamikData.writeIndex = index;
+            Log.d(TAG, "Write index = " + index);
+        } else if (i == 4){
+            String apduInit = "80c5000000000c";
+            apduInit += padVariableText(puskesmasID, 12);
+            serialPort.write(hexStringToByteArray(apduInit));
+            i++;
+            Log.i(TAG, "init tulis");
+        } else if (i == 5) {
+            serialPort.write(chunk1);
+            i++;
+            Log.i(TAG, "write insert medrec: c1");
+        } else if (i == 6) {
+            serialPort.write(chunk2);
+            i++;
+            Log.i(TAG, "write insert medrec: c2");
+        } else if (i == 7) {
+            serialPort.write(chunk3);
+            i++;
+            Log.i(TAG, "write insert medrec: c3");
+        } else if (i == 8) {
+            serialPort.write(chunk4);
+            i++;
+            Log.i(TAG, "write insert medrec: c4");
+        } else if (i == 9) {
+            serialPort.write(chunk5);
+            i++;
+            Log.i(TAG, "write insert medrec: c5");
+        } else if (i == 10) {
+            serialPort.write(chunk6);
+            i++;
+            Log.i(TAG, "write insert medrec: c6");
+        } else if (i == 11) {
+            serialPort.write(chunk7);
+            i++;
+            Log.i(TAG, "write insert medrec: c7");
+        } else if (i == 12) {
+            serialPort.write(chunk8);
+            i++;
+            Log.i(TAG, "write insert medrec: c8");
+        } else if (i == 13) {
+            serialPort.write(chunk9);
+            i++;
+            Log.i(TAG, "write insert medrec: c9");
+        } else if (i == 14) {
+            serialPort.write(chunk10);
+            i++;
+            Log.i(TAG, "write insert medrec: c10");
+        } else if (i == 15) {
+            serialPort.write(chunk11);
+            i++;
+            Log.i(TAG, "write insert medrec: c11");
+        } else if (i == 16) {
+            serialPort.write(chunk12);
+            i++;
+            Log.i(TAG, "write insert medrec: c12");
+        } else if (i == 17) {
+            serialPort.write(chunk13);
+            i++;
+            Log.i(TAG, "write insert medrec: c13");
+        } else if (i == 18) {
+            serialPort.write(APDU_finish);
+            i++;
+            Log.i(TAG, "write APDU finish");
+            if(MedrecDinamikData.writeIndex == 4){
+                MedrecDinamikData.writeIndex = 0;
+            } else {
+                MedrecDinamikData.writeIndex += 1;
+            }
+        } else if (i == 19) {
             serialPort.write(APDU_read_medrec_dinamik1);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 1");
-        } else if (i == 2) {
+        } else if (i == 20) {
             serialPort.write(APDU_read_medrec_dinamik2);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 2");
             showToastOnUi("Baca medrec 1 selesai");
-        } else if (i == 3) {
+        } else if (i == 21) {
             serialPort.write(APDU_read_medrec_dinamik3);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 3");
             showToastOnUi("Baca medrec 2 selesai");
-        } else if (i == 4) {
+        } else if (i == 22) {
             serialPort.write(APDU_read_medrec_dinamik4);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 4");
             showToastOnUi("Baca medrec 3 selesai");
-        } else if (i == 5) {
+        } else if (i == 23) {
             serialPort.write(APDU_read_medrec_dinamik5);
             i++;
             Log.i(TAG, "write apdu read medrec dinamik 5");
             showToastOnUi("Baca medrec 4 selesai");
-        }
-        else {
+        } else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
-            int index;
-            index = Util.getWriteIndex(mddArray);
-            Log.d(TAG, "Write index = " + index);
             showToastOnUi("Baca medrec dinamik BERHASIL!");
             MedrecDinamikData.isInDatabase = 1;
-            MedrecDinamikData.writeIndex =  index;
 //            getActivity().unregisterReceiver(broadcastReceiver);
         }
     }
@@ -678,6 +935,134 @@ public class RekmedFragment extends Fragment {
             @Override
             public void run() {
                 Toast.makeText(getActivity(), ftext, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void recoveryPermission() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(getActivity());
+                mBuilder.setIcon(R.drawable.logo2);
+                mBuilder.setTitle("Perhatian");
+                mBuilder.setMessage("Apakah Anda ingin melakukan recovery?");
+                mBuilder.setCancelable(false);
+                mBuilder.setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i1) {
+                        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+                        String[] projection = {
+                                EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA
+                        };
+                        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, projection, ""+ EhealthContract.RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+" DESC", "5");
+                        ArrayList<String> listTanggal = new ArrayList<>();
+                        int columnTanggal = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA);
+                        if (cursor.moveToFirst()) {
+                            do {
+                                String tanggal = cursor.getString(columnTanggal);
+                                listTanggal.add(tanggal);
+                            } while (cursor.moveToNext());
+                        }
+                        Log.i(TAG, listTanggal.toString());
+
+                        if(index == 5) {
+                            MedrecDinamikData.writeIndex -= 1;
+//                        } else {
+//                            ArrayList<Integer> hasil_compare= new ArrayList<Integer>();
+//                            for (String temp : listTanggal)
+//                                hasil_compare.add(tanggalPeriksa.contains(temp) ? 1 : 0);
+//
+//                            Log.i(TAG+" compare", hasil_compare.toString());
+//
+//                            ArrayList<String> timestamp_recovery = new ArrayList<String>();
+//                            for (int x=0; x<hasil_compare.size(); x++){
+//                                if(hasil_compare.get(x) == 0){
+//                                    timestamp_recovery.add(listTanggal.get(x));
+//                                }
+//                            }
+//
+//                            query = "SELECT * FROM "+ EhealthContract.RekamMedisEntry.TABLE_NAME+
+//                                    " WHERE "+EhealthContract.RekamMedisEntry.COLUMN_NIK+" = '"+PDCData.nik+"' AND ";
+//                            for(int x=0; x<timestamp_recovery.size(); x++) {
+//                                query += EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + " = '" + timestamp_recovery.get(x);
+//                                if(x != timestamp_recovery.size()-1){
+//                                    query += " OR ";
+//                                }
+//                            }
+//                            query+= "';";
+                        }
+
+                        String query = "SELECT * FROM "+ EhealthContract.RekamMedisEntry.TABLE_NAME+
+                                " WHERE "+EhealthContract.RekamMedisEntry.COLUMN_NIK+" = '"+PDCData.nik+"' AND "+
+                                EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA + " = '"+listTanggal.get(0)+"';";
+
+                        Cursor getData = db.rawQuery(query, null);
+                        Log.i(TAG, ""+getData.getCount());
+                        ContentValues values = new ContentValues();
+                        if(getData.moveToFirst()){
+                            do {
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA, getData.getString(1));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_NAMA_DOKTER, getData.getString(2));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_NIK, getData.getString(3));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS, getData.getString(4));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_POLI, getData.getString(5));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN, getData.getString(6));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE, getData.getString(7));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE, getData.getString(8));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_SUHU, getData.getString(9));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_NADI, getData.getString(10));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI, getData.getString(11));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA, getData.getString(12));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, getData.getString(13));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU, getData.getString(14));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL, getData.getString(15));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_TINGGI, getData.getString(16));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_BERAT, getData.getString(17));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_KESADARAN, getData.getString(18));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_KEPALA, getData.getString(19));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_THORAX, getData.getString(20));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN, getData.getString(21));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_GENITALIA, getData.getString(22));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS, getData.getString(23));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_KULIT, getData.getString(24));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI, getData.getString(25));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM, getData.getString(26));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI, getData.getString(27));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO, getData.getString(28));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, getData.getString(29));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, getData.getString(30));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, getData.getString(31));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_RESEP, getData.getString(32));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP, getData.getString(33));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP, getData.getString(34));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP, getData.getString(35));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN, getData.getString(36));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM, getData.getString(37));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM, getData.getString(38));
+                                values.put(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM, getData.getString(39));
+                            } while (getData.moveToNext());
+                        }
+
+                        chunk1 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1));
+                        chunk2 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 2));
+                        chunk3 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 3));
+                        chunk4 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 4));
+                        chunk5 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 5));
+                        chunk6 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 6));
+                        chunk7 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 7));
+                        chunk8 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 8));
+                        chunk9 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 9));
+                        chunk10 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 10));
+                        chunk11 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 11));
+                        chunk12 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 12));
+                        chunk13 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 13));
+                        send();
+//                        showLoader();
+                    }
+                });
+                AlertDialog alertDialog = mBuilder.create();
+                alertDialog.show();
             }
         });
     }
@@ -732,4 +1117,177 @@ public class RekmedFragment extends Fragment {
         }
     }
 
+    private String makeAPDUInsertCommand(ContentValues cv, int writeIndex, int chunk) {
+        switch(chunk) {
+            case 1:
+                String cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00"; // 00
+                cmd += "007b"; // Total length
+                cmd += "0000"; // Start pointer
+                cmd += "0077"; // actual data length
+                cmd += Util.bytesToHex(Util.intToBytes(writeIndex)); // data index
+                cmd += Util.bytesToHex(Util.dateToBytes(Util.getTimeMilisDate(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA)))); // tglperiksa
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_ID_PUSKESMAS), 12); // idpuskesmas
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_POLI)); // poli
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_RUJUKAN), 30); // pemberi rujukan
+                cmd += Util.intToHex(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE)); // systole
+                cmd += Util.intToHex(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE)); // diastole
+                cmd += Util.bytesToHex(Util.floatToBytes(cv.getAsFloat(EhealthContract.RekamMedisEntry.COLUMN_SUHU))); // suhu
+                cmd += Util.intToHex3(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_NADI)); // nadi
+                cmd += Util.intToHex3(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI)); // respirasi
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_KELUHANUTAMA), 50); // keluhan utama
+                assert cmd.length() == 260;
+                return cmd;
+            case 2:
+                // cmd is declared during compiled time
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0077"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG), 200); // riwayat penyakit sekarang
+                assert cmd.length() == 422;
+                return cmd;
+            case 3:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "013F"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_DULU), 100);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_KEL), 100);
+                assert cmd.length() == 422;
+                return cmd;
+            case 4:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00A3"; // total length
+                cmd += "0207"; // start pointer
+                cmd += "009F"; // actual data length
+                cmd += Util.intToHex(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_TINGGI));
+                cmd += Util.intToHex(cv.getAsInteger(EhealthContract.RekamMedisEntry.COLUMN_BERAT));
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_KESADARAN));
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_KEPALA), 50);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_THORAX), 50);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_ABDOMEN), 50);
+                assert cmd.length() == 340;
+                return cmd;
+            case 5:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "02A6"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_GENITALIA), 50);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_EXTREMITAS), 50);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_KULIT), 50);
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_NEUROLOGI), 50);
+                assert cmd.length() == 422;
+                return cmd;
+            case 6:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "036E"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_LABORATORIUM), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 7:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0436"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_RADIOLOGI), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 8:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CD"; // total length
+                cmd += "04FE"; // start pointer
+                cmd += "00C9"; // actual data length
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_STATUS_LABRADIO));
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA), 200);
+                assert cmd.length() == 424;
+                return cmd;
+            case 9:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "05C7"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 10:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "068F"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_ICD10_DIAGNOSA), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 11:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CC"; // total length
+                cmd += "0757"; // start pointer
+                cmd += "00C8"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_RESEP), 200);
+                assert cmd.length() == 422;
+                return cmd;
+            case 12:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "0036"; // total length
+                cmd += "081F"; // start pointer
+                cmd += "0034"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_CATTRESEP), 50);
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_STATUSRESEP));
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_REPETISIRESEP));
+                assert cmd.length() == 126;
+                return cmd;
+            case 13:
+                cmd = "80c6"; // CLA|INS
+                cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
+                cmd += "00";
+                cmd += "00CF"; // total length
+                cmd += "0853"; // start pointer
+                cmd += "00CB"; // actual data length
+                cmd += Util.padVariableText(cv.getAsString(EhealthContract.RekamMedisEntry.COLUMN_TINDAKAN), 200);
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_AD_VITAM));
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM));
+                cmd += String.format("%02X", cv.getAsByte(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM));
+                assert cmd.length() == 428;
+                return cmd;
+            default:
+                throw new WrongInputException("Wrong medrec chunk number");
+        }
+    }
+
+    class WrongInputException extends RuntimeException {
+        public WrongInputException(String message) {
+            super(message);
+        }
+    }
+
+    private void showLoader() {
+        progressDialog = ProgressDialog.show(getActivity(), "E-health",
+                "Melakukan recovery, harap tunggu", true);
+    }
 }

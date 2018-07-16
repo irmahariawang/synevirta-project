@@ -57,6 +57,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.hexStringToByteArray;
+import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.padVariableText;
+
 
 /**
  * Created by macbookpro on 9/4/17.
@@ -68,7 +71,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
     Typeface fontBold;
 
     private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
-                    chunk11, chunk12, chunk13;
+            chunk11, chunk12, chunk13;
 
     private TextView txtTitle;
     private int mPoli = RekamMedisEntry.POLI_UMUM;
@@ -104,9 +107,9 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
     ByteBuffer respondData;
     IntentFilter filter;
-    byte[] selectResponse;
+    byte[] selectResponse, initTulisResponse;
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
-    byte[] APDU_insert;
+    byte[] APDU_finish = {(byte)0x80, (byte)0xC7, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     Activity mActivity;
 
@@ -218,33 +221,33 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
 
 
-    //BUTTON SAVE
-    Button mShowDialog = (Button) findViewById(R.id.btnShowDialog);
+        //BUTTON SAVE
+        Button mShowDialog = (Button) findViewById(R.id.btnShowDialog);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
-    @Override
-        public void onClick(final View view) {
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(RekmedbaruActivity.this);
-        mBuilder.setIcon(R.drawable.logo2);
-        mBuilder.setTitle("Data yang Anda masukkan tidak dapat dirubah lagi");
-        mBuilder.setMessage("Apakah Anda akan menyimpan data sekarang?");
-        mBuilder.setCancelable(false);
-        mBuilder.setPositiveButton("Tidak", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
+            public void onClick(final View view) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(RekmedbaruActivity.this);
+                mBuilder.setIcon(R.drawable.logo2);
+                mBuilder.setTitle("Data yang Anda masukkan tidak dapat dirubah lagi");
+                mBuilder.setMessage("Apakah Anda akan menyimpan data sekarang?");
+                mBuilder.setCancelable(false);
+                mBuilder.setPositiveButton("Tidak", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                mBuilder.setNegativeButton("Ya", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        simpanData();
+                        dialogInterface.dismiss();
+                        //startActivity(new Intent(getApplicationContext(),BottombarActivity.class));
+                    }
+                });
+                AlertDialog alertDialog = mBuilder.create();
+                alertDialog.show();
             }
-        });
-        mBuilder.setNegativeButton("Ya", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                simpanData();
-                dialogInterface.dismiss();
-                //startActivity(new Intent(getApplicationContext(),BottombarActivity.class));
-            }
-        });
-        AlertDialog alertDialog = mBuilder.create();
-        alertDialog.show();
-        }
         });
 
 
@@ -278,7 +281,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                     break;
             }
         }
-        }
+    }
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -344,7 +347,23 @@ public class RekmedbaruActivity extends AppCompatActivity {
                         i--;
                     }
                 }
-            } else if (i == 2) { // insert chunk 1
+            } else if (i == 2){
+                respondData.put(bytes);
+                if (respondData.position() == 2) {
+                    initTulisResponse = new byte[2];
+                    respondData.rewind();
+                    respondData.get(initTulisResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Init response: " + Util.bytesToHex(initTulisResponse));
+                    if (!Util.bytesToHex(initTulisResponse).toString().equals("9000")) { // jika tidak berhasil
+                        i--;
+                        Log.e(TAG, "Init tulis gagal" + i);
+                    } else {
+                        send();
+                    }
+                }
+            } else if (i > 2 && i < 17) { // insert chunk 1-14 dan ins_final_tulis_medrec_dinamik
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     selectResponse = new byte[2];
@@ -355,228 +374,13 @@ public class RekmedbaruActivity extends AppCompatActivity {
                     Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
                     if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
                         i--;
-                        Log.e(TAG, "GAGAL INSERT: 1");
+                        Log.e(TAG, "GAGAL INSERT: " +i);
                     } else {
-                        Log.d(TAG, "Berhasil INSERT: 1");
+                        Log.d(TAG, "Berhasil INSERT: " +i);
                         send();
                     }
                 }
-            } else if (i == 3) { // insert chunk 2
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 2");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 2");
-                        send();
-                    }
-                }
-            } else if (i == 4) { // insert chunk 3
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 3");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 3");
-                        send();
-                    }
-                }
-            } else if (i == 5) { // insert chunk 4
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 4");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 4");
-                        send();
-                    }
-                }
-            }
-            else if (i == 6) { // insert chunk 5
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 5");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 5");
-                        send();
-                    }
-                }
-            }
-            else if (i == 7) { // insert chunk 6
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 6");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 6");
-                        send();
-                    }
-                }
-            }
-            else if (i == 8) { // insert chunk 7
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 7");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 7");
-                        send();
-                    }
-                }
-            }
-            else if (i == 9) { // insert chunk 8
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 8");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 8");
-                        send();
-                    }
-                }
-            }
-            else if (i == 10) { // insert chunk 9
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 9");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 9");
-                        send();
-                    }
-                }
-            }
-            else if (i == 11) { // insert chunk 10
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 10");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 10");
-                        send();
-                    }
-                }
-            }
-            else if (i == 12) { // insert chunk 11
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 11");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 11");
-                        send();
-                    }
-                }
-            }
-            else if (i == 13) { // insert chunk 12
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 12");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 12");
-                        send();
-                    }
-                }
-            }
-            else if (i == 14) { // insert chunk 13
-                respondData.put(bytes);
-                if (respondData.position() == 2) {
-                    selectResponse = new byte[2];
-                    respondData.rewind();
-                    respondData.get(selectResponse);
-                    respondData.position(0);
-
-                    Log.i(TAG, "Insert response: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) { // jika tidak berhasil
-                        i--;
-                        Log.e(TAG, "GAGAL INSERT: 13");
-                    } else {
-                        Log.d(TAG, "Berhasil INSERT: 13");
-//                        progressDialog.dismiss();
-                        send();
-                    }
-                }
-            }
-            else {
+            } else {
                 Log.e(TAG, "i: " + i);
             }
         }
@@ -587,75 +391,78 @@ public class RekmedbaruActivity extends AppCompatActivity {
             serialPort.write(APDU_select);
             i++;
             Log.i(TAG, "write apdu select");
-        }
-        else if (i == 1) {
+        } else if (i == 1) {
+            SharedPreferences prefs = getSharedPreferences("DATAPUSKES", MODE_PRIVATE);
+            String puskesmasID = prefs.getString("IDPUSKES", "");
+            String apduInit = "80c5000000000c";
+            apduInit += padVariableText(puskesmasID, 12);
+            serialPort.write(hexStringToByteArray(apduInit));
+            i++;
+            Log.i(TAG, "init tulis");
+        } else if (i == 2) {
             serialPort.write(chunk1);
             i++;
             Log.i(TAG, "write insert medrec: c1");
-        }
-        else if (i == 2) {
+        } else if (i == 3) {
             serialPort.write(chunk2);
             i++;
             Log.i(TAG, "write insert medrec: c2");
-        }
-        else if (i == 3) {
+        } else if (i == 4) {
             serialPort.write(chunk3);
             i++;
             Log.i(TAG, "write insert medrec: c3");
-        }
-        else if (i == 4) {
+        } else if (i == 5) {
             serialPort.write(chunk4);
             i++;
             Log.i(TAG, "write insert medrec: c4");
-        }
-        else if (i == 5) {
+        } else if (i == 6) {
             serialPort.write(chunk5);
             i++;
             Log.i(TAG, "write insert medrec: c5");
-        }
-        else if (i == 6) {
+        } else if (i == 7) {
             serialPort.write(chunk6);
             i++;
             Log.i(TAG, "write insert medrec: c6");
-        }
-        else if (i == 7) {
+        } else if (i == 8) {
             serialPort.write(chunk7);
             i++;
             Log.i(TAG, "write insert medrec: c7");
-        }
-        else if (i == 8) {
+        } else if (i == 9) {
             serialPort.write(chunk8);
             i++;
             Log.i(TAG, "write insert medrec: c8");
-        }
-        else if (i == 9) {
+        } else if (i == 10) {
             serialPort.write(chunk9);
             i++;
             Log.i(TAG, "write insert medrec: c9");
-        }
-        else if (i == 10) {
+        } else if (i == 11) {
             serialPort.write(chunk10);
             i++;
             Log.i(TAG, "write insert medrec: c10");
-        }
-        else if (i == 11) {
+        } else if (i == 12) {
             serialPort.write(chunk11);
             i++;
             Log.i(TAG, "write insert medrec: c11");
-        }
-        else if (i == 12) {
+        } else if (i == 13) {
             serialPort.write(chunk12);
             i++;
             Log.i(TAG, "write insert medrec: c12");
-        }
-        else if (i == 13) {
+        } else if (i == 14) {
             serialPort.write(chunk13);
             i++;
             Log.i(TAG, "write insert medrec: c13");
-        }
-        else {
+        } else if (i == 15) {
+            serialPort.write(APDU_finish);
+            i++;
+            Log.i(TAG, "write APDU finish");
+        } else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
+            if(MedrecDinamikData.writeIndex == 4){
+                MedrecDinamikData.writeIndex = 0;
+            } else {
+                MedrecDinamikData.writeIndex += 1;
+            }
             try {
                 if (broadcastReceiver != null) {
                     unregisterReceiver(broadcastReceiver);
@@ -668,414 +475,414 @@ public class RekmedbaruActivity extends AppCompatActivity {
         }
     }
 
-        private void setupSpinner(){
+    private void setupSpinner(){
 
-            //spinner poli
-            Spinner spinnerPoli = (Spinner) findViewById(R.id.poli_spinner);
-            ArrayAdapter<CharSequence> adapterPoli = ArrayAdapter.createFromResource(this,
-                    R.array.poli, android.R.layout.simple_spinner_item);
-            adapterPoli.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerPoli.setPrompt("Pilih poli tujuan");
-            spinnerPoli.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterPoli,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerPoli.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Gigi")) {
-                            mPoli = RekamMedisEntry.POLI_GIGI;
-                        } else {
-                            mPoli = RekamMedisEntry.POLI_UMUM;
-                        }
+        //spinner poli
+        Spinner spinnerPoli = (Spinner) findViewById(R.id.poli_spinner);
+        ArrayAdapter<CharSequence> adapterPoli = ArrayAdapter.createFromResource(this,
+                R.array.poli, android.R.layout.simple_spinner_item);
+        adapterPoli.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPoli.setPrompt("Pilih poli tujuan");
+        spinnerPoli.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterPoli,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerPoli.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Gigi")) {
+                        mPoli = RekamMedisEntry.POLI_GIGI;
+                    } else {
+                        mPoli = RekamMedisEntry.POLI_UMUM;
                     }
                 }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mPoli = RekamMedisEntry.POLI_UMUM;
-                }
-            });
-
-
-            //spinner kesadaran
-            Spinner spinnerKesadaran = (Spinner) findViewById(R.id.kesadaran_spinner);
-            ArrayAdapter<CharSequence> adapterKesadaran = ArrayAdapter.createFromResource(this,
-                    R.array.kesadaran, android.R.layout.simple_spinner_item);
-            adapterKesadaran.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerKesadaran.setPrompt("Pilih tingkat kesadaran");
-            spinnerKesadaran.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterKesadaran,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerKesadaran.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Apatis")) {
-                            mKesadaran = RekamMedisEntry.KESADARAN_APATIS;
-                        } else if (selection.equals("Delirium")){
-                            mKesadaran = RekamMedisEntry.KESADARAN_DELIRIUM;
-                        } else if (selection.equals("Somnolen")){
-                            mKesadaran = RekamMedisEntry.KESADARAN_SOMNOLEN;
-                        } else if (selection.equals("Sopor")){
-                            mKesadaran = RekamMedisEntry.KESADARAN_SOPOR;
-                        } else if (selection.equals("Semi-coma")){
-                            mKesadaran = RekamMedisEntry.KESADARAN_SEMICOMA;
-                        } else if (selection.equals("Coma")){
-                            mKesadaran = RekamMedisEntry.KESADARAN_COMA;
-                        } else {
-                            mPoli = RekamMedisEntry.KESADARAN_COMPOSMENTIS;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mKesadaran = RekamMedisEntry.KESADARAN_COMPOSMENTIS;
-                }
-            });
-
-            //spinner status Laboratorium Radiologi
-            Spinner spinnerLabRadio = (Spinner) findViewById(R.id.statusLabRadio);
-            ArrayAdapter<CharSequence> adapterLabRadio = ArrayAdapter.createFromResource(this,
-                    R.array.status_labradio, android.R.layout.simple_spinner_item);
-            adapterLabRadio.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerLabRadio.setPrompt("Pilih status Laboratorium Radiologi");
-            spinnerLabRadio.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterLabRadio,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerLabRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Dilayani sebagian")) {
-                            mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANISEBAGIAN;
-                        } else if (selection.equals("Tidak dilayani sama sekali")){
-                            mStatusLabRadio = RekamMedisEntry.LABRADIO_TIDAKDILAYANI;
-                        } else {
-                            mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANIPENUH;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANIPENUH;
-                }
-            });
-
-            //spinner status resep
-            Spinner spinnerResep = (Spinner) findViewById(R.id.statusResep);
-            ArrayAdapter<CharSequence> adapterResep = ArrayAdapter.createFromResource(this,
-                    R.array.status_resep, android.R.layout.simple_spinner_item);
-            adapterResep.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerResep.setPrompt("Pilih status resep");
-            spinnerResep.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterResep,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerResep.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Dilayani sebagian")) {
-                            mStatusResep = RekamMedisEntry.RESEP_DILAYANI_SEBAGIAN;
-                        } else if (selection.equals("Dilayani ada penggantian")){
-                            mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENGGANTIAN;
-                        } else if (selection.equals("Dilayani sebagian dan ada penggantian")){
-                            mStatusResep = RekamMedisEntry.RESEP_DILAYANI_SEBAGIAN_PENGGANTIAN;
-                        } else if (selection.equals("Tidak dilayani sama sekali")){
-                            mStatusResep = RekamMedisEntry.RESEP_TIDAK_DILAYANI;
-                        } else {
-                            mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENUH;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENUH;
-                }
-            });
-
-            //Radio button repetisi resep
-            radioGroup = (RadioGroup) findViewById(R.id.repetisiResep);
-            radioGroup.clearCheck();
-
-            radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    RadioButton rb = (RadioButton) group.findViewById(checkedId);
-                    if (null != rb && checkedId > -1) {
-                        if (checkedId != 0) {
-                            mRepetisiResep = RekamMedisEntry.RESEP_REPETISI_YA;
-                        } else {
-                            mRepetisiResep = RekamMedisEntry.RESEP_REPETISI_TIDAK;
-                        }
-                    }
-
-                }
-            });
-
-
-            //spinner status prognosis ad vitam
-            Spinner spinnerAdVitam = (Spinner) findViewById(R.id.adVitam);
-            ArrayAdapter<CharSequence> adapterAdVitam = ArrayAdapter.createFromResource(this,
-                    R.array.ad_vitam, android.R.layout.simple_spinner_item);
-            adapterAdVitam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerAdVitam.setPrompt("Pilih");
-            spinnerAdVitam.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterAdVitam,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerAdVitam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Dubia ad bonam")) {
-                            mAdVitam = RekamMedisEntry.VITAM_DUBIAADBONAM;
-                        } else if (selection.equals("Dubia ad malam")){
-                            mAdVitam = RekamMedisEntry.VITAM_DUBIAADMALAM;
-                        } else if (selection.equals("Ad malam")){
-                            mAdVitam = RekamMedisEntry.VITAM_ADMALAM;
-                        } else {
-                            mAdVitam = RekamMedisEntry.VITAM_ADBONAM;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mAdVitam = RekamMedisEntry.VITAM_ADBONAM;
-                }
-            });
-
-
-            //spinner status prognosis ad functionam
-            Spinner spinnerAdFunctionam = (Spinner) findViewById(R.id.adFunctionam);
-            ArrayAdapter<CharSequence> adapterAdFunctionam = ArrayAdapter.createFromResource(this,
-                    R.array.ad_functionam, android.R.layout.simple_spinner_item);
-            adapterAdFunctionam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerAdFunctionam.setPrompt("Pilih");
-            spinnerAdFunctionam.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterAdFunctionam,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerAdFunctionam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Dubia ad bonam")) {
-                            mAdFunctionam = RekamMedisEntry.FUNCTIONAM_DUBIAADBONAM;
-                        } else if (selection.equals("Dubia ad malam")){
-                            mAdFunctionam = RekamMedisEntry.FUNCTIONAM_DUBIAADMALAM;
-                        } else if (selection.equals("Ad malam")){
-                            mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADMALAM;
-                        } else {
-                            mAdVitam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
-                }
-            });
-            //spinner status prognosis ad sanationam
-            Spinner spinnerAdSanationam = (Spinner) findViewById(R.id.adSanationam);
-            ArrayAdapter<CharSequence> adapterAdSanationam = ArrayAdapter.createFromResource(this,
-                    R.array.ad_sanationam, android.R.layout.simple_spinner_item);
-            adapterAdSanationam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerAdSanationam.setPrompt("Pilih");
-            spinnerAdSanationam.setAdapter(new NothingSelectedSpinnerAdapter(
-                    adapterAdSanationam,
-                    R.layout.contact_spinner_row_nothing_selected,
-                    // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
-                    this));
-            spinnerAdSanationam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String selection = (String) parent.getItemAtPosition(position);
-                    if (!TextUtils.isEmpty(selection)) {
-                        if (selection.equals("Dubia ad bonam")) {
-                            mAdSanationam = RekamMedisEntry.SANATIONAM_DUBIAADBONAM;
-                        } else if (selection.equals("Dubia ad malam")){
-                            mAdSanationam = RekamMedisEntry.SANATIONAM_DUBIAADMALAM;
-                        } else if (selection.equals("Ad malam")){
-                            mAdSanationam = RekamMedisEntry.SANATIONAM_ADMALAM;
-                        } else {
-                            mAdSanationam = RekamMedisEntry.SANATIONAM_ADBONAM;
-                        }
-                    }
-                }
-                // Because AdapterView is an abstract class, onNothingSelected must be defined
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mAdSanationam = RekamMedisEntry.VITAM_ADBONAM;
-                }
-            });
-        }
-
-        private void setupAutoComplete(){
-            AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.statusDiagnosis);
-            EhealthDbHelper dbHelper = new EhealthDbHelper(getApplicationContext());
-            dbHelper.openDB();
-            //String pencarian = getIntent().getStringExtra("hasil");
-            String[] diagnosa = dbHelper.getAllDiagnosa();
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, diagnosa);
-            textView.setAdapter(adapter);
-            dbHelper.closeDB();
-        }
-
-        private void simpanData(){
-
-            EhealthDbHelper mDbHelper = new EhealthDbHelper(this);
-            mDbHelper.openDB();
-            //mDbHelper.createTableRekMed();
-
-            if(validateData()){
-                // Read from input fields
-                // Use trim to eliminate leading or trailing white space
-                //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                //String mTanggalPeriksa = sdf.format(new java.util.Date());
-
-                //setting format tanggal device yg baru
-                Long tsLong = System.currentTimeMillis();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(tsLong);
-                String mTanggalPeriksa = String.valueOf(formatter.format(calendar.getTime()));
-
-                String mIDPuskesmasString = mIDPuskesmas.getText().toString().trim();
-                String mNamaDokterString = PasiensyncActivity.getNamaDokter();
-                //  PoliSpinner
-                String mPemberiRujukanString = mPemberiRujukan.getText().toString().trim();
-                String mSystoleString = mSystole.getText().toString().trim();
-                String mDiastoleString = mDiastole.getText().toString().trim();
-                String mSuhuString = mSuhu.getText().toString().trim();
-                String mNadiString = mNadi.getText().toString().trim();
-                String mRespirasiString = mRespirasi.getText().toString().trim();
-                String mKeluhanUtamaString = mKeluhanUtama.getText().toString().trim();
-                String mRiwayatPenyakitSkrString = mRiwayatPenyakitSkr.getText().toString().trim();
-                String mRiwayatPenyakitDuluString = mRiwayatPenyakitDulu.getText().toString().trim();
-                String mRiwayatPenyakitKelString = mRiwayatPenyakitKel.getText().toString().trim();
-                String mTinggiString = mTinggi.getText().toString().trim();
-                String mBeratString = mBerat.getText().toString().trim();
-                // KesadaranSpinner
-                String mKepalaString = mKepala.getText().toString().trim();
-                String mThoraxString = mThorax.getText().toString().trim();
-                String mAbdomenString = mAbdomen.getText().toString().trim();
-                String mGenitaliaString = mGenitalia.getText().toString().trim();
-                String mExtremitasString = mExtremitas.getText().toString().trim();
-                String mKulitString = mKulit.getText().toString().trim();
-                String mNeurologiString = mNeurologi.getText().toString().trim();
-                String mLaboratoriumString = mLaboratorium.getText().toString().trim();
-                String mRadiologiString = mRadiologi.getText().toString().trim();
-                // StatusLabRadioSpinner
-                String mDiagnosisKerjaString = mDiagnosisKerja.getText().toString().trim();
-                String mDiagnosisBandingString = mDiagnosisBanding.getText().toString().trim();
-                String mICD10String = mICD10.getText().toString().trim();
-                String mResepString = mResep.getText().toString().trim();
-                String mCatatanResepString = mCatatanResep.getText().toString().trim();
-                // StatusResepSpinner
-                String mTindakanString = mTindakan.getText().toString().trim();
-                // AdVitamSpinner
-                // AdFunctionamSpinner
-                // AdSanationamSpinner
-
-                // Gets the database in write mode
-                SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-                // Create a ContentValues object where column names are the keys,
-                // and pet attributes from the editor are the values.
-                ContentValues values = new ContentValues();
-                values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
-                values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
-                values.put(RekamMedisEntry.COLUMN_NIK, PDCData.nik);
-                values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
-                values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
-                values.put(RekamMedisEntry.COLUMN_RUJUKAN, mPemberiRujukanString);
-                values.put(RekamMedisEntry.COLUMN_SYSTOLE, mSystoleString);
-                values.put(RekamMedisEntry.COLUMN_DIASTOLE, mDiastoleString);
-                values.put(RekamMedisEntry.COLUMN_SUHU, mSuhuString);
-                values.put(RekamMedisEntry.COLUMN_NADI, mNadiString);
-                values.put(RekamMedisEntry.COLUMN_RESPIRASI, mRespirasiString);
-                values.put(RekamMedisEntry.COLUMN_KELUHANUTAMA, mKeluhanUtamaString);
-                values.put(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, mRiwayatPenyakitSkrString);
-                values.put(RekamMedisEntry.COLUMN_PENYAKIT_DULU, mRiwayatPenyakitDuluString);
-                values.put(RekamMedisEntry.COLUMN_PENYAKIT_KEL, mRiwayatPenyakitKelString);
-                values.put(RekamMedisEntry.COLUMN_TINGGI, mTinggiString);
-                values.put(RekamMedisEntry.COLUMN_BERAT, mBeratString);
-                values.put(RekamMedisEntry.COLUMN_KESADARAN, mKesadaran);
-                values.put(RekamMedisEntry.COLUMN_KEPALA, mKepalaString);
-                values.put(RekamMedisEntry.COLUMN_THORAX, mThoraxString);
-                values.put(RekamMedisEntry.COLUMN_ABDOMEN, mAbdomenString);
-                values.put(RekamMedisEntry.COLUMN_GENITALIA, mGenitaliaString);
-                values.put(RekamMedisEntry.COLUMN_EXTREMITAS, mExtremitasString);
-                values.put(RekamMedisEntry.COLUMN_KULIT, mKulitString);
-                values.put(RekamMedisEntry.COLUMN_NEUROLOGI, mNeurologiString);
-                values.put(RekamMedisEntry.COLUMN_LABORATORIUM, mLaboratoriumString);
-                values.put(RekamMedisEntry.COLUMN_RADIOLOGI, mRadiologiString);
-                values.put(RekamMedisEntry.COLUMN_STATUS_LABRADIO, mStatusLabRadio);
-                values.put(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, mDiagnosisKerjaString);
-                values.put(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, mDiagnosisBandingString);
-                values.put(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, mICD10String);
-                values.put(RekamMedisEntry.COLUMN_RESEP, mResepString);
-                values.put(RekamMedisEntry.COLUMN_CATTRESEP, mCatatanResepString);
-                values.put(RekamMedisEntry.COLUMN_STATUSRESEP, mStatusResep);
-                values.put(RekamMedisEntry.COLUMN_REPETISIRESEP, mRepetisiResep);
-                values.put(RekamMedisEntry.COLUMN_TINDAKAN, mTindakanString);
-                values.put(RekamMedisEntry.COLUMN_AD_VITAM, mAdVitam);
-                values.put(RekamMedisEntry.COLUMN_AD_FUNCTIONAM, mAdFunctionam);
-                values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
-
-                chunk1 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1));
-                chunk2 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 2));
-                chunk3 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 3));
-                chunk4 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 4));
-                chunk5 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 5));
-                chunk6 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 6));
-                chunk7 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 7));
-                chunk8 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 8));
-                chunk9 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 9));
-                chunk10 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 10));
-                chunk11 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 11));
-                chunk12 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 12));
-                chunk13 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 13));
-                send();
-                showLoader();
-
-                // Insert a new row for pet in the database, returning the ID of that new row.
-                long newRowId = db.insert(RekamMedisEntry.TABLE_NAME, null, values);
-
-                // Show a toast message depending on whether or not the insertion was successful
-                if (newRowId == -1) {
-                    // If the row ID is -1, then there was an error with insertion.
-                    //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Otherwise, the insertion was successful and we can display a toast with the row ID.
-                    //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
-                    //simpanData();
-//                    finish();
-                }
-                mDbHelper.closeDB();
             }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mPoli = RekamMedisEntry.POLI_UMUM;
+            }
+        });
+
+
+        //spinner kesadaran
+        Spinner spinnerKesadaran = (Spinner) findViewById(R.id.kesadaran_spinner);
+        ArrayAdapter<CharSequence> adapterKesadaran = ArrayAdapter.createFromResource(this,
+                R.array.kesadaran, android.R.layout.simple_spinner_item);
+        adapterKesadaran.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerKesadaran.setPrompt("Pilih tingkat kesadaran");
+        spinnerKesadaran.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterKesadaran,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerKesadaran.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Apatis")) {
+                        mKesadaran = RekamMedisEntry.KESADARAN_APATIS;
+                    } else if (selection.equals("Delirium")){
+                        mKesadaran = RekamMedisEntry.KESADARAN_DELIRIUM;
+                    } else if (selection.equals("Somnolen")){
+                        mKesadaran = RekamMedisEntry.KESADARAN_SOMNOLEN;
+                    } else if (selection.equals("Sopor")){
+                        mKesadaran = RekamMedisEntry.KESADARAN_SOPOR;
+                    } else if (selection.equals("Semi-coma")){
+                        mKesadaran = RekamMedisEntry.KESADARAN_SEMICOMA;
+                    } else if (selection.equals("Coma")){
+                        mKesadaran = RekamMedisEntry.KESADARAN_COMA;
+                    } else {
+                        mPoli = RekamMedisEntry.KESADARAN_COMPOSMENTIS;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mKesadaran = RekamMedisEntry.KESADARAN_COMPOSMENTIS;
+            }
+        });
+
+        //spinner status Laboratorium Radiologi
+        Spinner spinnerLabRadio = (Spinner) findViewById(R.id.statusLabRadio);
+        ArrayAdapter<CharSequence> adapterLabRadio = ArrayAdapter.createFromResource(this,
+                R.array.status_labradio, android.R.layout.simple_spinner_item);
+        adapterLabRadio.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerLabRadio.setPrompt("Pilih status Laboratorium Radiologi");
+        spinnerLabRadio.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterLabRadio,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerLabRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Dilayani sebagian")) {
+                        mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANISEBAGIAN;
+                    } else if (selection.equals("Tidak dilayani sama sekali")){
+                        mStatusLabRadio = RekamMedisEntry.LABRADIO_TIDAKDILAYANI;
+                    } else {
+                        mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANIPENUH;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mStatusLabRadio = RekamMedisEntry.LABRADIO_DILAYANIPENUH;
+            }
+        });
+
+        //spinner status resep
+        Spinner spinnerResep = (Spinner) findViewById(R.id.statusResep);
+        ArrayAdapter<CharSequence> adapterResep = ArrayAdapter.createFromResource(this,
+                R.array.status_resep, android.R.layout.simple_spinner_item);
+        adapterResep.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerResep.setPrompt("Pilih status resep");
+        spinnerResep.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterResep,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerResep.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Dilayani sebagian")) {
+                        mStatusResep = RekamMedisEntry.RESEP_DILAYANI_SEBAGIAN;
+                    } else if (selection.equals("Dilayani ada penggantian")){
+                        mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENGGANTIAN;
+                    } else if (selection.equals("Dilayani sebagian dan ada penggantian")){
+                        mStatusResep = RekamMedisEntry.RESEP_DILAYANI_SEBAGIAN_PENGGANTIAN;
+                    } else if (selection.equals("Tidak dilayani sama sekali")){
+                        mStatusResep = RekamMedisEntry.RESEP_TIDAK_DILAYANI;
+                    } else {
+                        mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENUH;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mStatusResep = RekamMedisEntry.RESEP_DILAYANI_PENUH;
+            }
+        });
+
+        //Radio button repetisi resep
+        radioGroup = (RadioGroup) findViewById(R.id.repetisiResep);
+        radioGroup.clearCheck();
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb = (RadioButton) group.findViewById(checkedId);
+                if (null != rb && checkedId > -1) {
+                    if (checkedId != 0) {
+                        mRepetisiResep = RekamMedisEntry.RESEP_REPETISI_YA;
+                    } else {
+                        mRepetisiResep = RekamMedisEntry.RESEP_REPETISI_TIDAK;
+                    }
+                }
+
+            }
+        });
+
+
+        //spinner status prognosis ad vitam
+        Spinner spinnerAdVitam = (Spinner) findViewById(R.id.adVitam);
+        ArrayAdapter<CharSequence> adapterAdVitam = ArrayAdapter.createFromResource(this,
+                R.array.ad_vitam, android.R.layout.simple_spinner_item);
+        adapterAdVitam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdVitam.setPrompt("Pilih");
+        spinnerAdVitam.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterAdVitam,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerAdVitam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Dubia ad bonam")) {
+                        mAdVitam = RekamMedisEntry.VITAM_DUBIAADBONAM;
+                    } else if (selection.equals("Dubia ad malam")){
+                        mAdVitam = RekamMedisEntry.VITAM_DUBIAADMALAM;
+                    } else if (selection.equals("Ad malam")){
+                        mAdVitam = RekamMedisEntry.VITAM_ADMALAM;
+                    } else {
+                        mAdVitam = RekamMedisEntry.VITAM_ADBONAM;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mAdVitam = RekamMedisEntry.VITAM_ADBONAM;
+            }
+        });
+
+
+        //spinner status prognosis ad functionam
+        Spinner spinnerAdFunctionam = (Spinner) findViewById(R.id.adFunctionam);
+        ArrayAdapter<CharSequence> adapterAdFunctionam = ArrayAdapter.createFromResource(this,
+                R.array.ad_functionam, android.R.layout.simple_spinner_item);
+        adapterAdFunctionam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdFunctionam.setPrompt("Pilih");
+        spinnerAdFunctionam.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterAdFunctionam,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerAdFunctionam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Dubia ad bonam")) {
+                        mAdFunctionam = RekamMedisEntry.FUNCTIONAM_DUBIAADBONAM;
+                    } else if (selection.equals("Dubia ad malam")){
+                        mAdFunctionam = RekamMedisEntry.FUNCTIONAM_DUBIAADMALAM;
+                    } else if (selection.equals("Ad malam")){
+                        mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADMALAM;
+                    } else {
+                        mAdVitam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
+            }
+        });
+        //spinner status prognosis ad sanationam
+        Spinner spinnerAdSanationam = (Spinner) findViewById(R.id.adSanationam);
+        ArrayAdapter<CharSequence> adapterAdSanationam = ArrayAdapter.createFromResource(this,
+                R.array.ad_sanationam, android.R.layout.simple_spinner_item);
+        adapterAdSanationam.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdSanationam.setPrompt("Pilih");
+        spinnerAdSanationam.setAdapter(new NothingSelectedSpinnerAdapter(
+                adapterAdSanationam,
+                R.layout.contact_spinner_row_nothing_selected,
+                // R.layout.contact_spinner_nothing_selected_dropdown, // Optional
+                this));
+        spinnerAdSanationam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals("Dubia ad bonam")) {
+                        mAdSanationam = RekamMedisEntry.SANATIONAM_DUBIAADBONAM;
+                    } else if (selection.equals("Dubia ad malam")){
+                        mAdSanationam = RekamMedisEntry.SANATIONAM_DUBIAADMALAM;
+                    } else if (selection.equals("Ad malam")){
+                        mAdSanationam = RekamMedisEntry.SANATIONAM_ADMALAM;
+                    } else {
+                        mAdSanationam = RekamMedisEntry.SANATIONAM_ADBONAM;
+                    }
+                }
+            }
+            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mAdSanationam = RekamMedisEntry.VITAM_ADBONAM;
+            }
+        });
+    }
+
+    private void setupAutoComplete(){
+        AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.statusDiagnosis);
+        EhealthDbHelper dbHelper = new EhealthDbHelper(getApplicationContext());
+        dbHelper.openDB();
+        //String pencarian = getIntent().getStringExtra("hasil");
+        String[] diagnosa = dbHelper.getAllDiagnosa();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, diagnosa);
+        textView.setAdapter(adapter);
+        dbHelper.closeDB();
+    }
+
+    private void simpanData(){
+
+        EhealthDbHelper mDbHelper = new EhealthDbHelper(this);
+        mDbHelper.openDB();
+        //mDbHelper.createTableRekMed();
+
+        if(validateData()){
+            // Read from input fields
+            // Use trim to eliminate leading or trailing white space
+            //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            //String mTanggalPeriksa = sdf.format(new java.util.Date());
+
+            //setting format tanggal device yg baru
+            Long tsLong = System.currentTimeMillis();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(tsLong);
+            String mTanggalPeriksa = String.valueOf(formatter.format(calendar.getTime()));
+
+            String mIDPuskesmasString = mIDPuskesmas.getText().toString().trim();
+            String mNamaDokterString = PasiensyncActivity.getNamaDokter();
+            //  PoliSpinner
+            String mPemberiRujukanString = mPemberiRujukan.getText().toString().trim();
+            String mSystoleString = mSystole.getText().toString().trim();
+            String mDiastoleString = mDiastole.getText().toString().trim();
+            String mSuhuString = mSuhu.getText().toString().trim();
+            String mNadiString = mNadi.getText().toString().trim();
+            String mRespirasiString = mRespirasi.getText().toString().trim();
+            String mKeluhanUtamaString = mKeluhanUtama.getText().toString().trim();
+            String mRiwayatPenyakitSkrString = mRiwayatPenyakitSkr.getText().toString().trim();
+            String mRiwayatPenyakitDuluString = mRiwayatPenyakitDulu.getText().toString().trim();
+            String mRiwayatPenyakitKelString = mRiwayatPenyakitKel.getText().toString().trim();
+            String mTinggiString = mTinggi.getText().toString().trim();
+            String mBeratString = mBerat.getText().toString().trim();
+            // KesadaranSpinner
+            String mKepalaString = mKepala.getText().toString().trim();
+            String mThoraxString = mThorax.getText().toString().trim();
+            String mAbdomenString = mAbdomen.getText().toString().trim();
+            String mGenitaliaString = mGenitalia.getText().toString().trim();
+            String mExtremitasString = mExtremitas.getText().toString().trim();
+            String mKulitString = mKulit.getText().toString().trim();
+            String mNeurologiString = mNeurologi.getText().toString().trim();
+            String mLaboratoriumString = mLaboratorium.getText().toString().trim();
+            String mRadiologiString = mRadiologi.getText().toString().trim();
+            // StatusLabRadioSpinner
+            String mDiagnosisKerjaString = mDiagnosisKerja.getText().toString().trim();
+            String mDiagnosisBandingString = mDiagnosisBanding.getText().toString().trim();
+            String mICD10String = mICD10.getText().toString().trim();
+            String mResepString = mResep.getText().toString().trim();
+            String mCatatanResepString = mCatatanResep.getText().toString().trim();
+            // StatusResepSpinner
+            String mTindakanString = mTindakan.getText().toString().trim();
+            // AdVitamSpinner
+            // AdFunctionamSpinner
+            // AdSanationamSpinner
+
+            // Gets the database in write mode
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+            // Create a ContentValues object where column names are the keys,
+            // and pet attributes from the editor are the values.
+            ContentValues values = new ContentValues();
+            values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
+            values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
+            values.put(RekamMedisEntry.COLUMN_NIK, PDCData.nik);
+            values.put(RekamMedisEntry.COLUMN_ID_PUSKESMAS, mIDPuskesmasString);
+            values.put(RekamMedisEntry.COLUMN_POLI, mPoli);
+            values.put(RekamMedisEntry.COLUMN_RUJUKAN, mPemberiRujukanString);
+            values.put(RekamMedisEntry.COLUMN_SYSTOLE, mSystoleString);
+            values.put(RekamMedisEntry.COLUMN_DIASTOLE, mDiastoleString);
+            values.put(RekamMedisEntry.COLUMN_SUHU, mSuhuString);
+            values.put(RekamMedisEntry.COLUMN_NADI, mNadiString);
+            values.put(RekamMedisEntry.COLUMN_RESPIRASI, mRespirasiString);
+            values.put(RekamMedisEntry.COLUMN_KELUHANUTAMA, mKeluhanUtamaString);
+            values.put(RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG, mRiwayatPenyakitSkrString);
+            values.put(RekamMedisEntry.COLUMN_PENYAKIT_DULU, mRiwayatPenyakitDuluString);
+            values.put(RekamMedisEntry.COLUMN_PENYAKIT_KEL, mRiwayatPenyakitKelString);
+            values.put(RekamMedisEntry.COLUMN_TINGGI, mTinggiString);
+            values.put(RekamMedisEntry.COLUMN_BERAT, mBeratString);
+            values.put(RekamMedisEntry.COLUMN_KESADARAN, mKesadaran);
+            values.put(RekamMedisEntry.COLUMN_KEPALA, mKepalaString);
+            values.put(RekamMedisEntry.COLUMN_THORAX, mThoraxString);
+            values.put(RekamMedisEntry.COLUMN_ABDOMEN, mAbdomenString);
+            values.put(RekamMedisEntry.COLUMN_GENITALIA, mGenitaliaString);
+            values.put(RekamMedisEntry.COLUMN_EXTREMITAS, mExtremitasString);
+            values.put(RekamMedisEntry.COLUMN_KULIT, mKulitString);
+            values.put(RekamMedisEntry.COLUMN_NEUROLOGI, mNeurologiString);
+            values.put(RekamMedisEntry.COLUMN_LABORATORIUM, mLaboratoriumString);
+            values.put(RekamMedisEntry.COLUMN_RADIOLOGI, mRadiologiString);
+            values.put(RekamMedisEntry.COLUMN_STATUS_LABRADIO, mStatusLabRadio);
+            values.put(RekamMedisEntry.COLUMN_DIAGNOSIS_KERJA, mDiagnosisKerjaString);
+            values.put(RekamMedisEntry.COLUMN_DIAGNOSIS_BANDING, mDiagnosisBandingString);
+            values.put(RekamMedisEntry.COLUMN_ICD10_DIAGNOSA, mICD10String);
+            values.put(RekamMedisEntry.COLUMN_RESEP, mResepString);
+            values.put(RekamMedisEntry.COLUMN_CATTRESEP, mCatatanResepString);
+            values.put(RekamMedisEntry.COLUMN_STATUSRESEP, mStatusResep);
+            values.put(RekamMedisEntry.COLUMN_REPETISIRESEP, mRepetisiResep);
+            values.put(RekamMedisEntry.COLUMN_TINDAKAN, mTindakanString);
+            values.put(RekamMedisEntry.COLUMN_AD_VITAM, mAdVitam);
+            values.put(RekamMedisEntry.COLUMN_AD_FUNCTIONAM, mAdFunctionam);
+            values.put(RekamMedisEntry.COLUMN_AD_SANATIONAM, mAdSanationam);
+
+            chunk1 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 1));
+            chunk2 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 2));
+            chunk3 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 3));
+            chunk4 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 4));
+            chunk5 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 5));
+            chunk6 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 6));
+            chunk7 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 7));
+            chunk8 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 8));
+            chunk9 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 9));
+            chunk10 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 10));
+            chunk11 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 11));
+            chunk12 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 12));
+            chunk13 = Util.hexStringToByteArray(makeAPDUInsertCommand(values, MedrecDinamikData.writeIndex, 13));
+            send();
+            showLoader();
+
+            // Insert a new row for pet in the database, returning the ID of that new row.
+            long newRowId = db.insert(RekamMedisEntry.TABLE_NAME, null, values);
+
+            // Show a toast message depending on whether or not the insertion was successful
+            if (newRowId == -1) {
+                // If the row ID is -1, then there was an error with insertion.
+                //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast with the row ID.
+                //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+                //simpanData();
+//                    finish();
+            }
+            mDbHelper.closeDB();
         }
+    }
 
     //VALIDASI ISIAN DATA
     private boolean validateData(){
@@ -1117,7 +924,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private String makeAPDUInsertCommand(ContentValues cv, int writeIndex, int chunk) {
         switch(chunk) {
             case 1:
-                String cmd = "80c5"; // CLA|INS
+                String cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00"; // 00
                 cmd += "007b"; // Total length
@@ -1138,7 +945,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 return cmd;
             case 2:
                 // cmd is declared during compiled time
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1148,7 +955,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 3:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1159,7 +966,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 4:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00A3"; // total length
@@ -1174,7 +981,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 340;
                 return cmd;
             case 5:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1187,7 +994,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 6:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1197,7 +1004,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 7:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1207,7 +1014,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 8:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CD"; // total length
@@ -1218,7 +1025,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 424;
                 return cmd;
             case 9:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1228,7 +1035,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 10:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1238,7 +1045,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 11:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CC"; // total length
@@ -1248,7 +1055,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 422;
                 return cmd;
             case 12:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "0036"; // total length
@@ -1260,7 +1067,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 assert cmd.length() == 126;
                 return cmd;
             case 13:
-                cmd = "80c5"; // CLA|INS
+                cmd = "80c6"; // CLA|INS
                 cmd += Util.bytesToHex(Util.intToShortToBytes(writeIndex)); // internal index / P1P2
                 cmd += "00";
                 cmd += "00CF"; // total length

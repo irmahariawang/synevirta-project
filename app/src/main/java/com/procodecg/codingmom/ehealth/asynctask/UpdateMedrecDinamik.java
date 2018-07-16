@@ -34,7 +34,7 @@ public class UpdateMedrecDinamik extends AsyncTask<String, String, String> {
     public AsyncResponse asyncResponse;
 
     private Context mContext;
-    private String response = "", timestamp = "";
+    private String response = "", timestamp = "", nik = "";
     private SharedPreferences settings;
 
     public UpdateMedrecDinamik(Context context) {
@@ -116,6 +116,7 @@ public class UpdateMedrecDinamik extends AsyncTask<String, String, String> {
 
             response = br.readLine();
             timestamp = array[2];
+            nik = array[3];
 
         } catch (SocketTimeoutException e){
             response = "timeout";
@@ -127,6 +128,6 @@ public class UpdateMedrecDinamik extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        asyncResponse.taskComplete(result, timestamp);
+        asyncResponse.taskComplete(result, timestamp, nik);
     }
 }

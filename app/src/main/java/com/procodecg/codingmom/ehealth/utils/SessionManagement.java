@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 
 import com.procodecg.codingmom.ehealth.main.MainActivity;
+import com.procodecg.codingmom.ehealth.main.WelcomeActivity;
 
 
 public class SessionManagement extends AppCompatActivity {
@@ -37,9 +38,10 @@ public class SessionManagement extends AppCompatActivity {
 
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = new Intent(SessionManagement.this,
-                                    MainActivity.class);
+                                    WelcomeActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            finish();
                             startActivity(intent);
 
                             dialog.cancel();

@@ -93,11 +93,11 @@ public class Setting extends AppCompatActivity {
 
         if(TextUtils.isEmpty(time)){
             settimeout.setError("Timeout tidak boleh kosong!");
-            settimeout.setText("90");
+            settimeout.setText("300");
             return;
-        } else if(Integer.valueOf(time)<90){
-            settimeout.setError("Timeout tidak boleh kurang dari 90!");
-            settimeout.setText("90");
+        } else if(Integer.valueOf(time)<300){
+            settimeout.setError("Timeout tidak boleh kurang dari 300!");
+            settimeout.setText("300");
             return;
         }
 

@@ -626,6 +626,40 @@ public final class EhealthContract {
         public final static String COLUMN_DIAGNOSA = "PENYAKIT";
     }
 
+    public static final class SyncEntry implements BaseColumns {
+
+        /** The content URI to access the pet data in the provider */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_EHEALTH);
+
+        /** Name of database table */
+        public final static String TABLE_NAME = "last_sync";
+
+        public final static String _ID = BaseColumns._ID;
+
+
+        /**
+         * NIK
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_NIK ="NIK";
+
+        /**
+         * LAST_TIMESTAMP
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_LAST_TIMESTAMP = "last_timestamp";
+
+        /**
+         * nama_dokter.
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_DOKTER = "nama_dokter";
+
+    }
+
     public class TB_NAME {
     }
 }
