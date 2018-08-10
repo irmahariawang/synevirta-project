@@ -49,6 +49,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
 
@@ -57,6 +59,8 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
  */
 
 public class PasiensyncActivity extends SessionManagement {
+
+    Boolean personalized;
 
     TextView tv1, tv2, tv3;
 
@@ -119,6 +123,7 @@ public class PasiensyncActivity extends SessionManagement {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_pasiensync);
+        personalized = false;
 
         font = Typeface.createFromAsset(getAssets(), "font1.ttf");
         fontbold = Typeface.createFromAsset(getAssets(), "font1bold.ttf");
@@ -358,12 +363,12 @@ public class PasiensyncActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
-                    if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
-//                        i--;
-                    } else {
+                    if (Util.bytesToHex(selectResponse).toString().equals("9000")) {
                         isCommandReceived = 1;
                         send();
                     }
+
+                    progressStatus = 0;
                 }
             } else if (i == 2) { //medrec statik
                 respondData.put(bytes);
@@ -376,30 +381,35 @@ public class PasiensyncActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Medrec statik string: " + Util.bytesToHex(medrecStatikResponse));
+                    if(responseVerifier(Util.bytesToHex(Arrays.copyOfRange(medrecStatikResponse, 1, 1386)))) {
+                        golodar = medrecStatikResponse[0];
+                        int g = golodar;
+                        setProgressBar(1);
+                        al = Arrays.copyOfRange(medrecStatikResponse, 1, 101);
+                        setProgressBar(2);
+                        operasi = Arrays.copyOfRange(medrecStatikResponse, 103, 358);
+                        setProgressBar(3);
+                        rawatrs = Arrays.copyOfRange(medrecStatikResponse, 360, 615);
+                        setProgressBar(4);
+                        kronis = Arrays.copyOfRange(medrecStatikResponse, 617, 872);
+                        setProgressBar(5);
+                        bawaan = Arrays.copyOfRange(medrecStatikResponse, 874, 1129);
+                        setProgressBar(6);
+                        resiko = Arrays.copyOfRange(medrecStatikResponse, 1131, 1386);
+                        setProgressBar(7);
 
-                    golodar = medrecStatikResponse[0];
-                    int g = golodar;
-                    setProgressBar(1);
-                    al = Arrays.copyOfRange(medrecStatikResponse, 1, 101);
-                    setProgressBar(2);
-                    operasi = Arrays.copyOfRange(medrecStatikResponse, 103, 358);
-                    setProgressBar(3);
-                    rawatrs = Arrays.copyOfRange(medrecStatikResponse, 360, 615);
-                    setProgressBar(4);
-                    kronis = Arrays.copyOfRange(medrecStatikResponse, 617, 872);
-                    setProgressBar(5);
-                    bawaan = Arrays.copyOfRange(medrecStatikResponse, 874, 1129);
-                    setProgressBar(6);
-                    resiko = Arrays.copyOfRange(medrecStatikResponse, 1131, 1386);
-                    setProgressBar(7);
+                        Log.i(TAG, "Goldar: " + g);
+                        Log.i(TAG, "alergi: " + Util.bytesToString(Util.trimZeroPadding(al)));
+                        Log.i(TAG, "operasi: " + Util.bytesToString(Util.trimZeroPadding(operasi)));
+                        Log.i(TAG, "rawat rs: " + Util.bytesToString(Util.trimZeroPadding(rawatrs)));
+                        Log.i(TAG, "kronis: " + Util.bytesToString(Util.trimZeroPadding(kronis)));
+                        Log.i(TAG, "bawaan: " + Util.bytesToString(Util.trimZeroPadding(bawaan)));
+                        Log.i(TAG, "resiko: " + Util.bytesToString(Util.trimZeroPadding(resiko)));
+                    } else {
+                        personalized = false;
+                        i = 3;
+                    }
 
-                    Log.i(TAG, "Goldar: " + g);
-                    Log.i(TAG, "alergi: " + Util.bytesToString(Util.trimZeroPadding(al)));
-                    Log.i(TAG, "operasi: " + Util.bytesToString(Util.trimZeroPadding(operasi)));
-                    Log.i(TAG, "rawat rs: " + Util.bytesToString(Util.trimZeroPadding(rawatrs)));
-                    Log.i(TAG, "kronis: " + Util.bytesToString(Util.trimZeroPadding(kronis)));
-                    Log.i(TAG, "bawaan: " + Util.bytesToString(Util.trimZeroPadding(bawaan)));
-                    Log.i(TAG, "resiko: " + Util.bytesToString(Util.trimZeroPadding(resiko)));
                     send();
                 }
             } else if (i == 3) { // biodata
@@ -553,47 +563,6 @@ public class PasiensyncActivity extends SessionManagement {
 
                     send();
 
-                    String namaString = Util.bytesToHex(namaPasien);
-                    //String tglLahirString =
-                    //String jenisKelaminString =
-
-                    //--pasiendetail--
-                    //String noPDC
-                    String kategoriPasienString = Util.bytesToString(Util.trimZeroPadding(kategoriPasien));
-                    String noAsuransiString = Util.bytesToString(Util.trimZeroPadding(noAsuransi));
-                    String tglDaftarString = Util.bytesToString(Util.trimZeroPadding(tglDaftar));
-                    //String kelasPerawatanString =
-                    String namaKkString = Util.bytesToHex(namaKK);
-                    String hubKeluargaString = Util.bytesToString(Util.trimZeroPadding(hubunganKeluarga));
-                    String alamatString = Util.bytesToHex(alamat);
-                    //String RTRWString
-                    //String kelurahanDesaString =
-                    //String kecamatanString =
-                    //String kotaKabupatenString =
-                    //String propinsiString =
-                    //String kodeposString =
-                    //String wilayahKerjaString =
-                    //String teleponString =
-                    //String hpString =
-                    //String agamaString =
-                    //String pendidikanString =
-                    //String pekerjaanString =
-                    //String surelString =
-                    //String statusPerkawinanString =
-                    //String kewarganegaraanString =
-                    //String alamatKeluargaString =
-                    //String kelurahanKeluargaString =
-                    //String kecamatanKeluargaString =
-                    //String kotaKeluargaString =
-                    //String propinsiKeluargaString =
-                    //String kodeposKeluargaString =
-                    //String teleponKeluargaString =
-                    //String hpKeluargaString =
-                    //String namaKantorString =
-                    //String alamatKantorString =
-                    //String kotaKantorString =
-                    //String teleponKantorString =
-
                 }
             }
             else {
@@ -632,11 +601,17 @@ public class PasiensyncActivity extends SessionManagement {
             setText("Membaca biodata pasien");
             Log.i(TAG, "write apdu read biodata");
         } else {
-            serialPort.close();
-            Log.i(TAG, "serial port closed");
-            showToastOnUi("Baca data PDC BERHASIL!");
-            MedrecDinamikData.isInDatabase = 0;
-            unregisterReceiver(broadcastReceiver);
+            if(personalized) {
+                serialPort.close();
+                Log.i(TAG, "serial port closed");
+                unregisterReceiver(broadcastReceiver);
+                showToastOnUi("Baca data PDC BERHASIL!");
+                MedrecDinamikData.isInDatabase = 0;
+            } else {
+                setText("PDC belum dipersonalisasi\nSilahkan masukkan PDC lain");
+                personalized = true;
+//                progressBar.setVisibility(View.INVISIBLE);
+            }
         }
 
     }
@@ -685,6 +660,13 @@ public class PasiensyncActivity extends SessionManagement {
                 tv2.setText(ftext);
             }
         });
+    }
+
+    private boolean responseVerifier(String response){
+        Pattern pattern = Pattern.compile("[1-9]");
+        Matcher matcher = pattern.matcher(response);
+
+        return matcher.find();
     }
 
     @Override

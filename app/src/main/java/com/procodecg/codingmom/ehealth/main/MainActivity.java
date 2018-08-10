@@ -40,6 +40,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.procodecg.codingmom.ehealth.main.PinActivity.hideKeyboard;
 
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     int i, isCommandReceived;
     String data;
-    byte[] selectResponse;
+    byte[] selectResponse, certResponse;
 
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
 
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDU_check_cert = {(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     TextView tv1, tv2, tv3, tv4;
 
@@ -270,6 +273,22 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 }
+            } else if (i == 2) {
+                respondData.put(bytes);
+
+                if(respondData.position() == 19){
+                    certResponse = new byte[19];
+                    respondData.rewind();
+                    respondData.get(certResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Cert response string: " + Util.bytesToHex(certResponse));
+                    if (responseVerifier(Util.bytesToHex(Arrays.copyOfRange(certResponse, 0, 17)))){
+                        send();
+                    } else {
+                        showToastOnUi("HPC belum dipersonalisasi \nSilahkan masukan HPC lain");
+                    }
+                }
             } else {
                 Log.e(TAG, "No i.");
             }
@@ -288,14 +307,18 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "Koneksi kartu gagal");
 //                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
-                    tv2.setText("Koneksi kartu berhasil");
+//                    tv2.setText("Koneksi kartu berhasil");
 //                    showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else if (i == 1){
+            serialPort.write(APDU_check_cert);
+            i++;
+            Log.d(TAG, "Apdu cert");
+        } else {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             unregisterReceiver(broadcastReceiver);
@@ -311,6 +334,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, ftext, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean responseVerifier(String response){
+        Pattern pattern = Pattern.compile("[1-9]");
+        Matcher matcher = pattern.matcher(response);
+
+        return matcher.find();
     }
 
     @Override

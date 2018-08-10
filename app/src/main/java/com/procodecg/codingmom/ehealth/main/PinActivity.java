@@ -41,8 +41,12 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PinActivity extends SessionManagement {
+
+    Boolean personalized;
 
     Typeface font;
     Typeface fontbold;
@@ -81,7 +85,7 @@ public class PinActivity extends SessionManagement {
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
 
-    byte[] APDU_owner_auth = {(byte) 0x80, (byte) 0xC3, 0x00, 0x00, 0x00, 0x00, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35};
+    byte[] APDU_owner_auth;
     // 00A4040008 48504344554D4D59
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     // 80D10000000000
@@ -151,6 +155,7 @@ public class PinActivity extends SessionManagement {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_pin);
+        personalized = false;
 
         //TODO diganti
 //        final TextView attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
@@ -401,21 +406,26 @@ public class PinActivity extends SessionManagement {
 
                     Log.i(TAG, "HP Data response string: " + Util.bytesToHex(hpdata));
 
-                    nik = Arrays.copyOfRange(hpdata, 0, 16);
-                    byte nameLen = hpdata[16];
-                    nama = Arrays.copyOfRange(hpdata, 17, 17 + nameLen);
-                    byte sipLen = hpdata[17 + nameLen];
-                    sip = Arrays.copyOfRange(hpdata, 17 + nameLen + 1, 17 + nameLen + 1 + sipLen);
+                    if(responseVerifier(Util.bytesToHex(Arrays.copyOfRange(hpdata, 0, 100)))){
+                        nik = Arrays.copyOfRange(hpdata, 0, 16);
+                        byte nameLen = hpdata[16];
+                        nama = Arrays.copyOfRange(hpdata, 17, 17 + nameLen);
+                        byte sipLen = hpdata[17 + nameLen];
+                        sip = Arrays.copyOfRange(hpdata, 17 + nameLen + 1, 17 + nameLen + 1 + sipLen);
 
-                    Log.i(TAG, "nik: " + Util.bytesToString(nik));
-                    Log.i(TAG, "nama: " + Util.bytesToString(nama));
-                    Log.i(TAG, "sip: " + Util.bytesToString(sip));
+                        Log.i(TAG, "nik: " + Util.bytesToString(nik));
+                        Log.i(TAG, "nama: " + Util.bytesToString(nama));
+                        Log.i(TAG, "sip: " + Util.bytesToString(sip));
 
-                    HPCData.nik = Util.bytesToString(nik);
-                    HPCData.nama = Util.bytesToString(nama);
-                    HPCData.sip = Util.bytesToString(sip);
+                        HPCData.nik = Util.bytesToString(nik);
+                        HPCData.nama = Util.bytesToString(nama);
+                        HPCData.sip = Util.bytesToString(sip);
+                    } else {
+                        personalized = false;
+                        i = 4;
+                    }
 
-                    send();
+                   send();
                 }
             } else if (i == 4) {
                 respondData.put(bytes);
@@ -432,6 +442,7 @@ public class PinActivity extends SessionManagement {
                     role = cert[0];
 
                     Log.i(TAG, "hp role: " + role);
+                    personalized = true;
 
                     send();
                 }
@@ -477,11 +488,21 @@ public class PinActivity extends SessionManagement {
             serialPort.close();
             Log.i(TAG, "serial port closed");
             unregisterReceiver(broadcastReceiver);
-            getHPCdata();
-            hideKeyboard(PinActivity.this);
-            Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
-            startActivity(activity);
-            finish();
+
+            if(personalized) {
+                getHPCdata();
+                hideKeyboard(PinActivity.this);
+                Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
+                startActivity(activity);
+                finish();
+            } else {
+                showToastOnUi("HPC belum dipersonalisasi");
+                Intent activity = new Intent(PinActivity.this, MainActivity.class);
+                startActivity(activity);
+                finish();
+            }
+
+            personalized = true;
         }
     }
 
@@ -524,6 +545,13 @@ public class PinActivity extends SessionManagement {
                 }
             }
         });
+    }
+
+    private boolean responseVerifier(String response){
+        Pattern pattern = Pattern.compile("[1-9]");
+        Matcher matcher = pattern.matcher(response);
+
+        return matcher.find();
     }
 
     private void showToastOnUi(String text) {
