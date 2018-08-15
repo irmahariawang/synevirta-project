@@ -94,9 +94,7 @@ public class PasiensyncActivity extends SessionManagement {
     ByteBuffer respondData;
     IntentFilter filter;
 
-    byte[] selectResponse;
-    byte[] medrecStatikResponse;
-    byte[] biodataResponse;
+    byte[] selectResponse, cardCheckingResponse, medrecStatikResponse, biodataResponse;
 
     MedrecStatikData msd;
 
@@ -106,6 +104,7 @@ public class PasiensyncActivity extends SessionManagement {
     UsbSerialDevice serialPort;
 
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDU_card_checking = {(byte)0x80, (byte)0xB1, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_statik = {(byte) 0x80, (byte) 0xD4, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_biodata = {(byte) 0x80, (byte) 0xD3, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrecDinamik1 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -123,7 +122,7 @@ public class PasiensyncActivity extends SessionManagement {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_pasiensync);
-        personalized = false;
+        personalized = true;
 
         font = Typeface.createFromAsset(getAssets(), "font1.ttf");
         fontbold = Typeface.createFromAsset(getAssets(), "font1bold.ttf");
@@ -367,10 +366,24 @@ public class PasiensyncActivity extends SessionManagement {
                         isCommandReceived = 1;
                         send();
                     }
-
-                    progressStatus = 0;
                 }
-            } else if (i == 2) { //medrec statik
+            } else if (i == 2) { //select
+                respondData.put(bytes);
+                if (respondData.position() == 3) {
+                    cardCheckingResponse = new byte[3];
+                    respondData.rewind();
+                    respondData.get(cardCheckingResponse);
+                    respondData.position(0);
+
+                    Log.i(TAG, "Select response string: " + Util.bytesToHex(cardCheckingResponse));
+                    if (Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("11")) {
+                        send();
+                        progressStatus = 0;
+                    } else {
+                        personalized = false;
+                    }
+                }
+            } else if (i == 3) { //medrec statik
                 respondData.put(bytes);
                 byte golodar;
                 byte[] al, operasi, rawatrs, kronis, bawaan, resiko;
@@ -406,13 +419,12 @@ public class PasiensyncActivity extends SessionManagement {
                         Log.i(TAG, "bawaan: " + Util.bytesToString(Util.trimZeroPadding(bawaan)));
                         Log.i(TAG, "resiko: " + Util.bytesToString(Util.trimZeroPadding(resiko)));
                     } else {
-                        personalized = false;
                         i = 3;
                     }
 
                     send();
                 }
-            } else if (i == 3) { // biodata
+            } else if (i == 4) { // biodata
                 respondData.put(bytes);
                 if (respondData.position() == 826) {
                     byte[] nik, kategoriPasien, noAsuransi, tglDaftar, namaPasien, namaKK,
@@ -591,11 +603,16 @@ public class PasiensyncActivity extends SessionManagement {
                 e.printStackTrace();
             }
         } else if (i == 1) {
+            serialPort.write(APDU_card_checking);
+            i++;
+            setText("Card Checking");
+            Log.i(TAG, "write apdu card checking");
+        } else if (i == 2) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
             setText("Membaca rekmed statik");
             Log.i(TAG, "write apdu read medrec statik");
-        } else if (i == 2) {
+        } else if (i == 3) {
             serialPort.write(APDU_read_biodata);
             i++;
             setText("Membaca biodata pasien");

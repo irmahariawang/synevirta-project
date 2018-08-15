@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     int i, isCommandReceived;
     String data;
-    byte[] selectResponse, certResponse;
+    byte[] selectResponse, cardChecking;
 
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
 
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
-    byte[] APDU_check_cert = {(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] APDU_card_check = {(byte) 0x80, (byte) 0xE1, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     TextView tv1, tv2, tv3, tv4;
 
@@ -276,14 +276,14 @@ public class MainActivity extends AppCompatActivity {
             } else if (i == 2) {
                 respondData.put(bytes);
 
-                if(respondData.position() == 19){
-                    certResponse = new byte[19];
+                if(respondData.position() == 3){
+                    cardChecking = new byte[3];
                     respondData.rewind();
-                    respondData.get(certResponse);
+                    respondData.get(cardChecking);
                     respondData.position(0);
 
-                    Log.i(TAG, "Cert response string: " + Util.bytesToHex(certResponse));
-                    if (responseVerifier(Util.bytesToHex(Arrays.copyOfRange(certResponse, 0, 17)))){
+                    Log.i(TAG, "Cert response string: " + Util.bytesToHex(cardChecking));
+                    if (Util.bytesToHex(Arrays.copyOfRange(cardChecking, 0, 1)).equals("11")){
                         send();
                     } else {
                         showToastOnUi("HPC belum dipersonalisasi \nSilahkan masukan HPC lain");
@@ -305,17 +305,14 @@ public class MainActivity extends AppCompatActivity {
                 if (isCommandReceived != 1) {
                     tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
-//                    showToastOnUi("Koneksi kartu gagal, silakan cabut pasang kartu.");
                 } else {
-//                    tv2.setText("Koneksi kartu berhasil");
-//                    showToastOnUi("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         } else if (i == 1){
-            serialPort.write(APDU_check_cert);
+            serialPort.write(APDU_card_check);
             i++;
             Log.d(TAG, "Apdu cert");
         } else {
