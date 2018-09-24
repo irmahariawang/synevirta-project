@@ -32,6 +32,7 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 import com.procodecg.codingmom.ehealth.rekam_medis.RekmedbaruActivity;
 import com.procodecg.codingmom.ehealth.utils.Setting;
 import com.procodecg.codingmom.ehealth.data.CopyDBHelper;
+import com.procodecg.codingmom.ehealth.data.CopyWilayahDBHelper;
 import com.procodecg.codingmom.ehealth.utils.Edit;
 
 import java.io.File;
@@ -100,13 +101,22 @@ public class MainActivity extends AppCompatActivity {
         tv3.setTypeface(font);
         tv4.setTypeface(font);
 
-        if (doesDatabaseExist(getApplicationContext(),"ehealth.db"))
-        {
-            //Toast.makeText(this, "DB ada", Toast.LENGTH_SHORT).show();
-        }
-        else
-        {
+        if (!doesDatabaseExist(getApplicationContext(),"ehealth.db") && doesDatabaseExist(getApplicationContext(),"kode_wilayah.db")) {
             copyDBEhealth();
+            Log.i(TAG, "create db ehealth");
+            Toast.makeText(MainActivity.this, "create db ehealth", Toast.LENGTH_LONG).show();
+        } else if (doesDatabaseExist(getApplicationContext(),"ehealth.db") && !doesDatabaseExist(getApplicationContext(),"kode_wilayah.db")) {
+            copyDBWilayah();
+            Log.i(TAG, "create db wilayah");
+            Toast.makeText(MainActivity.this, "create db wilayah", Toast.LENGTH_LONG).show();
+        } else if (!doesDatabaseExist(getApplicationContext(),"ehealth.db") && !doesDatabaseExist(getApplicationContext(),"kode_wilayah.db")) {
+            copyDBEhealth();
+            copyDBWilayah();
+            Log.i(TAG, "create db ehealth & wilayah");
+            Toast.makeText(MainActivity.this, "create all db", Toast.LENGTH_LONG).show();
+        } else {
+            Log.i(TAG, "all db exist");
+            Toast.makeText(MainActivity.this, "all db exist", Toast.LENGTH_LONG).show();
         }
         //getHPCdata();
 
@@ -134,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         String namapuskes = pref.getString("NAMAPUSKES","________");
         if(idpuskes.equals("") || namapuskes.equals("") || idpuskes.equals("________") || namapuskes.equals("________")){
 //            Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
-            showToastOnUi("DATA PUSKESMAS HARUS DIISI");
+            setTextView("DATA PUSKESMAS HARUS DIISI");
 
         } else{
             startActivity(new Intent(getApplicationContext(),PinActivity.class));
@@ -171,6 +181,25 @@ public class MainActivity extends AppCompatActivity {
         mDBHelper.close();
     }
 
+    public void copyDBWilayah(){
+
+        CopyWilayahDBHelper wDBHelper = new CopyWilayahDBHelper(this);
+
+        try {
+            wDBHelper.updateDataBase();
+        } catch (IOException mIOException) {
+            throw new Error("UnableToUpdateDatabase");
+        }
+
+        try {
+            SQLiteDatabase mDb = wDBHelper.getReadableDatabase();
+        } catch (SQLException mSQLException) {
+            throw mSQLException;
+        }
+        //mDBHelper.createTableKartu();
+        wDBHelper.close();
+    }
+
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -201,13 +230,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
+                        setTextView("Port in Null\nSilahkan cabut pasang kemabli kartu");
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
 
-                tv2.setText("Pengecekan kartu");
+                setTextView("Pengecekan kartu");
 
                 // connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
@@ -233,11 +263,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     Toast.makeText(context.getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
+                    setTextView("USB Device Empty\nSilahkan cabut pasang kembali kartu");
                 }
 
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 i=0;
-                tv2.setText("Masukkan kartu HPC Anda");
+                setTextView("Masukkan kartu HPC Anda");
             } else {
                 Log.w(TAG, "NO INTENT?");
             }
@@ -266,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(selectResponse));
                     if (!Util.bytesToHex(selectResponse).toString().equals("9000")) {
-                        showToastOnUi("Koneksi applet gagal");
+                        setTextView("Koneksi applet gagal\nSilahkan masukan kartu yang lain");
                     } else {
                         isCommandReceived = 1;
                         send();
@@ -286,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
                     if (Util.bytesToHex(Arrays.copyOfRange(cardChecking, 0, 1)).equals("11")){
                         send();
                     } else {
-                        showToastOnUi("HPC belum dipersonalisasi \nSilahkan masukan HPC lain");
+                        setTextView("HPC belum dipersonalisasi \nSilahkan masukan HPC lain");
                     }
                 }
             } else {
@@ -303,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Apdu select");
                 Thread.sleep(1500);
                 if (isCommandReceived != 1) {
-                    tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
+                    setTextView("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
                 } else {
                     Log.i(TAG, "Berhasil koneksi");
@@ -323,12 +354,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showToastOnUi(String text) {
+    private void setTextView(final String text) {
         final String ftext = text;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this, ftext, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, ftext, Toast.LENGTH_SHORT).show();
+                tv2.setText(text);
             }
         });
     }

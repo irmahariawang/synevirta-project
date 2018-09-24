@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.asynctask.HostChecking;
+import com.procodecg.codingmom.ehealth.asynctask.SyncPrompt;
 import com.procodecg.codingmom.ehealth.asynctask.TokenRequest;
 import com.procodecg.codingmom.ehealth.asynctask.UpdateMedrecDinamik;
 import com.procodecg.codingmom.ehealth.data.EhealthContract;
@@ -117,52 +118,57 @@ public class RekmedDinamisFragment extends Fragment {
         fabSinkronSikda.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                if (networkInfo != null && networkInfo.isConnected()) {
-//                    ((BottombarActivity)getActivity()).changeTextStatus(true);
-                    new HostChecking(getActivity()).execute();
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor lastTimestamp = db.query(EhealthContract.SyncEntry.TABLE_NAME, new String[]{EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP}, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, null);
 
-                    settings = getActivity().getSharedPreferences("HOST", MODE_PRIVATE);
-                    Boolean hostDetected = settings.getBoolean("DETECTED", true);
-
-                    settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
-                    String username = settings.getString("USERNAME", "");
-                    String password = settings.getString("PASSWORD", "");
-
-                    if(hostDetected){
-                        SQLiteDatabase db = dbHelper.getReadableDatabase();
-                        Cursor lastTimestamp = db.query(EhealthContract.SyncEntry.TABLE_NAME, new String[]{EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP}, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, null);
-
-//                        Cursor cursor;
-//                        if(lastTimestamp.getCount()==1){
-//                            cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, ""+RekamMedisEntry.COLUMN_TGL_PERIKSA+">?", new String[]{PDCData.nik} , null, null, null, "1");
-//                        }
-
-                        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, null, null , null, null, null, "1");
-                        if(cursor.getCount()==0){
-                            Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
-                        } else {
-                            jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
-                            String token = jwt.getString("ACCESS_TOKEN", "");
-
-                            if (token.isEmpty()) {
-                                Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
-                                new TokenRequest(getActivity()).execute(username, password);
-                            } else {
-                                try {
-                                    ((BottombarActivity) getActivity()).getDataAndPost(true);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "Host not detected", Toast.LENGTH_SHORT).show();
-                    }
+                Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, null, null , null, null, null, "1");
+                if(cursor.getCount()==0){
+                    Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
                 } else {
-                    ((BottombarActivity)getActivity()).changeTextStatus(false);
+                    Intent activity = new Intent(getActivity(), SyncPrompt.class);
+                    startActivity(activity);
                 }
+                ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+//                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+//                if (networkInfo != null && networkInfo.isConnected()) {
+////                    ((BottombarActivity)getActivity()).changeTextStatus(true);
+//                    new HostChecking(getActivity()).execute();
+//
+//                    settings = getActivity().getSharedPreferences("HOST", MODE_PRIVATE);
+//                    Boolean hostDetected = settings.getBoolean("DETECTED", true);
+//
+//                    settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
+//                    String username = settings.getString("USERNAME", "");
+//                    String password = settings.getString("PASSWORD", "");
+//
+//                    if(hostDetected){
+//                        SQLiteDatabase db = dbHelper.getReadableDatabase();
+//                        Cursor lastTimestamp = db.query(EhealthContract.SyncEntry.TABLE_NAME, new String[]{EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP}, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, null);
+//
+//                        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, null, null , null, null, null, "1");
+//                        if(cursor.getCount()==0){
+//                            Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
+//                        } else {
+//                            jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
+//                            String token = jwt.getString("ACCESS_TOKEN", "");
+//
+//                            if (token.isEmpty()) {
+//                                Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
+//                                new TokenRequest(getActivity()).execute(username, password);
+//                            } else {
+//                                try {
+//                                    ((BottombarActivity) getActivity()).getDataAndPost(true);
+//                                } catch (ParseException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }
+//                    } else {
+//                        Toast.makeText(getActivity(), "Host not detected", Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    ((BottombarActivity)getActivity()).changeTextStatus(false);
+//                }
             }
         });
 

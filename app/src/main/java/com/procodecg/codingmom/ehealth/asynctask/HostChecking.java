@@ -107,7 +107,7 @@ public class HostChecking extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean isReachable) {
-        Log.i("Connected", String.valueOf(isReachable));
+        Log.i("Host Status", String.valueOf(isReachable));
         asyncResponse.hostDetected(isReachable);
     }
 }

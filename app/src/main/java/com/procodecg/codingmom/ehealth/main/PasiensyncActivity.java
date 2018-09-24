@@ -37,6 +37,7 @@ import com.felhr.usbserial.UsbSerialInterface;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.data.EhealthContract.KartuEntry;
 import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
+import com.procodecg.codingmom.ehealth.data.WilayahDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.BottombarActivity;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecDinamikData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.MedrecStatikData;
@@ -94,6 +95,9 @@ public class PasiensyncActivity extends SessionManagement {
     ByteBuffer respondData;
     IntentFilter filter;
 
+    EhealthDbHelper mDbHelper;
+    WilayahDbHelper wDbHelper;
+
     byte[] selectResponse, cardCheckingResponse, medrecStatikResponse, biodataResponse;
 
     MedrecStatikData msd;
@@ -120,6 +124,11 @@ public class PasiensyncActivity extends SessionManagement {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDbHelper = new EhealthDbHelper(this);
+        mDbHelper.openDB();
+        wDbHelper = new WilayahDbHelper(this);
+        wDbHelper.openDB();
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_pasiensync);
         personalized = true;
@@ -154,14 +163,6 @@ public class PasiensyncActivity extends SessionManagement {
     protected void onStart() {
         super.onStart();
         displayNamaDokter();
-    }
-
-    public void goToProfil(View v) {
-//        pdc = new PDCDataActivity(getApplicationContext());
-
-        Intent activity = new Intent(this, BottombarActivity.class);
-        startActivity(activity);
-        finish();
     }
 
     //utk UPLOAD PHOTO
@@ -305,13 +306,14 @@ public class PasiensyncActivity extends SessionManagement {
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
+                        setTextView("Port is Null\nSilahkan cabut pasang kembali kartu");
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
 
-                tv2.setText("Pengecekan kartu");
+                setTextView("Pengecekan kartu");
 
                 // connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
@@ -335,10 +337,11 @@ public class PasiensyncActivity extends SessionManagement {
                     }
                 } else {
                     Toast.makeText(context.getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
+                    setTextView("USB Device Empty\nSilahkan cabut pasang kembali kartu");
                 }
 
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
-                tv2.setText("Silahkan masukkan kartu PDC Pasien");
+                setTextView("Silahkan masukkan kartu PDC Pasien");
                 i = 0;
             } else {
                 Log.w(TAG, "NO INTENT?");
@@ -376,39 +379,44 @@ public class PasiensyncActivity extends SessionManagement {
                     respondData.position(0);
 
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(cardCheckingResponse));
-                    if (Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("11")) {
-                        send();
-                        progressStatus = 0;
+                    if (Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("11")
+                            || Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("01")) {
+//                        progressStatus = 0;
+                        i = 2;
                     } else {
                         personalized = false;
+                        i = 4;
                     }
+
+                    send();
                 }
             } else if (i == 3) { //medrec statik
                 respondData.put(bytes);
                 byte golodar;
                 byte[] al, operasi, rawatrs, kronis, bawaan, resiko;
-                if (respondData.position() == 1390) {
-                    medrecStatikResponse = new byte[1390];
+                Log.i(TAG, "Medrec statik length : " + respondData.position());
+                if (respondData.position() == 1105) {
+                    medrecStatikResponse = new byte[1105];
                     respondData.rewind();
                     respondData.get(medrecStatikResponse);
                     respondData.position(0);
 
                     Log.i(TAG, "Medrec statik string: " + Util.bytesToHex(medrecStatikResponse));
-                    if(responseVerifier(Util.bytesToHex(Arrays.copyOfRange(medrecStatikResponse, 1, 1386)))) {
+                    if(responseVerifier(Util.bytesToHex(Arrays.copyOfRange(medrecStatikResponse, 1, 1103)))) {
                         golodar = medrecStatikResponse[0];
                         int g = golodar;
                         setProgressBar(1);
-                        al = Arrays.copyOfRange(medrecStatikResponse, 1, 101);
+                        al = Arrays.copyOfRange(medrecStatikResponse, 1, 102);
                         setProgressBar(2);
-                        operasi = Arrays.copyOfRange(medrecStatikResponse, 103, 358);
+                        operasi = Arrays.copyOfRange(medrecStatikResponse, 103, 303);
                         setProgressBar(3);
-                        rawatrs = Arrays.copyOfRange(medrecStatikResponse, 360, 615);
+                        rawatrs = Arrays.copyOfRange(medrecStatikResponse, 303, 503);
                         setProgressBar(4);
-                        kronis = Arrays.copyOfRange(medrecStatikResponse, 617, 872);
+                        kronis = Arrays.copyOfRange(medrecStatikResponse, 503, 703);
                         setProgressBar(5);
-                        bawaan = Arrays.copyOfRange(medrecStatikResponse, 874, 1129);
+                        bawaan = Arrays.copyOfRange(medrecStatikResponse, 703, 903);
                         setProgressBar(6);
-                        resiko = Arrays.copyOfRange(medrecStatikResponse, 1131, 1386);
+                        resiko = Arrays.copyOfRange(medrecStatikResponse, 903, 1103);
                         setProgressBar(7);
 
                         Log.i(TAG, "Goldar: " + g);
@@ -418,15 +426,14 @@ public class PasiensyncActivity extends SessionManagement {
                         Log.i(TAG, "kronis: " + Util.bytesToString(Util.trimZeroPadding(kronis)));
                         Log.i(TAG, "bawaan: " + Util.bytesToString(Util.trimZeroPadding(bawaan)));
                         Log.i(TAG, "resiko: " + Util.bytesToString(Util.trimZeroPadding(resiko)));
-                    } else {
-                        i = 3;
                     }
 
                     send();
                 }
             } else if (i == 4) { // biodata
                 respondData.put(bytes);
-                if (respondData.position() == 826) {
+                Log.i(TAG, "Biodata statik length : " + respondData.position());
+                if (respondData.position() == 951) {
                     byte[] nik, kategoriPasien, noAsuransi, tglDaftar, namaPasien, namaKK,
                             hubunganKeluarga, alamat, rt, rw, kelurahanDesa, kecamatan, kotaKabupaten, provinsi, kodepos,
                             isDalamWilayahKerja, tempatLahir, tglLahir, telepon, hp, jenisKelamin, agama, pendidikan,
@@ -434,7 +441,7 @@ public class PasiensyncActivity extends SessionManagement {
                             hubunganKerabat, alamatKerabat, kelurahanDesaKerabat, kecamatanKerabat, kotaKabupatenKerabat,
                             provinsiKerabat, kodeposKerabat, teleponKerabat, hpKerabat, namaKantor, alamatKantor,
                             kotaKabupatenKantor, teleponKantor, hpKantor;
-                    biodataResponse = new byte[826];
+                    biodataResponse = new byte[951];
                     respondData.rewind();
                     respondData.get(biodataResponse);
                     respondData.position(0);
@@ -449,42 +456,44 @@ public class PasiensyncActivity extends SessionManagement {
                     namaKK = Arrays.copyOfRange(biodataResponse, 206, 258);
                     hubunganKeluarga = Arrays.copyOfRange(biodataResponse, 258, 259);
                     alamat = Arrays.copyOfRange(biodataResponse, 259, 361);
-                    rt = Arrays.copyOfRange(biodataResponse, 361, 362);
-                    rw = Arrays.copyOfRange(biodataResponse, 362, 363);
-                    kelurahanDesa = Arrays.copyOfRange(biodataResponse, 363, 365);
-                    kecamatan = Arrays.copyOfRange(biodataResponse, 365, 366);
-                    kotaKabupaten = Arrays.copyOfRange(biodataResponse, 366, 367);
-                    provinsi = Arrays.copyOfRange(biodataResponse, 367, 368);
-                    kodepos = Arrays.copyOfRange(biodataResponse, 368, 371);
-                    isDalamWilayahKerja = Arrays.copyOfRange(biodataResponse, 371, 372);
-                    tempatLahir = Arrays.copyOfRange(biodataResponse, 372, 394);
-                    tglLahir = Arrays.copyOfRange(biodataResponse, 394, 398);
-                    telepon = Arrays.copyOfRange(biodataResponse, 398, 416);
-                    hp = Arrays.copyOfRange(biodataResponse, 416, 434);
-                    jenisKelamin = Arrays.copyOfRange(biodataResponse, 434, 435);
-                    agama = Arrays.copyOfRange(biodataResponse, 435, 436);
-                    pendidikan = Arrays.copyOfRange(biodataResponse, 436, 437);
-                    pekerjaan = Arrays.copyOfRange(biodataResponse, 437, 438);
-                    kelasPerawatan = Arrays.copyOfRange(biodataResponse, 438, 440);
-                    email = Arrays.copyOfRange(biodataResponse, 440, 462);
-                    statusPernikahan = Arrays.copyOfRange(biodataResponse, 462, 463);
-                    kewarganegaraan = Arrays.copyOfRange(biodataResponse, 463, 464);
+                    rt = Arrays.copyOfRange(biodataResponse, 361, 365);
+                    rw = Arrays.copyOfRange(biodataResponse, 365, 369);
+                    kelurahanDesa = Arrays.copyOfRange(biodataResponse, 369, 379);
+                    kecamatan = Arrays.copyOfRange(biodataResponse, 379, 386);
+                    kotaKabupaten = Arrays.copyOfRange(biodataResponse, 386, 390);
+                    provinsi = Arrays.copyOfRange(biodataResponse, 390, 392);
+                    kodepos = Arrays.copyOfRange(biodataResponse, 392, 397);
+                    isDalamWilayahKerja = Arrays.copyOfRange(biodataResponse, 397, 398);
+                    tempatLahir = Arrays.copyOfRange(biodataResponse, 398, 420);
+                    tglLahir = Arrays.copyOfRange(biodataResponse, 420, 424);
+                    telepon = Arrays.copyOfRange(biodataResponse, 424, 440);
+                    hp = Arrays.copyOfRange(biodataResponse, 440, 456);
+                    jenisKelamin = Arrays.copyOfRange(biodataResponse, 456, 457);
+                    agama = Arrays.copyOfRange(biodataResponse, 457, 458);
+                    pendidikan = Arrays.copyOfRange(biodataResponse, 458, 459);
+                    pekerjaan = Arrays.copyOfRange(biodataResponse, 459, 460);
+                    kelasPerawatan = Arrays.copyOfRange(biodataResponse, 460, 462);
+                    email = Arrays.copyOfRange(biodataResponse, 462, 514);
+                    statusPernikahan = Arrays.copyOfRange(biodataResponse, 514, 515);
+                    kewarganegaraan = Arrays.copyOfRange(biodataResponse, 515, 516);
 
-                    namaKerabat = Arrays.copyOfRange(biodataResponse, 464, 516);
-                    hubunganKerabat = Arrays.copyOfRange(biodataResponse, 516, 517);
-                    alamatKerabat = Arrays.copyOfRange(biodataResponse, 517, 619);
-                    kelurahanDesaKerabat = Arrays.copyOfRange(biodataResponse, 619, 621);
-                    kecamatanKerabat = Arrays.copyOfRange(biodataResponse, 621, 622);
-                    kotaKabupatenKerabat = Arrays.copyOfRange(biodataResponse, 622, 623);
-                    provinsiKerabat = Arrays.copyOfRange(biodataResponse, 623, 624);
-                    kodeposKerabat = Arrays.copyOfRange(biodataResponse, 624, 627);
-                    teleponKerabat = Arrays.copyOfRange(biodataResponse, 627, 645);
-                    hpKerabat = Arrays.copyOfRange(biodataResponse, 645, 663);
-                    namaKantor = Arrays.copyOfRange(biodataResponse, 663, 685);
-                    alamatKantor = Arrays.copyOfRange(biodataResponse, 685, 787);
-                    kotaKabupatenKantor = Arrays.copyOfRange(biodataResponse, 787, 788);
-                    teleponKantor = Arrays.copyOfRange(biodataResponse, 788, 806);
-                    hpKantor = Arrays.copyOfRange(biodataResponse, 806, 822);
+                    namaKerabat = Arrays.copyOfRange(biodataResponse, 516, 568);
+                    hubunganKerabat = Arrays.copyOfRange(biodataResponse, 568, 569);
+                    alamatKerabat = Arrays.copyOfRange(biodataResponse, 569, 671);
+                    kelurahanDesaKerabat = Arrays.copyOfRange(biodataResponse, 671, 681);
+                    kecamatanKerabat = Arrays.copyOfRange(biodataResponse, 681, 688);
+                    kotaKabupatenKerabat = Arrays.copyOfRange(biodataResponse, 688, 692);
+                    provinsiKerabat = Arrays.copyOfRange(biodataResponse, 692, 694);
+                    kodeposKerabat = Arrays.copyOfRange(biodataResponse, 694, 699);
+                    teleponKerabat = Arrays.copyOfRange(biodataResponse, 699, 715);
+                    hpKerabat = Arrays.copyOfRange(biodataResponse, 715, 731);
+                    namaKantor = Arrays.copyOfRange(biodataResponse, 731, 783);
+                    alamatKantor = Arrays.copyOfRange(biodataResponse, 783, 885);
+                    kotaKabupatenKantor = Arrays.copyOfRange(biodataResponse, 885, 889);
+                    teleponKantor = Arrays.copyOfRange(biodataResponse, 889, 905);
+                    hpKantor = Arrays.copyOfRange(biodataResponse, 905, 921);
+
+                    SQLiteDatabase sql = wDbHelper.getReadableDatabase();
 
                     PDCData.nik = Util.bytesToString(Util.trimZeroPadding(nik));
                     setProgressBar(8);
@@ -502,17 +511,37 @@ public class PasiensyncActivity extends SessionManagement {
                     setProgressBar(14);
                     PDCData.alamat = Util.bytesToString(Util.trimZeroPadding(alamat));
                     setProgressBar(15);
-                    PDCData.rt = Util.bytesToHex(rt);
+                    PDCData.rt = Util.bytesToString(rt);
                     setProgressBar(16);
-                    PDCData.rw = Util.bytesToHex(rw);
+                    PDCData.rw = Util.bytesToString(rw);
                     setProgressBar(17);
-                    PDCData.kelurahanDesa = Util.bytesToHex(kelurahanDesa);
+                    Cursor kd_kelurahan = sql.query("mst_kelurahan", new String[]{"KELURAHAN"}, "KD_KELURAHAN = ?", new String[]{Util.bytesToString(kelurahanDesa)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.kelurahanDesa = kd_kelurahan.getString(0);
+                    } else {
+                        PDCData.kelurahanDesa = "Kode kelurahan tidak dikenali";
+                    }
                     setProgressBar(18);
-                    PDCData.kecamatan = Util.bytesToHex(kecamatan);
+                    Cursor kd_kecamatan = sql.query("mst_kecamatan", new String[]{"KECAMATAN"}, "KD_KECAMATAN = ?", new String[]{Util.bytesToString(kecamatan)}, null, null, null);
+                    if(kd_kecamatan.moveToFirst()) {
+                        PDCData.kecamatan = kd_kecamatan.getString(0);
+                    } else {
+                        PDCData.kecamatan = "Kode kecamatan tidak dikenali";
+                    }
                     setProgressBar(19);
-                    PDCData.kotaKabupaten = Util.bytesToHex(kotaKabupaten);
+                    Cursor kd_kabupaten = sql.query("mst_kabupaten", new String[]{"KABUPATEN"}, "KD_KABUPATEN = ?", new String[]{Util.bytesToString(kotaKabupaten)}, null, null, null);
+                    if(kd_kabupaten.moveToFirst()) {
+                        PDCData.kotaKabupaten = kd_kabupaten.getString(0);
+                    } else {
+                        PDCData.kotaKabupaten = "Kode kabupaten tidak dikenali";
+                    }
                     setProgressBar(20);
-                    PDCData.provinsi = Util.bytesToHex(provinsi);
+                    Cursor kd_provinsi = sql.query("mst_provinsi", new String[]{"PROVINSI"}, "KD_PROVINSI = ?", new String[]{Util.bytesToString(provinsi)}, null, null, null);
+                    if(kd_provinsi.moveToFirst()) {
+                        PDCData.provinsi = kd_provinsi.getString(0);
+                    } else {
+                        PDCData.provinsi = "Kode provinsi tidak dikenali";
+                    }
                     setProgressBar(21);
                     PDCData.kodepos = Util.bytesToString(kodepos);
                     setProgressBar(22);
@@ -548,13 +577,33 @@ public class PasiensyncActivity extends SessionManagement {
                     setProgressBar(37);
                     PDCData.alamatKerabat = Util.bytesToString(Util.trimZeroPadding(alamatKerabat));
                     setProgressBar(38);
-                    PDCData.kelurahanDesaKerabat = Util.bytesToHex(kelurahanDesaKerabat);
+                    Cursor kd_kel_kerabat = sql.query("mst_kelurahan", new String[]{"KELURAHAN"}, "KD_KELURAHAN = ?", new String[]{Util.bytesToString(kelurahanDesaKerabat)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.kelurahanDesaKerabat = kd_kel_kerabat.getString(0);
+                    } else {
+                        PDCData.kelurahanDesaKerabat = "Kode kelurahan tidak dikenali";
+                    }
                     setProgressBar(39);
-                    PDCData.kecamatanKerabat = Util.bytesToHex(kecamatanKerabat);
+                    Cursor kd_kec_kerabat = sql.query("mst_kecamatan", new String[]{"KECAMATAN"}, "KD_KECAMATAN = ?", new String[]{Util.bytesToString(kecamatanKerabat)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.kecamatanKerabat = kd_kec_kerabat.getString(0);
+                    } else {
+                        PDCData.kecamatanKerabat = "Kode kecamatan tidak dikenali";
+                    }
                     setProgressBar(40);
-                    PDCData.kotaKabupatenKerabat = Util.bytesToHex(kotaKabupatenKerabat);
+                    Cursor kd_kab_kerabat = sql.query("mst_kabupaten", new String[]{"KABUPATEN"}, "KD_KABUPATEN = ?", new String[]{Util.bytesToString(kotaKabupatenKerabat)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.kotaKabupatenKerabat = kd_kab_kerabat.getString(0);
+                    } else {
+                        PDCData.kotaKabupatenKerabat = "Kode kabupaten tidak dikenali";
+                    }
                     setProgressBar(41);
-                    PDCData.provinsiKerabat = Util.bytesToHex(provinsiKerabat);
+                    Cursor kd_prov_kerabat = sql.query("mst_provinsi", new String[]{"PROVINSI"}, "KD_PROVINSI = ?", new String[]{Util.bytesToString(provinsiKerabat)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.provinsiKerabat = kd_prov_kerabat.getString(0);
+                    } else {
+                        PDCData.provinsiKerabat = "Kode provinsi tidak dikenali";
+                    }
                     setProgressBar(42);
                     PDCData.kodeposKerabat = Util.bytesToString(kodeposKerabat);
                     setProgressBar(43);
@@ -566,7 +615,12 @@ public class PasiensyncActivity extends SessionManagement {
                     setProgressBar(46);
                     PDCData.alamatKantor = Util.bytesToString(Util.trimZeroPadding(alamatKantor));
                     setProgressBar(47);
-                    PDCData.kotaKabupatenKantor = Util.bytesToHex(kotaKabupatenKantor);
+                    Cursor kd_kab_kantor = sql.query("mst_kabupaten", new String[]{"KABUPATEN"}, "KD_KABUPATEN = ?", new String[]{Util.bytesToString(kotaKabupatenKantor)}, null, null, null);
+                    if(kd_kelurahan.moveToFirst()) {
+                        PDCData.kotaKabupatenKantor = kd_kab_kantor.getString(0);
+                    } else {
+                        PDCData.kotaKabupatenKantor = "Kode kabupaten tidak dikenali";
+                    }
                     setProgressBar(48);
                     PDCData.teleponKantor = Util.bytesToString(Util.trimZeroPadding(teleponKantor));
                     setProgressBar(49);
@@ -576,8 +630,7 @@ public class PasiensyncActivity extends SessionManagement {
                     send();
 
                 }
-            }
-            else {
+            } else {
                 Log.i(TAG, "no i " + i);
             }
         }
@@ -592,11 +645,11 @@ public class PasiensyncActivity extends SessionManagement {
                 Thread.sleep(2000);
                 if (isCommandReceived != 1) {
                     i = 0;
-                    tv2.setText("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
+                    setTextView("Koneksi kartu gagal\nSilahkan cabut pasang kartu");
                     Log.i(TAG, "Koneksi kartu gagal");
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
-                    tv2.setText("Berhasil koneksi");
+                    setTextView("Berhasil koneksi");
                     Log.i(TAG, "Berhasil koneksi");
                 }
             } catch (InterruptedException e){
@@ -605,17 +658,17 @@ public class PasiensyncActivity extends SessionManagement {
         } else if (i == 1) {
             serialPort.write(APDU_card_checking);
             i++;
-            setText("Card Checking");
+            setTextView("Card Checking");
             Log.i(TAG, "write apdu card checking");
         } else if (i == 2) {
             serialPort.write(APDU_read_medrec_statik);
             i++;
-            setText("Membaca rekmed statik");
+            setTextView("Membaca rekmed statik");
             Log.i(TAG, "write apdu read medrec statik");
         } else if (i == 3) {
             serialPort.write(APDU_read_biodata);
             i++;
-            setText("Membaca biodata pasien");
+            setTextView("Membaca biodata pasien");
             Log.i(TAG, "write apdu read biodata");
         } else {
             if(personalized) {
@@ -625,7 +678,7 @@ public class PasiensyncActivity extends SessionManagement {
                 showToastOnUi("Baca data PDC BERHASIL!");
                 MedrecDinamikData.isInDatabase = 0;
             } else {
-                setText("PDC belum dipersonalisasi\nSilahkan masukkan PDC lain");
+                setTextView("PDC belum dipersonalisasi\nSilahkan masukkan PDC lain");
                 personalized = true;
 //                progressBar.setVisibility(View.INVISIBLE);
             }
@@ -669,7 +722,7 @@ public class PasiensyncActivity extends SessionManagement {
         });
     }
 
-    private void setText(final String text){
+    private void setTextView(final String text){
         final String ftext = text;
         runOnUiThread(new Runnable() {
             @Override

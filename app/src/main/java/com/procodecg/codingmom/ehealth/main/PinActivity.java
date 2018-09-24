@@ -338,6 +338,9 @@ public class PinActivity extends SessionManagement {
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
+                        Intent intent1 = new Intent(PinActivity.this, MainActivity.class);
+                        startActivity(intent1);
+                        finish();
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
@@ -585,7 +588,9 @@ public class PinActivity extends SessionManagement {
                     break;
             }
         } else {
-            //Toast.makeText(getApplicationContext(), "Usb devices empty", Toast.LENGTH_SHORT).show();
+            Intent intent1 = new Intent(PinActivity.this, MainActivity.class);
+            startActivity(intent1);
+            finish();
         }
     }
 

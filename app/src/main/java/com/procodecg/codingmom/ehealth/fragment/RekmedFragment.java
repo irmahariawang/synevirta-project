@@ -256,7 +256,22 @@ public class RekmedFragment extends Fragment {
                         break;
                 }
             } else {
+                Toast.makeText(getActivity(), "USB Empty", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "Usb devices empty");
+
+//                /*selama usb permissionnya belum bisa sekali, pake intent*/
+//                myDialog.cancel();
+//
+//                ProfilpasienFragment fragment = new ProfilpasienFragment();
+//                FragmentManager fragmentManager = getFragmentManager();
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                fragmentTransaction.replace(R.id.frame_layout, fragment);
+//                fragmentTransaction.commit();
+
+                Intent intent = new Intent(getActivity(), PasiensyncActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+
             }
         }
     }
@@ -286,12 +301,16 @@ public class RekmedFragment extends Fragment {
                             send();
                         } else {
                             Log.w(TAG, "PORT NOT OPEN");
+                            Toast.makeText(getActivity(), "Port not Open", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
+                        Toast.makeText(getActivity(), "Port is Null", Toast.LENGTH_LONG).show();
+
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
+                    Toast.makeText(getActivity(), "Permission not granted", Toast.LENGTH_LONG).show();
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
                 Log.i(TAG,"ACTION_USB_DEVICE_DETACHED");
@@ -1107,14 +1126,14 @@ public class RekmedFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "RekmedFragment.onPause() has been called.");
-        try {
-            if (broadcastReceiver != null) {
-                getActivity().unregisterReceiver(broadcastReceiver);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.i(TAG,"epicReciver is already unregistered");
-//            broadcastReceiver = null;
-        }
+//        try {
+//            if (broadcastReceiver != null) {
+//                getActivity().unregisterReceiver(broadcastReceiver);
+//            }
+//        } catch (IllegalArgumentException e) {
+//            Log.i(TAG,"epicReciver is already unregistered");
+////            broadcastReceiver = null;
+//        }
     }
 
     private String makeAPDUInsertCommand(ContentValues cv, int writeIndex, int chunk) {

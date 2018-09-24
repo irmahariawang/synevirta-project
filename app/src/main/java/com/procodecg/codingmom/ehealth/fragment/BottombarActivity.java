@@ -91,6 +91,7 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
     private TextView txtTitle;
     private TextView txtSubTitle;
     public static BottombarActivity instance;
+    public static String hostStatus;
     
     private SharedPreferences jwt, settings;
     EhealthDbHelper mDbHelper;
@@ -577,7 +578,7 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
         try {
             obj = new JSONObject(output);
             code = obj.getString("code");
-            accessToken = obj.getString("token");
+            accessToken = obj.getString("status");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -604,6 +605,7 @@ public class BottombarActivity extends SessionManagement implements AsyncRespons
         SharedPreferences.Editor editor=sp.edit();
         editor.putBoolean("DETECTED", output);
         editor.apply();
+//        hostStatus = "reachable";
     }
 
     // Method to change the text status
