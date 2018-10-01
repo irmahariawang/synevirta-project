@@ -433,7 +433,7 @@ public class PasiensyncActivity extends SessionManagement {
             } else if (i == 4) { // biodata
                 respondData.put(bytes);
                 Log.i(TAG, "Biodata statik length : " + respondData.position());
-                if (respondData.position() == 951) {
+                if (respondData.position() == 923) {
                     byte[] nik, kategoriPasien, noAsuransi, tglDaftar, namaPasien, namaKK,
                             hubunganKeluarga, alamat, rt, rw, kelurahanDesa, kecamatan, kotaKabupaten, provinsi, kodepos,
                             isDalamWilayahKerja, tempatLahir, tglLahir, telepon, hp, jenisKelamin, agama, pendidikan,
@@ -441,7 +441,7 @@ public class PasiensyncActivity extends SessionManagement {
                             hubunganKerabat, alamatKerabat, kelurahanDesaKerabat, kecamatanKerabat, kotaKabupatenKerabat,
                             provinsiKerabat, kodeposKerabat, teleponKerabat, hpKerabat, namaKantor, alamatKantor,
                             kotaKabupatenKantor, teleponKantor, hpKantor;
-                    biodataResponse = new byte[951];
+                    biodataResponse = new byte[923];
                     respondData.rewind();
                     respondData.get(biodataResponse);
                     respondData.position(0);

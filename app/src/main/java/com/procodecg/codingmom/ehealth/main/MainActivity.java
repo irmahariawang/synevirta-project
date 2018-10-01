@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
-                        setTextView("Port in Null\nSilahkan cabut pasang kemabli kartu");
+                        setTextView("Port in Null\nSilahkan cabut pasang kembali kartu");
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");

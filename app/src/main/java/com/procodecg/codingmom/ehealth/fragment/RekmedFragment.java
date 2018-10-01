@@ -463,19 +463,20 @@ public class RekmedFragment extends Fragment {
                         Log.e(TAG, "GAGAL INSERT: " + i);
                     } else {
                         Log.d(TAG, "Berhasil INSERT: " + i);
-                        send();
+                        if(MedrecDinamikData.writeIndex == 0 && !MedrecDinamikData.fullData) {
+                            i = 24;
+                        } else {
+                            send();
+                        }
                     }
                 }
             } else if (i > 19 && i < 25) { //medrec dinamik
                 respondData.put(bytes);
-
-                // TODO medrec dinamik length baru + status code
                 if (respondData.position() == 2336) {
                     medrecDinamikResponse = new byte[2336];
                     respondData.rewind();
                     respondData.get(medrecDinamikResponse);
                     respondData.position(0);
-//                    Log.i(TAG, "Medrec dinamik string: " + Util.bytesToHex(medrecDinamikResponse));
 
                     byte[] response = Arrays.copyOfRange(medrecDinamikResponse, 0, 2334);
 
@@ -484,6 +485,10 @@ public class RekmedFragment extends Fragment {
 
                     if(responseVerifier(Util.bytesToHex(response))) {
                         processDinamikData(medrecDinamikResponse);
+                        if(i-19 >= MedrecDinamikData.writeIndex && index != 5){
+                            i = 24;
+                            setProgressBar(50);
+                        }
                     } else {
                         i = 24;
                         setProgressBar(50);
@@ -491,8 +496,10 @@ public class RekmedFragment extends Fragment {
 
                     send();
                 }
-            }
-            else {
+            } else if(i == 100){
+                i = 24;
+                send();
+            } else {
                 Log.i(TAG, "no i " + i);
             }
         }
@@ -844,10 +851,14 @@ public class RekmedFragment extends Fragment {
             i++;
             Log.i(TAG, "pengecekan flag pada kartu");
 
-            int index;
-            index = Util.getWriteIndex(timestamp);
-            MedrecDinamikData.writeIndex = index;
-            Log.d(TAG, "Write index = " + index);
+            int ind;
+            ind = Util.getWriteIndex(timestamp);
+            MedrecDinamikData.writeIndex = ind;
+            Log.d(TAG, "Write index = " + ind);
+
+            if(MedrecDinamikData.writeIndex == 0 && index == 0){
+                i = 100;
+            }
         } else if (i == 4){
             String apduInit = "80c5000000000c";
             apduInit += padVariableText(puskesmasID, 12);
@@ -911,6 +922,7 @@ public class RekmedFragment extends Fragment {
             i++;
             Log.i(TAG, "write APDU finish");
             if(MedrecDinamikData.writeIndex == 4){
+                MedrecDinamikData.fullData = true;
                 MedrecDinamikData.writeIndex = 0;
             } else {
                 MedrecDinamikData.writeIndex += 1;

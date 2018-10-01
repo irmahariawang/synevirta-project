@@ -277,94 +277,94 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, null, null , null, null, null, "1");
 
         if(cursor.getCount()==0){
-            lastDataNIK = new ArrayList<String>();
-            lastDataTimestamp = new ArrayList<String>();
+//            lastDataNIK = new ArrayList<String>();
+//            lastDataTimestamp = new ArrayList<String>();
+//
+//            SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
+//            int size = sync.getInt("size", -1);
+//            text.add("JML_TS_BARU " + String.valueOf(size));
+//            int x = 0;
+//            do {
+//                String nik = sync.getString(String.valueOf(x), "");
+//                if(!nik.isEmpty()) {
+//                    String ts = sync.getString(nik, "");
+//                    lastDataNIK.add(nik);
+//                    lastDataTimestamp.add(ts);
+//                }
+//                x++;
+//            } while(x < size);
+//
+//            text.add("NIK_ARRAY_BARU "+ lastDataNIK.toString());
+//            text.add("TS_ARRAY_BARU "+ lastDataTimestamp.toString());
+//
+//            SQLiteDatabase dbHelper = mDbHelper.getWritableDatabase();
+//            int index = 0;
+//            if(lastDataNIK.size() != 0) {
+//                do {
+//                    if (index < size) {
+//                        ContentValues values = new ContentValues();
+//                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
+//                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
+//
+//                        long updateRow = dbHelper.update(EhealthContract.SyncEntry.TABLE_NAME, values, "" + EhealthContract.SyncEntry.COLUMN_NIK + " = ?", new String[]{lastDataNIK.get(index)});
+//
+//                        if (updateRow == -1) {
+//                            text.add("Update last timestamp gagal! "+lastDataTimestamp.get(index));
+//                        } else {
+//                            text.add("Update last timestamp berhasil! "+lastDataTimestamp.get(index));
+//                        }
+//                    } else {
+//                        ContentValues values = new ContentValues();
+//                        values.put(EhealthContract.SyncEntry.COLUMN_NIK, lastDataNIK.get(index));
+//                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
+//                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
+//
+//                        // Insert a new row in the database, returning the ID of that new row.
+//                        long newRowId = dbHelper.insert(EhealthContract.SyncEntry.TABLE_NAME, null, values);
+//
+//                        if (newRowId == -1) {
+//                            text.add("Penyimpanan last timestamp gagal! "+lastDataTimestamp.get(index));
+//                        } else {
+//                            text.add("Penyimpanan last timestamp berhasil! "+lastDataTimestamp.get(index));
+//                        }
+//                    }
+//
+//                    index++;
+//                } while (index < lastDataNIK.size() && index < lastDataTimestamp.size());
+//            }
 
-            SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
-            int size = sync.getInt("size", -1);
-            text.add("JML_TS_BARU " + String.valueOf(size));
-            int x = 0;
-            do {
-                String nik = sync.getString(String.valueOf(x), "");
-                if(!nik.isEmpty()) {
-                    String ts = sync.getString(nik, "");
-                    lastDataNIK.add(nik);
-                    lastDataTimestamp.add(ts);
-                }
-                x++;
-            } while(x < size);
-
-            text.add("NIK_ARRAY_BARU "+ lastDataNIK.toString());
-            text.add("TS_ARRAY_BARU "+ lastDataTimestamp.toString());
-
-            SQLiteDatabase dbHelper = mDbHelper.getWritableDatabase();
-            int index = 0;
-            if(lastDataNIK.size() != 0) {
-                do {
-                    if (index < size) {
-                        ContentValues values = new ContentValues();
-                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
-                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
-
-                        long updateRow = dbHelper.update(EhealthContract.SyncEntry.TABLE_NAME, values, "" + EhealthContract.SyncEntry.COLUMN_NIK + " = ?", new String[]{lastDataNIK.get(index)});
-
-                        if (updateRow == -1) {
-                            text.add("Update last timestamp gagal! "+lastDataTimestamp.get(index));
-                        } else {
-                            text.add("Update last timestamp berhasil! "+lastDataTimestamp.get(index));
-                        }
-                    } else {
-                        ContentValues values = new ContentValues();
-                        values.put(EhealthContract.SyncEntry.COLUMN_NIK, lastDataNIK.get(index));
-                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
-                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
-
-                        // Insert a new row in the database, returning the ID of that new row.
-                        long newRowId = dbHelper.insert(EhealthContract.SyncEntry.TABLE_NAME, null, values);
-
-                        if (newRowId == -1) {
-                            text.add("Penyimpanan last timestamp gagal! "+lastDataTimestamp.get(index));
-                        } else {
-                            text.add("Penyimpanan last timestamp berhasil! "+lastDataTimestamp.get(index));
-                        }
-                    }
-
-                    index++;
-                } while (index < lastDataNIK.size() && index < lastDataTimestamp.size());
-            }
-
-            SharedPreferences.Editor clearSync = sync.edit();
-            clearSync.clear();
-            clearSync.commit();
+//            SharedPreferences.Editor clearSync = sync.edit();
+//            clearSync.clear();
+//            clearSync.commit();
             text.add("Sinkronisasi selesai");
         } else {
             dataNIK = new ArrayList<String>();
             dataTimestamp = new ArrayList<String>();
 
-            if(first){
-                SQLiteDatabase dbHelper = mDbHelper.getReadableDatabase();
-
-                String query = "SELECT * FROM "+ EhealthContract.SyncEntry.TABLE_NAME+";";
-
-                Cursor lastTS = dbHelper.rawQuery(query, null);
-                text.add("getCount " +lastTS.getCount());
-                int j = 0;
-                if(lastTS.getCount()!=0){
-                    SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sync.edit();
-
-                    if(lastTS.moveToFirst()){
-                        do{
-                            editor.putString(""+j, lastTS.getString(1));
-                            editor.putString(""+lastTS.getString(1), lastTS.getString(2));
-                            j++;
-                        }while (lastTS.moveToNext());
-                    }
-
-                    editor.putInt("size", j);
-                    editor.commit();
-                }
-            }
+//            if(first){
+//                SQLiteDatabase dbHelper = mDbHelper.getReadableDatabase();
+//
+//                String query = "SELECT * FROM "+ EhealthContract.SyncEntry.TABLE_NAME+";";
+//
+//                Cursor lastTS = dbHelper.rawQuery(query, null);
+//                text.add("getCount " +lastTS.getCount());
+//                int j = 0;
+//                if(lastTS.getCount()!=0){
+//                    SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = sync.edit();
+//
+//                    if(lastTS.moveToFirst()){
+//                        do{
+//                            editor.putString(""+j, lastTS.getString(1));
+//                            editor.putString(""+lastTS.getString(1), lastTS.getString(2));
+//                            j++;
+//                        }while (lastTS.moveToNext());
+//                    }
+//
+//                    editor.putInt("size", j);
+//                    editor.commit();
+//                }
+//            }
 
             SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
             int jumlah = sync.getInt("size", -1);
