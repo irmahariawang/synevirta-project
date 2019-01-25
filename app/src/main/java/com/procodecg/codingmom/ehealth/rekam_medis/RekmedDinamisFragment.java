@@ -45,7 +45,10 @@ import static com.procodecg.codingmom.ehealth.data.EhealthContract.RekamMedisEnt
 
 
 /**
- * Created by macbookpro on 8/29/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
  */
 
 public class RekmedDinamisFragment extends Fragment {
@@ -57,7 +60,7 @@ public class RekmedDinamisFragment extends Fragment {
     }
 
     private RecycleListAdapter rAdapter;
-    
+
     private SharedPreferences jwt, settings;
 
     private ArrayList<String> listTanggal;
@@ -113,7 +116,7 @@ public class RekmedDinamisFragment extends Fragment {
             }
         };
         fabRekmedBaru.setOnClickListener(listener);
-        
+
         FloatingActionButton fabSinkronSikda = (FloatingActionButton) view.findViewById(R.id.fabSinkronSikda);
         fabSinkronSikda.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,46 +132,7 @@ public class RekmedDinamisFragment extends Fragment {
                     startActivity(activity);
                 }
                 ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-//                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-//                if (networkInfo != null && networkInfo.isConnected()) {
-////                    ((BottombarActivity)getActivity()).changeTextStatus(true);
-//                    new HostChecking(getActivity()).execute();
 //
-//                    settings = getActivity().getSharedPreferences("HOST", MODE_PRIVATE);
-//                    Boolean hostDetected = settings.getBoolean("DETECTED", true);
-//
-//                    settings = getActivity().getSharedPreferences("SETTING", MODE_PRIVATE);
-//                    String username = settings.getString("USERNAME", "");
-//                    String password = settings.getString("PASSWORD", "");
-//
-//                    if(hostDetected){
-//                        SQLiteDatabase db = dbHelper.getReadableDatabase();
-//                        Cursor lastTimestamp = db.query(EhealthContract.SyncEntry.TABLE_NAME, new String[]{EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP}, ""+RekamMedisEntry.COLUMN_NIK+"=?", new String[]{PDCData.nik}, null, null, null);
-//
-//                        Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, null, null, null , null, null, null, "1");
-//                        if(cursor.getCount()==0){
-//                            Toast.makeText(getActivity(), "Data tidak ditemukan", Toast.LENGTH_LONG).show();
-//                        } else {
-//                            jwt = getActivity().getSharedPreferences("TOKEN", MODE_PRIVATE);
-//                            String token = jwt.getString("ACCESS_TOKEN", "");
-//
-//                            if (token.isEmpty()) {
-//                                Toast.makeText(getActivity(), "Request token ...", Toast.LENGTH_SHORT).show();
-//                                new TokenRequest(getActivity()).execute(username, password);
-//                            } else {
-//                                try {
-//                                    ((BottombarActivity) getActivity()).getDataAndPost(true);
-//                                } catch (ParseException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }
-//                    } else {
-//                        Toast.makeText(getActivity(), "Host not detected", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    ((BottombarActivity)getActivity()).changeTextStatus(false);
-//                }
             }
         });
 

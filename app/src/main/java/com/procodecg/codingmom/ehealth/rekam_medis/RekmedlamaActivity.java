@@ -16,9 +16,12 @@ import com.procodecg.codingmom.ehealth.data.EhealthDbHelper;
 import com.procodecg.codingmom.ehealth.fragment.RecycleListAdapter;
 
 /**
- * Created by macbookpro on 8/30/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
  */
-
 public class RekmedlamaActivity extends AppCompatActivity {
 
     private TextView txtTitle;
@@ -27,11 +30,6 @@ public class RekmedlamaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //MENGHILANGKAN TOOLBAR
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_rekmedlama);
 
         txtTitle = (TextView) findViewById(R.id.txt_title);
@@ -48,7 +46,6 @@ public class RekmedlamaActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivity(new Intent(getApplicationContext(),BottombarActivity.class));
                 finish();
             }
         });
@@ -180,11 +177,6 @@ public class RekmedlamaActivity extends AppCompatActivity {
             int idAdFunctionamIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_AD_FUNCTIONAM);
             int idAdSanationamIndex = cursor.getColumnIndex(EhealthContract.RekamMedisEntry.COLUMN_AD_SANATIONAM);
 
-
-
-
-
-
             while (cursor.moveToNext()){
                 int currentID = cursor.getInt(idColumnIndex);
 
@@ -301,9 +293,6 @@ public class RekmedlamaActivity extends AppCompatActivity {
             cursor.close();
         }
 
-        //TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-        //Toast.makeText(this, RecycleListAdapter.getCurrentPosition(), Toast.LENGTH_SHORT).show();
-        //Toast.makeText(this, getIntent().getStringExtra("dokter"), Toast.LENGTH_SHORT).show();
     }
 
     public String getPoliString (int currentPoli){

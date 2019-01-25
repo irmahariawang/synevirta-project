@@ -34,24 +34,32 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by idedevteam on 8/15/18.
+ * (c) 2018
+ * Created by :
+ *      Annisa Alifiani
  */
 
 public class SyncPrompt extends Activity implements AsyncResponse{
 
-    Boolean hostStatus;
+    //Class
     EhealthDbHelper mDbHelper;
-    ListView listSync;
-    String username, password, timestampLama;;
+
+    //Variable
+    Boolean hostStatus;
+    String username, password, timestampLama;
     ArrayList<String> text = new ArrayList<String>();
     ArrayAdapter<String> adapter;
     ArrayList<String> lastDataNIK, lastDataTimestamp, dataNIK, dataTimestamp;
+
+    //View
+    ListView listSync;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sync_prompt);
 
+        //Ambil username dan password untuk token
         SharedPreferences settings = getSharedPreferences("SETTING", MODE_PRIVATE);
         username = settings.getString("USERNAME", "");
         password = settings.getString("PASSWORD", "");
@@ -64,13 +72,14 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         mDbHelper = new EhealthDbHelper(this);
         mDbHelper.openDB();
 
+        //Pengecekan koneksi internet pada device
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             text.add("Connection status : Connect");
 
+            //Pengecekan host SIKDA
             new HostChecking(this).execute();
-
         } else {
             text.add("Connection status : Disconnect");
         }
@@ -84,8 +93,10 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         adapter.notifyDataSetChanged();
     }
 
+    //Response asynctask setelah mengirim data yang disinkronisasi ke SIKDA
     @Override
     public void taskComplete(String output, String timestamp, String nik) {
+        //Parse respon
         JSONObject obj;
         String code = "", status = "";
         try {
@@ -100,8 +111,10 @@ public class SyncPrompt extends Activity implements AsyncResponse{
             text.add("Request toke baru ...");
             new TokenRequest(this).execute(username, password);
         } else if(code.equals("216") || code.equals("207")){
-            text.add("Sinkronisasi data berhasil");
+            text.add(status);
             try {
+                //Menyimpan timestamp yang terakhir disinkronisasi ke SIKDA
+                //Timestamp disimpan berdasarkan NIK
                 text.add("NIK "+ dataNIK.contains(nik));
                 SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
                 int j = sync.getInt("size", -1);
@@ -139,7 +152,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
                 SQLiteDatabase db = mDbHelper.getReadableDatabase();
                 db.delete(EhealthContract.RekamMedisEntry.TABLE_NAME, EhealthContract.RekamMedisEntry.COLUMN_TGL_PERIKSA+"=?", new String[]{timestamp});
 
-                getDataAndPost(false);
+                getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -150,8 +163,10 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         adapter.notifyDataSetChanged();
     }
 
+    //Response asynctask setelah mengirim request token
     @Override
     public void tokenRequest(String output) {
+        //Parse respon
         JSONObject obj;
         String code = "", status = "";
         try {
@@ -163,6 +178,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         }
 
         if(code.equals("111")){
+            //Menyimpan token pada device
             text.add("Token baru diterima ...");
             text.add("Token baru : " + status);
             SharedPreferences sp = getSharedPreferences("TOKEN", MODE_PRIVATE);
@@ -172,7 +188,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
 
             text.add("Menyimpan token ...");
             try {
-                getDataAndPost(true);
+                getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -186,7 +202,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         } else if(code.equals("113")){
             text.add("Sinkronisasi ke SIKDA siap");
             try {
-                getDataAndPost(true);
+                getDataAndPost();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -195,6 +211,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         adapter.notifyDataSetChanged();
     }
 
+    //Response asyctask setelah melakukan pengecekan host SIKDA
     @Override
     public void hostDetected(Boolean output) {
         hostStatus = output;
@@ -209,7 +226,6 @@ public class SyncPrompt extends Activity implements AsyncResponse{
             if(token.isEmpty()){
                 new TokenRequest(this).execute(username, password);
                 text.add("Request token ...");
-//                text.add("U : " +username+ " P : " +password);
             } else {
                 new TokenRequest(this).execute(token);
                 text.add("Access token : " + token);
@@ -220,12 +236,12 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         adapter.notifyDataSetChanged();
     }
 
-    //menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA dalam bentuk JSON Object
-    public void getDataAndPost(Boolean first) throws ParseException {
-        String timestamp;
+    //Menyiapkan data medrek dinamik dari SQLite untuk dikirim ke SIKDA
+    //Data yang dikirim ke SIKDA disiapkan dalam bentuk JSON Object
+    public void getDataAndPost() throws ParseException {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        //mengambil token yang sudah ada pada app
+        //Mengambil token yang ada pada device
         SharedPreferences jwt = getSharedPreferences("TOKEN", MODE_PRIVATE);
         String token = jwt.getString("ACCESS_TOKEN", "");
 
@@ -245,7 +261,7 @@ public class SyncPrompt extends Activity implements AsyncResponse{
                 EhealthContract.RekamMedisEntry.COLUMN_RESPIRASI,
                 EhealthContract.RekamMedisEntry.COLUMN_BERAT,
                 EhealthContract.RekamMedisEntry.COLUMN_TINGGI,
-                //13-37
+                //13-37 json array pelayanan keterangan tambahan
                 EhealthContract.RekamMedisEntry.COLUMN_SYSTOLE,
                 EhealthContract.RekamMedisEntry.COLUMN_DIASTOLE,
                 EhealthContract.RekamMedisEntry.COLUMN_PENYAKIT_SEKARANG,
@@ -277,94 +293,10 @@ public class SyncPrompt extends Activity implements AsyncResponse{
         Cursor cursor = db.query(EhealthContract.RekamMedisEntry.TABLE_NAME, columns, null, null , null, null, null, "1");
 
         if(cursor.getCount()==0){
-//            lastDataNIK = new ArrayList<String>();
-//            lastDataTimestamp = new ArrayList<String>();
-//
-//            SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
-//            int size = sync.getInt("size", -1);
-//            text.add("JML_TS_BARU " + String.valueOf(size));
-//            int x = 0;
-//            do {
-//                String nik = sync.getString(String.valueOf(x), "");
-//                if(!nik.isEmpty()) {
-//                    String ts = sync.getString(nik, "");
-//                    lastDataNIK.add(nik);
-//                    lastDataTimestamp.add(ts);
-//                }
-//                x++;
-//            } while(x < size);
-//
-//            text.add("NIK_ARRAY_BARU "+ lastDataNIK.toString());
-//            text.add("TS_ARRAY_BARU "+ lastDataTimestamp.toString());
-//
-//            SQLiteDatabase dbHelper = mDbHelper.getWritableDatabase();
-//            int index = 0;
-//            if(lastDataNIK.size() != 0) {
-//                do {
-//                    if (index < size) {
-//                        ContentValues values = new ContentValues();
-//                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
-//                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
-//
-//                        long updateRow = dbHelper.update(EhealthContract.SyncEntry.TABLE_NAME, values, "" + EhealthContract.SyncEntry.COLUMN_NIK + " = ?", new String[]{lastDataNIK.get(index)});
-//
-//                        if (updateRow == -1) {
-//                            text.add("Update last timestamp gagal! "+lastDataTimestamp.get(index));
-//                        } else {
-//                            text.add("Update last timestamp berhasil! "+lastDataTimestamp.get(index));
-//                        }
-//                    } else {
-//                        ContentValues values = new ContentValues();
-//                        values.put(EhealthContract.SyncEntry.COLUMN_NIK, lastDataNIK.get(index));
-//                        values.put(EhealthContract.SyncEntry.COLUMN_LAST_TIMESTAMP, lastDataTimestamp.get(index));
-//                        values.put(EhealthContract.SyncEntry.COLUMN_DOKTER, HPCData.nik);
-//
-//                        // Insert a new row in the database, returning the ID of that new row.
-//                        long newRowId = dbHelper.insert(EhealthContract.SyncEntry.TABLE_NAME, null, values);
-//
-//                        if (newRowId == -1) {
-//                            text.add("Penyimpanan last timestamp gagal! "+lastDataTimestamp.get(index));
-//                        } else {
-//                            text.add("Penyimpanan last timestamp berhasil! "+lastDataTimestamp.get(index));
-//                        }
-//                    }
-//
-//                    index++;
-//                } while (index < lastDataNIK.size() && index < lastDataTimestamp.size());
-//            }
-
-//            SharedPreferences.Editor clearSync = sync.edit();
-//            clearSync.clear();
-//            clearSync.commit();
-            text.add("Sinkronisasi selesai");
+            text.add("Sinkronisasi dengan SIKDA selesai");
         } else {
             dataNIK = new ArrayList<String>();
             dataTimestamp = new ArrayList<String>();
-
-//            if(first){
-//                SQLiteDatabase dbHelper = mDbHelper.getReadableDatabase();
-//
-//                String query = "SELECT * FROM "+ EhealthContract.SyncEntry.TABLE_NAME+";";
-//
-//                Cursor lastTS = dbHelper.rawQuery(query, null);
-//                text.add("getCount " +lastTS.getCount());
-//                int j = 0;
-//                if(lastTS.getCount()!=0){
-//                    SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
-//                    SharedPreferences.Editor editor = sync.edit();
-//
-//                    if(lastTS.moveToFirst()){
-//                        do{
-//                            editor.putString(""+j, lastTS.getString(1));
-//                            editor.putString(""+lastTS.getString(1), lastTS.getString(2));
-//                            j++;
-//                        }while (lastTS.moveToNext());
-//                    }
-//
-//                    editor.putInt("size", j);
-//                    editor.commit();
-//                }
-//            }
 
             SharedPreferences sync = getSharedPreferences("SYNC", MODE_PRIVATE);
             int jumlah = sync.getInt("size", -1);
@@ -376,30 +308,29 @@ public class SyncPrompt extends Activity implements AsyncResponse{
             do {
                 String nik = sync.getString(String.valueOf(x), "");
                 if(!nik.isEmpty()) {
-//                    text.add("NIK "+nik+ " ada");
                     String ts = sync.getString(nik, "");
-//                    text.add("TS NIK "+ ts);
                     dataNIK.add(nik);
                     dataTimestamp.add(ts);
                 }
                 x++;
             } while(x < jumlah);
 
+            //Untuk debug timestamp dan NIK yang dikirim terakhir
             text.add("NIK_ARRAYS "+ dataNIK.toString());
             text.add("TS_ARRAYS "+ dataTimestamp.toString());
 
-
+            //Mengambil data dari SQLite
             cursor.moveToFirst();
-
             if(dataNIK.contains(cursor.getString(2))){
                 int index = dataNIK.indexOf(cursor.getString(2));
 
+                //Ambil timestamp terakhir
                 String lastTS = dataTimestamp.get(index);
-
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date timeLama = sdf.parse(lastTS);
                 Date timeBaru = sdf.parse(cursor.getString(1));
 
+                //Pengecekan timestamp data yang akan dikirim
                 if(timeBaru.after(timeLama)){
                     DateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     DateFormat output = new SimpleDateFormat("yyyy-MM-dd");

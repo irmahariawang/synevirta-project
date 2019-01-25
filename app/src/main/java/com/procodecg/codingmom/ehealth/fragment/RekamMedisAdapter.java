@@ -5,7 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Created by neo on 07/03/18.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
  */
 
 public class RekamMedisAdapter extends RecyclerView.Adapter<RekamMedisAdapter.ViewHolder> {

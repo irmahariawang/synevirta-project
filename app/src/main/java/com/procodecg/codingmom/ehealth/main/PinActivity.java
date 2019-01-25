@@ -44,35 +44,19 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
+ */
+
 public class PinActivity extends SessionManagement {
 
-    Boolean personalized;
-
+    // View
     Typeface font;
     Typeface fontbold;
-    HPCActivity hpc;
-
-    /*
-     *   Komunikasi dengan Kartu
-     */
-    final String TAG = "HPCPDCDUMMY";
-    public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
-    public final String ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
-
-    int i, isCommandReceived;
-    String data;
-    byte[] selectResponse;
-    byte[] authResponse;
-    byte[] hpdata;
-    byte[] cert;
-
-    ByteBuffer respondData;
-
-    IntentFilter filter;
-
-    TextView hpcNama;
-    TextView hpcRole;
-    TextView hpcSIP;
 
     TextView attemptslefttv;
     TextView numberOfRemainingLoginAttemptstv;
@@ -80,24 +64,38 @@ public class PinActivity extends SessionManagement {
 
     Pinview pinview;
 
+    // TAG
+    final String TAG = "EHELATHPIN";
+    public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
+
+    // Variable
+    Boolean personalized;
+
+    // USB Accessories
+    int i, isCommandReceived;
+    String data;
+    byte[] selectResponse;
+    byte[] authResponse;
+    byte[] hpdata;
+    byte[] cert;
+    ByteBuffer respondData;
+    IntentFilter filter;
+
     UsbManager usbManager;
     UsbDevice usbDevice;
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
 
-    byte[] APDU_owner_auth;
+    // APDU command
+    byte[] APDUOwnerAuth;
     // 00A4040008 48504344554D4D59
-    byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDUSelect = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     // 80D10000000000
-    byte[] APDU_read_HPData = {(byte) 0x80, (byte) 0xD1, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] APDUReadHPData = {(byte) 0x80, (byte) 0xD1, 0x00, 0x00, 0x00, 0x00, 0x00};
     // 80D20000000000
-    byte[] APDU_read_cert = {(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte[] APDUReadCert = {(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-    /*
-     *   Komunikasi dengan Kartu
-     */
-
-    // batas jumlah input pin salah yang diperbolehkan
+    // Batas jumlah input pin salah yang diperbolehkan
     private int numberOfRemainingLoginAttempts = 3;
 
     @Override
@@ -125,19 +123,18 @@ public class PinActivity extends SessionManagement {
     }
 
 
-    // fungsi sembunyikan keyboard
+    // Fungsi sembunyikan keyboard
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
         View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
+
         if (view == null) {
             view = new View(activity);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-//  fungsi menghapus pin input yang salah
+    // Menghapus pin input yang salah
     private void clearPin(ViewGroup group)
     {
         for (int i = 0, count = group.getChildCount(); i < count; ++i) {
@@ -157,11 +154,6 @@ public class PinActivity extends SessionManagement {
         setContentView(R.layout.activity_pin);
         personalized = false;
 
-        //TODO diganti
-//        final TextView attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
-//        final TextView numberOfRemainingLoginAttemptstv = (TextView) findViewById(R.id.numberOfRemainingLoginAttemptsTV);
-//        final TextView textviewkali = (TextView) findViewById(R.id.textViewKali);
-
         attemptslefttv = (TextView) findViewById(R.id.attemptsLeftTV);
         numberOfRemainingLoginAttemptstv = (TextView) findViewById(R.id.numberOfRemainingLoginAttemptsTV);
         textviewkali = (TextView) findViewById(R.id.textViewKali);
@@ -179,61 +171,12 @@ public class PinActivity extends SessionManagement {
 
         pinview = (Pinview) findViewById(R.id.pinView);
 
-//        getHPCdata();
-
         pinview.setPinViewEventListener(new Pinview.PinViewEventListener() {
             @Override
             public void onDataEntered(Pinview pinview, boolean b) {
                 String cmd_auth = "80c30000000005" + Util.asciiToHex(pinview.getValue().toString());
-                APDU_owner_auth = Util.hexStringToByteArray(cmd_auth);
+                APDUOwnerAuth = Util.hexStringToByteArray(cmd_auth);
                 send();
-////          jika pin benar
-//                if (pinview.getValue().toString().equals("12345")) {
-//                    Toast.makeText(PinActivity.this, "Pin Anda benar", Toast.LENGTH_SHORT).show();
-//                    hideKeyboard(PinActivity.this);
-//                    Intent activity = new Intent(PinActivity.this, PasiensyncActivity.class);
-//                    startActivity(activity);
-//                    finish();
-//
-////          jika pin salah
-//                } else {
-//
-//                    clearPin((ViewGroup) pinview);
-//                    pinview.clearFocus();
-//                    Toast.makeText(getApplicationContext(), "PIN yang Anda masukkan salah",
-//                            Toast.LENGTH_SHORT).show();
-//
-//                    numberOfRemainingLoginAttempts--;
-//                    numberOfRemainingLoginAttemptstv.setText(Integer.toString(numberOfRemainingLoginAttempts));
-//
-////                  tampilkan text "Kesempatan login : x kali"
-//                    attemptslefttv.setVisibility(View.VISIBLE);
-//                    numberOfRemainingLoginAttemptstv.setVisibility(View.VISIBLE);
-//                    textviewkali.setVisibility(View.VISIBLE);
-//
-////                  jika kesempatan login habis
-//                    if (numberOfRemainingLoginAttempts == 0) {
-//                        hideKeyboard(PinActivity.this);
-////                      tampilkan dialog box alert
-//                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(PinActivity.this);
-//                        mBuilder.setTitle(R.string.dialog_title_pin);
-//                        mBuilder.setMessage(R.string.dialog_msg_pin);
-//                        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                dialogInterface.dismiss();
-//                                Intent activity = new Intent(PinActivity.this, MainActivity.class);
-//                                startActivity(activity);
-//                                finish();
-//                            }
-//                        });
-//
-//                        AlertDialog alertDialog = mBuilder.create();
-//                        alertDialog.show();
-//
-//                    }
-//                }
-
             }
         });
 
@@ -252,64 +195,44 @@ public class PinActivity extends SessionManagement {
         registerReceiver(broadcastReceiver, filter);
 
         connectUsbDevice();
-        /*
-         * Komunikasi dengan kartu
-         */
     }
 
-
-    /** mengambil data dari kartu HPC
-     *
-     */
-
+    // Mendapatkan HPC data
     public void getHPCdata() {
         Log.i(TAG, "nik: " + HPCData.nik);
         Log.i(TAG, "nama: " + HPCData.nama);
         Log.i(TAG, "sip: " + HPCData.sip);
 
-        //Boolean statusKartuHPC = true;
-        String HPCnumberString = "D12345";
-        String namaDokterString = "dr. Sinta";
+        EhealthDbHelper db = new EhealthDbHelper(getApplicationContext());
+        db.openDB();
+        db.createTableKartu();
 
-            //Toast.makeText(this, "true ", Toast.LENGTH_SHORT).show();
-            // Create database helper
-            EhealthDbHelper db = new EhealthDbHelper(getApplicationContext());
-            db.openDB();
-            db.createTableKartu();
-            //db.createTableRekMed();
-            //mDbHelper.deleteAll();
-            // Gets the database in write mode
-            SQLiteDatabase mDbHelper = db.getWritableDatabase();
+        SQLiteDatabase mDbHelper = db.getWritableDatabase();
 
-            // Create a ContentValues object where column names are the keys
-            ContentValues values = new ContentValues();
-            values.put(EhealthContract.KartuEntry.COLUMN_HPCNUMBER, HPCData.nik);
-//            values.put(KartuEntry.COLUMN_PIN_HPC, PIN_HPC);
-            values.put(EhealthContract.KartuEntry.COLUMN_DOKTER, HPCData.nama);
+        // Data yang akan dimasukan ke db
+        ContentValues values = new ContentValues();
+        values.put(EhealthContract.KartuEntry.COLUMN_HPCNUMBER, HPCData.nik);
+        values.put(EhealthContract.KartuEntry.COLUMN_DOKTER, HPCData.nama);
 
-            // Insert a new row in the database, returning the ID of that new row.
-            long newRowId = mDbHelper.insert(EhealthContract.KartuEntry.TABLE_NAME, null, values);
-            mDbHelper.close();
-            // Show a toast message depending on whether or not the insertion was successful
-            if (newRowId == -1) {
-                // If the row ID is -1, then there was an error with insertion.
-                showToastOnUi("Sinkronisasi kartu HPC GAGAL!");
-//                Toast.makeText(this, "Sinkronisasi kartu HPC GAGAL!", Toast.LENGTH_SHORT).show();
-                Intent activity = new Intent(PinActivity.this, MainActivity.class);
-                startActivity(activity);
-                finish();
-            } else {
-                // Otherwise, the insertion was successful and we can display a toast with the row ID.
-                showToastOnUi("Sinkronisasi kartu HPC BERHASIL!");
-//                Toast.makeText(this, "Sinkronisasi kartu HPC BERHASIL! ", Toast.LENGTH_SHORT).show();
-            }
+        // Insert row pada db kartu
+        long newRowId = mDbHelper.insert(EhealthContract.KartuEntry.TABLE_NAME, null, values);
+        mDbHelper.close();
+
+        if (newRowId == -1) {
+            showToastOnUi("Sinkronisasi kartu HPC GAGAL!");
+            Intent activity = new Intent(PinActivity.this, MainActivity.class);
+            startActivity(activity);
+            finish();
+        } else {
+            showToastOnUi("Sinkronisasi kartu HPC BERHASIL!");
+        }
 
     }
 
+    // Broadcast untuk mendeteksi kartu pada card reader
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Toast.makeText(getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
@@ -349,6 +272,7 @@ public class PinActivity extends SessionManagement {
         }
     };
 
+    // Menerima APDU response
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         // triggers whenever data is read
         @Override
@@ -360,7 +284,7 @@ public class PinActivity extends SessionManagement {
             Log.d(TAG, "Data " + data);
             Log.d(TAG, "i: " + i);
 
-            if (i == 1) {
+            if (i == 1) { // Select Applet
                 respondData.put(bytes);
 
                 if (respondData.position() == 2) {
@@ -377,7 +301,7 @@ public class PinActivity extends SessionManagement {
                     }
 
                 }
-            } else if (i == 2) {
+            } else if (i == 2) { // Pengecekan PIN
                 respondData.put(bytes);
 
                 if (respondData.position() == 2) {
@@ -396,7 +320,7 @@ public class PinActivity extends SessionManagement {
                         send();
                     }
                 }
-            } else if (i == 3) {
+            } else if (i == 3) { // Membaca HPC data
                 respondData.put(bytes);
                 Log.d(TAG, "respondData pos: " + respondData.position());
 
@@ -420,9 +344,9 @@ public class PinActivity extends SessionManagement {
                         Log.i(TAG, "nama: " + Util.bytesToString(nama));
                         Log.i(TAG, "sip: " + Util.bytesToString(sip));
 
-                        HPCData.nik = Util.bytesToString(nik);
-                        HPCData.nama = Util.bytesToString(nama);
-                        HPCData.sip = Util.bytesToString(sip);
+                        HPCData.nik   = Util.bytesToString(nik);
+                        HPCData.nama  = Util.bytesToString(nama);
+                        HPCData.sip   = Util.bytesToString(sip);
                     } else {
                         personalized = false;
                         i = 4;
@@ -430,7 +354,7 @@ public class PinActivity extends SessionManagement {
 
                    send();
                 }
-            } else if (i == 4) {
+            } else if (i == 4) { // Membaca cert
                 respondData.put(bytes);
 
                 if (respondData.position() == 19) {
@@ -455,10 +379,11 @@ public class PinActivity extends SessionManagement {
         }
     };
 
+    // Mengirim APDU command
     public void send() {
         if (i == 0) {
             try {
-                serialPort.write(APDU_select);
+                serialPort.write(APDUSelect);
                 i++;
                 Log.d(TAG, "Apdu select");
                 Thread.sleep(1500);
@@ -476,15 +401,15 @@ public class PinActivity extends SessionManagement {
                 e.printStackTrace();
             }
         } else if (i == 1) {
-            serialPort.write(APDU_owner_auth);
+            serialPort.write(APDUOwnerAuth);
             i++;
             Log.d(TAG, "Apdu owner auth");
         } else if (i == 2) {
-            serialPort.write(APDU_read_HPData);
+            serialPort.write(APDUReadHPData);
             i++;
             Log.d(TAG, "Apdu read hp data");
         } else if (i == 3) {
-            serialPort.write(APDU_read_cert);
+            serialPort.write(APDUReadCert);
             i++;
             Log.d(TAG, "Apdu read cert");
         } else {
@@ -509,7 +434,7 @@ public class PinActivity extends SessionManagement {
         }
     }
 
-    //TODO lakukan ini di thread ui, serial port close, unreg receiver?
+    // Jika kesempatan untuk memasukan pin habis
     private void clearPinUi() {
         runOnUiThread(new Runnable() {
             @Override
@@ -520,16 +445,16 @@ public class PinActivity extends SessionManagement {
                 numberOfRemainingLoginAttempts--;
                 numberOfRemainingLoginAttemptstv.setText(Integer.toString(numberOfRemainingLoginAttempts));
 
-//                  tampilkan text "Kesempatan login : x kali"
+                // Tampilkan text "Kesempatan login : x kali"
                 attemptslefttv.setVisibility(View.VISIBLE);
                 numberOfRemainingLoginAttemptstv.setVisibility(View.VISIBLE);
                 textviewkali.setVisibility(View.VISIBLE);
 
-//                  jika kesempatan login habis
+                // Jika kesempatan login habis
                 if (numberOfRemainingLoginAttempts == 0) {
                     serialPort.close();
                     hideKeyboard(PinActivity.this);
-//                      tampilkan dialog box alert
+                    // Tampilkan dialog box alert
                     AlertDialog.Builder mBuilder = new AlertDialog.Builder(PinActivity.this);
                     mBuilder.setTitle(R.string.dialog_title_pin);
                     mBuilder.setMessage(R.string.dialog_msg_pin);
@@ -550,6 +475,7 @@ public class PinActivity extends SessionManagement {
         });
     }
 
+    // Pengecekan APDU response
     private boolean responseVerifier(String response){
         Pattern pattern = Pattern.compile("[1-9]");
         Matcher matcher = pattern.matcher(response);
@@ -557,6 +483,7 @@ public class PinActivity extends SessionManagement {
         return matcher.find();
     }
 
+    // Show toast
     private void showToastOnUi(String text) {
         final String ftext = text;
         runOnUiThread(new Runnable() {
@@ -567,6 +494,7 @@ public class PinActivity extends SessionManagement {
         });
     }
 
+    // Koneksi ke USB device
     private void connectUsbDevice() {
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
         if (!usbDevices.isEmpty()) {
@@ -580,7 +508,7 @@ public class PinActivity extends SessionManagement {
                     usbManager.requestPermission(usbDevice, pi);
                     keep = false;
                 } else {
-                    usbConn = null;
+                    usbConn   = null;
                     usbDevice = null;
                 }
 

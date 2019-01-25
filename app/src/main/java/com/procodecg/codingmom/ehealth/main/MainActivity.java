@@ -46,33 +46,42 @@ import java.util.regex.Pattern;
 
 import static com.procodecg.codingmom.ehealth.main.PinActivity.hideKeyboard;
 
+/**
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     private static long back_pressed;
 
-    final String TAG = "HPCPDCDUMMY";
+    // TAG
+    final String TAG = "EHEALTHMAIN";
     public final String ACTION_USB_PERMISSION = "com.procodecg.codingmom.ehealth.USB_PERMISSION";
 
+    // Variable
     int i, isCommandReceived;
     String data;
-    byte[] selectResponse, cardChecking;
 
+    // View
+    Typeface font;
+    SharedPreferences pref;
+    TextView tv1, tv2, tv3, tv4;
+
+    // USB Accessories
+    byte[] selectResponse, cardChecking;
     UsbManager usbManager;
     UsbDevice usbDevice;
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
-
     ByteBuffer respondData;
-
     IntentFilter filter;
 
-    Typeface font;
-    SharedPreferences pref;
-
-    byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
-    byte[] APDU_card_check = {(byte) 0x80, (byte) 0xE1, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-    TextView tv1, tv2, tv3, tv4;
+    // APDU Command
+    byte[] APDUSelect = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x48, 0x50, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
+    byte[] APDUCardCheck = {(byte) 0x80, (byte) 0xE1, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +90,11 @@ public class MainActivity extends AppCompatActivity {
 
         hideKeyboard(MainActivity.this);
 
-        //deklarasi KEY untuk SP
+        // File penyimpanan data puskesmas
         SharedPreferences prefs = getSharedPreferences("DATAPUSKES", MODE_PRIVATE);
-        //default values
         String idpuskes = prefs.getString("IDPUSKES", "________");
         String namapuskes = prefs.getString("NAMAPUSKES", "________");
 
-        //set values
         ((TextView) findViewById(R.id.txt_idPuskesmas)).setText(idpuskes);
         ((TextView) findViewById(R.id.txt_namaPuskesmas)).setText(namapuskes);
 
@@ -101,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         tv3.setTypeface(font);
         tv4.setTypeface(font);
 
+        // Pengecekan db awal
         if (!doesDatabaseExist(getApplicationContext(),"ehealth.db") && doesDatabaseExist(getApplicationContext(),"kode_wilayah.db")) {
             copyDBEhealth();
             Log.i(TAG, "create db ehealth");
@@ -118,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "all db exist");
             Toast.makeText(MainActivity.this, "all db exist", Toast.LENGTH_LONG).show();
         }
-        //getHPCdata();
 
+        // USB Accessories
         i = 0;
         isCommandReceived = 0;
         respondData = ByteBuffer.allocate(102);
@@ -132,38 +140,37 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(broadcastReceiver, filter);
     }
 
-    //edit data Puskesmas
-      public void showEdit(View view) {
+    // Edit data puskesmas
+    public void showEdit(View view) {
       startActivity(new Intent(getApplicationContext(),Edit.class));
-      }
+    }
 
-    //cek isi data Puskesmas sebelum masukin PIN
+    // Pengecekan data puskesmas, data puskesmas harus diisi untuk lanjut ke PinActivity
     public void goToPin(){
         pref = getSharedPreferences("DATAPUSKES",MODE_PRIVATE);
         String idpuskes = pref.getString("IDPUSKES","________");
         String namapuskes = pref.getString("NAMAPUSKES","________");
         if(idpuskes.equals("") || namapuskes.equals("") || idpuskes.equals("________") || namapuskes.equals("________")){
-//            Toast.makeText(getApplicationContext(),"DATA PUSKESMAS HARUS DIISI",Toast.LENGTH_SHORT).show();
             setTextView("DATA PUSKESMAS HARUS DIISI");
-
         } else{
             startActivity(new Intent(getApplicationContext(),PinActivity.class));
             finish();
         }
     }
 
-    //masuk ke Activity setting
+    // Masuk ke Setting
     public void showSett(View view) {
         startActivity(new Intent(getApplicationContext(), Setting.class));
     }
 
+    // Pengecekan db
     private static boolean doesDatabaseExist(Context context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
     }
 
+    // Copy ehealth.db : kode icd
     public void copyDBEhealth(){
-
         CopyDBHelper mDBHelper = new CopyDBHelper(this);
 
         try {
@@ -177,12 +184,12 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-        //mDBHelper.createTableKartu();
+
         mDBHelper.close();
     }
 
+    // Copy wilayah.db : master kode wilayah provinsi, kabupaten kota, kecamatan, kelurahan desa
     public void copyDBWilayah(){
-
         CopyWilayahDBHelper wDBHelper = new CopyWilayahDBHelper(this);
 
         try {
@@ -196,10 +203,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-        //mDBHelper.createTableKartu();
+
         wDBHelper.close();
     }
 
+    // Broadcast USB untuk mendeteksi kartu pada card reader
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -207,7 +215,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
 
-//                boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 if (granted) {
                     Log.d(TAG, "Permission granted");
@@ -239,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
 
                 setTextView("Pengecekan kartu");
 
-                // connect usb device
+                // Connect usb device
                 HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
                 if (!usbDevices.isEmpty()) {
                     boolean keep = true;
@@ -247,12 +254,10 @@ public class MainActivity extends AppCompatActivity {
                         usbDevice = entry.getValue();
                         int deviceID = usbDevice.getVendorId();
                         if (deviceID == 1027 || deviceID == 9025) {
-//                            if(!usbManager.hasPermission(usbDevice)) {
-                                Log.d(TAG, "Device ID " + deviceID);
-                                PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
-                                usbManager.requestPermission(usbDevice, pi);
-                                keep = false;
-//                            }
+                            Log.d(TAG, "Device ID " + deviceID);
+                            PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                            usbManager.requestPermission(usbDevice, pi);
+                            keep = false;
                         } else {
                             usbConn = null;
                             usbDevice = null;
@@ -275,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Membaca APDU response
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         // triggers whenever data is read
         @Override
@@ -286,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Data " + data);
             Log.d(TAG, "i: " + i);
 
-            if (i == 1) {
+            if (i == 1) { // Select Applet
                 respondData.put(bytes);
 
                 if (respondData.position() == 2) {
@@ -302,9 +308,8 @@ public class MainActivity extends AppCompatActivity {
                         isCommandReceived = 1;
                         send();
                     }
-
                 }
-            } else if (i == 2) {
+            } else if (i == 2) { // Cek personalized status
                 respondData.put(bytes);
 
                 if(respondData.position() == 3){
@@ -326,10 +331,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Kirim APDU command
     public void send() {
         if (i == 0) {
             try {
-                serialPort.write(APDU_select);
+                serialPort.write(APDUSelect);
                 i++;
                 Log.d(TAG, "Apdu select");
                 Thread.sleep(1500);
@@ -343,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         } else if (i == 1){
-            serialPort.write(APDU_card_check);
+            serialPort.write(APDUCardCheck);
             i++;
             Log.d(TAG, "Apdu cert");
         } else {
@@ -354,22 +360,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Set text
     private void setTextView(final String text) {
         final String ftext = text;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-//                Toast.makeText(MainActivity.this, ftext, Toast.LENGTH_SHORT).show();
                 tv2.setText(text);
             }
         });
-    }
-
-    private boolean responseVerifier(String response){
-        Pattern pattern = Pattern.compile("[1-9]");
-        Matcher matcher = pattern.matcher(response);
-
-        return matcher.find();
     }
 
     @Override

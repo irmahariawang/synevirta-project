@@ -20,31 +20,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by macbookpro on 9/4/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
  */
 
 public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.ViewHolder> {
+
+    // Variable
     private ArrayList<String> listTanggal;
     private ArrayList<String> listNamaDokter;
     private Activity activity;
     public static String tanggalPelayanan;
 
-/*
-    private List<RekamMedisModel> rekamMedisModelList = new ArrayList<>();
-
-    public RecycleListAdapter(List<RekamMedisModel> rekamMedisModelList){
-        this.rekamMedisModelList = rekamMedisModelList;
-    }
-*/
-
-
     private int[] ic;
 
     Typeface font;
-
-//    public void setOnCardClickListener(RekmedDinamisFragment onCardClickListener) {
-//        this.onCardClickListener = onCardClickListener;
-//    }
 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -56,10 +47,10 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
 
         public ViewHolder(View v) {
             super(v);
-            mTextView1=(TextView)v.findViewById(R.id.txt_tanggal);
-            mTextView2=(TextView)v.findViewById(R.id.txt_namaDokter);
-            mImage=(ImageView)v.findViewById(R.id.img_card);
-            rootLayout=(RelativeLayout)v.findViewById(R.id.rootLayout);
+            mTextView1  =(TextView)v.findViewById(R.id.txt_tanggal);
+            mTextView2  =(TextView)v.findViewById(R.id.txt_namaDokter);
+            mImage      =(ImageView)v.findViewById(R.id.img_card);
+            rootLayout  =(RelativeLayout)v.findViewById(R.id.rootLayout);
         }
     }
 
@@ -72,9 +63,7 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
 
     @Override
     public int getItemCount() {
-        //listTanggal.size();
         return (null != listNamaDokter ? listNamaDokter.size():null);
-        // if listnamadokter != null maka listnamadokter = array size, else listnamadokter = null
     }
 
     @Override
@@ -87,23 +76,13 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
     }
 
     @Override
-//    public void onBindViewHolder(ViewHolder holder, final int position) {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-
         //font
         font = Typeface.createFromAsset(activity.getAssets(),"font1.ttf");
         holder.mTextView1.setTypeface(font);
 
         holder.mTextView1.setText(listTanggal.get(position));
         holder.mTextView2.setText(listNamaDokter.get(position));
-//        holder.mTextView2.setText(listNamaDokter.get(position).getNamaDokter());
-
-        //ini dikomen yg bikin error 3 record
-        //Bitmap icon = BitmapFactory.decodeResource(activity.getResources(),ic[position]);
-        //holder.mImage.setImageBitmap(icon);
-
-//    public void onBindViewHolder(final BeneficiaryViewHolder holder, int position) {
-//        holder.textViewName.setText(listBeneficiary.get(position).getName());
 
         holder.rootLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,30 +91,6 @@ public class RecycleListAdapter extends RecyclerView.Adapter<RecycleListAdapter.
                 Toast.makeText(activity, tanggalPelayanan, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(activity, RekmedlamaActivity.class);
                 activity.startActivity(intent);
-
-
-
-                /*
-                switch (position){
-                    case 0:
-                        Toast.makeText(activity, "Posisi 1", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(activity, RekmedlamaActivity.class);
-                activity.startActivity(intent);
-
-                        break;
-
-                    case 1:
-                        Toast.makeText(activity, "Posisi 2", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-                */
-                /*
-                Intent intent = new Intent(activity, RekmedlamaActivity.class);
-                intent.putExtra("dokter", listNamaDokter.get(position));
-                activity.startActivity(intent);*/
-
-
             }
 
         });

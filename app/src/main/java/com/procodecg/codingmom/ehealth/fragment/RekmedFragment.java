@@ -73,29 +73,31 @@ import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.padVariableText;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.trimZeroPadding;
 
 /**
- * Created by macbookpro on 8/29/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
  */
 
 public class RekmedFragment extends Fragment {
 
+    // View
     Dialog myDialog;
     ProgressBar progressBar;
+    private ProgressDialog progressDialog;
     TextView textView;
 
+    // Variable
     int index;
-
     int progressStatus = 0;
     Handler handler = new Handler();
 
+    // Db
     EhealthDbHelper mDbHelper;
 
-    private ProgressDialog progressDialog;
-
-    /*
-     * Komunikasi dengan kartu
-     */
-    static final String[] ASD = new String[] { "1", "2", "3", "4", "5"};
-    final String TAG = "HPCPDCDUMMY";
+    // USB Accesories
+    final String TAG = "EHEALTHREKMEDFRAGMENT";
     public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
 
     private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
@@ -118,6 +120,7 @@ public class RekmedFragment extends Fragment {
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
 
+    // APDU command
     //00 A4 04 00 08 50 44 43 44 55 4D 4D 59
     byte[] APDU_select = {0x00, (byte)0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     byte[] APDU_card_checking = {(byte)0x80, (byte)0xB2, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -129,9 +132,6 @@ public class RekmedFragment extends Fragment {
     byte[] APDU_read_medrec_dinamik4 = {(byte)0x80, (byte)0xD5, 0x00, 0x03, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_dinamik5 = {(byte)0x80, (byte)0xD5, 0x00, 0x04, 0x00, 0x00, 0x00};
     byte[] APDU_finish = {(byte)0x80, (byte)0xC7, 0x00, 0x00, 0x00, 0x00, 0x00};
-    /*
-     * Komunikasi dengan kartu
-     */
 
     public static RekmedFragment newInstance() {
         RekmedFragment fragment = new RekmedFragment();
@@ -163,8 +163,6 @@ public class RekmedFragment extends Fragment {
         // Set Tabs inside Toolbar
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.result_tabs);
         tabLayout.setupWithViewPager(viewPager);
-//        tabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
-
 
         return view;
 
@@ -326,6 +324,7 @@ public class RekmedFragment extends Fragment {
         }
     };
 
+    // Membaca APDU response
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] bytes) {
@@ -333,7 +332,7 @@ public class RekmedFragment extends Fragment {
             data = bytesToHex(bytes);
             Log.d(TAG, "Data " + data);
 
-            if (i == 1) { //select
+            if (i == 1) { // Select applet
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     selectResponse = new byte[2];
@@ -343,7 +342,7 @@ public class RekmedFragment extends Fragment {
                     Log.i(TAG, "Select response string: " + bytesToHex(selectResponse));
                     send();
                 }
-            } else if (i == 2) {
+            } else if (i == 2) { // Baca jumlah medrek dinamik
                 respondData.put(bytes);
                 if (respondData.position() == 3) {
                     byte[] recordIndex;
@@ -357,7 +356,7 @@ public class RekmedFragment extends Fragment {
                     Log.i(TAG, "Select record index string: " + bytesToHex(indexResponse));
                     send();
                 }
-            } else if (i == 3) {
+            } else if (i == 3) { // Baca timestamp rekmed dinamik
                 respondData.put(bytes);
                 byte[] response;
                 if (index == 0 && respondData.position() == 2) {
@@ -413,7 +412,7 @@ public class RekmedFragment extends Fragment {
                     processTimestamp(response);
                     send();
                 }
-            } else if (i == 4) {
+            } else if (i == 4) { // Baca flag dan puskesmas ID
                 respondData.put(bytes);
                 if (respondData.position() == 15) {
                     checkingResponse = new byte[15];
@@ -433,7 +432,7 @@ public class RekmedFragment extends Fragment {
                         send();
                     }
                 }
-            } else if (i == 5) {
+            } else if (i == 5) { // Init tulis rekmed dinamik
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     initTulisResponse = new byte[2];
@@ -442,14 +441,14 @@ public class RekmedFragment extends Fragment {
                     respondData.position(0);
 
                     Log.i(TAG, "Init response: " + Util.bytesToHex(initTulisResponse));
-                    if (!Util.bytesToHex(initTulisResponse).toString().equals("9000")) { // jika tidak berhasil
+                    if (!Util.bytesToHex(initTulisResponse).toString().equals("9000")) {
                         i--;
                         Log.e(TAG, "Init tulis gagal" + i);
                     } else {
                         send();
                     }
                 }
-            } else if (i > 5 && i < 20) { // insert chunk 1-14 dan ins_final_tulis_medrec_dinamik
+            } else if (i > 5 && i < 20) { // Insert chunk 1-14 dan ins_final_tulis_medrec_dinamik
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     selectResponse = new byte[2];
@@ -470,7 +469,7 @@ public class RekmedFragment extends Fragment {
                         }
                     }
                 }
-            } else if (i > 19 && i < 25) { //medrec dinamik
+            } else if (i > 19 && i < 25) { // Baca rekmed dinamik
                 respondData.put(bytes);
                 if (respondData.position() == 2336) {
                     medrecDinamikResponse = new byte[2336];
@@ -505,6 +504,7 @@ public class RekmedFragment extends Fragment {
         }
     };
 
+    // Filter APDU response
     private boolean responseVerifier(String response){
         Pattern pattern = Pattern.compile("[1-9]");
         Matcher matcher = pattern.matcher(response);
@@ -512,6 +512,7 @@ public class RekmedFragment extends Fragment {
         return matcher.find();
     }
 
+    // Convert timestamp
     public void processTimestamp(byte[] data) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         
@@ -537,8 +538,8 @@ public class RekmedFragment extends Fragment {
         Log.i(TAG, tanggalPeriksa.toString());
     }
 
+    // Proses rekmed dinamik
     public void processDinamikData(byte[] data) {
-        //TODO
         ByteBuffer bb = ByteBuffer.wrap(medrecDinamikResponse);
         bb.rewind();
 
@@ -833,6 +834,7 @@ public class RekmedFragment extends Fragment {
         mDbHelper.closeDB();
     }
 
+    // Kirim APDU command
     public void send() {
         if (i == 0) {
             serialPort.write(APDU_select);
@@ -970,6 +972,7 @@ public class RekmedFragment extends Fragment {
         });
     }
 
+    // Jika flag tulis rekmed dinamik tidak final
     private void recoveryPermission() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -1109,6 +1112,7 @@ public class RekmedFragment extends Fragment {
         myDialog.show();
     }
 
+    // Progress Bar
     private void setProgressBar(final int max){
         new Thread(new Runnable() {
             public void run() {
@@ -1138,16 +1142,9 @@ public class RekmedFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "RekmedFragment.onPause() has been called.");
-//        try {
-//            if (broadcastReceiver != null) {
-//                getActivity().unregisterReceiver(broadcastReceiver);
-//            }
-//        } catch (IllegalArgumentException e) {
-//            Log.i(TAG,"epicReciver is already unregistered");
-////            broadcastReceiver = null;
-//        }
     }
 
+    // Menyiapkan APDU command
     private String makeAPDUInsertCommand(ContentValues cv, int writeIndex, int chunk) {
         switch(chunk) {
             case 1:

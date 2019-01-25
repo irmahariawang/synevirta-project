@@ -56,41 +56,38 @@ import java.util.regex.Pattern;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.HPCData.nama;
 
 /**
- * Created by macbookpro on 7/27/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
  */
 
 public class PasiensyncActivity extends SessionManagement {
 
-    Boolean personalized;
+    private static long back_pressed;
 
+    // View
     TextView tv1, tv2, tv3;
-
     Typeface font;
     Typeface fontbold;
     ProgressBar progressBar;
-    PDCDataActivity pdc;
-
-    private static long back_pressed;
-
-    public static final int SELECTED_PICTURE = 1;
-    //rivate static String currentNamaDokter;
-
-    ImageView iv;
-    private static String currentHPCNumber;
-    public static String currentNamaDokter;
-
-    /*
-     * Komunikasi dengan kartu
-     */
-    final String TAG = "HPCPDCDUMMY";
-    public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
-
-    String data;
-    int i; // buat increment serial tulis apdu
-    int isCommandReceived;
 
     int progressStatus = 0;
     Handler handler = new Handler();
+
+    // Variable
+    Boolean personalized;
+    public static final int SELECTED_PICTURE = 1;
+    private static String currentHPCNumber;
+    public static String currentNamaDokter;
+
+    // USB Accessories
+    final String TAG = "EHEALTHPASIENSYNC";
+    public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
+
+    String data;
+    int i, isCommandReceived;
 
     ByteBuffer respondData;
     IntentFilter filter;
@@ -100,30 +97,22 @@ public class PasiensyncActivity extends SessionManagement {
 
     byte[] selectResponse, cardCheckingResponse, medrecStatikResponse, biodataResponse;
 
-    MedrecStatikData msd;
-
     UsbManager usbManager;
     UsbDevice usbDevice;
     UsbDeviceConnection usbConn;
     UsbSerialDevice serialPort;
 
+    // APDU command
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     byte[] APDU_card_checking = {(byte)0x80, (byte)0xB1, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_medrec_statik = {(byte) 0x80, (byte) 0xD4, 0x00, 0x00, 0x00, 0x00, 0x00};
     byte[] APDU_read_biodata = {(byte) 0x80, (byte) 0xD3, 0x00, 0x00, 0x00, 0x00, 0x00};
-    byte[] APDU_read_medrecDinamik1 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x00, 0x00, 0x00, 0x00};
-    byte[] APDU_read_medrecDinamik2 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x01, 0x00, 0x00, 0x00};
-    byte[] APDU_read_medrecDinamik3 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x02, 0x00, 0x00, 0x00};
-    byte[] APDU_read_medrecDinamik4 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x03, 0x00, 0x00, 0x00};
-    byte[] APDU_read_medrecDinamik5 = {(byte) 0x80, (byte) 0xD5, 0x00, 0x04, 0x00, 0x00, 0x00};
-    /*
-     * Komunikasi dengan kartu
-     */
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Buka db
         mDbHelper = new EhealthDbHelper(this);
         mDbHelper.openDB();
         wDbHelper = new WilayahDbHelper(this);
@@ -156,7 +145,6 @@ public class PasiensyncActivity extends SessionManagement {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(broadcastReceiver, filter);
-        // Komunikasi dengan kartu
     }
 
     @Override
@@ -165,7 +153,7 @@ public class PasiensyncActivity extends SessionManagement {
         displayNamaDokter();
     }
 
-    //utk UPLOAD PHOTO
+    // Upload photo
     public void imgClick(View v) {
         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(i, SELECTED_PICTURE);
@@ -197,9 +185,8 @@ public class PasiensyncActivity extends SessionManagement {
 
     ;
 
-    //utk DISPLAY NAMA DOKTER
+    // Display nama dokter
     private void displayNamaDokter() {
-        // Create and/or open a database to read from it
         EhealthDbHelper mDbHelper = new EhealthDbHelper(this);
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         final TextView textNamaDoktertv = (TextView) findViewById(R.id.textNamaDokter);
@@ -211,37 +198,19 @@ public class PasiensyncActivity extends SessionManagement {
         };
 
         Cursor cursor = db.query(KartuEntry.TABLE_NAME, projection, null, null, null, null, null);
-        // TextView displayView = (TextView) findViewById(R.id.text_view_kartu);
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        // Cursor cursor = db.rawQuery("SELECT * FROM " + KartuEntry.TABLE_NAME, null);
 
         try {
-
-            // Figure out the index of each column
-            // int idColumnIndex = cursor.getColumnIndex(KartuEntry._ID);
             int HPCnumberColumnIndex = cursor.getColumnIndex(KartuEntry.COLUMN_HPCNUMBER);
             int namaDokterColumnIndex = cursor.getColumnIndex(KartuEntry.COLUMN_DOKTER);
-            //int pinHPCColumnIndex = cursor.getColumnIndex(KartuEntry.COLUMN_PIN_HPC);
-            //int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
-
-            // Iterate through all the returned rows in the cursor
 
             while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                // int currentID = cursor.getInt(idColumnIndex);
                 currentHPCNumber = cursor.getString(HPCnumberColumnIndex);
                 currentNamaDokter = cursor.getString(namaDokterColumnIndex);
-                //String currentPinHPC = cursor.getString(pinHPCColumnIndex);
-//              Menampilkan nama dokter
+
                 textNamaDoktertv.setText(currentNamaDokter);
                 textNamaDoktertv.setVisibility(View.VISIBLE);
             }
-
         } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
             cursor.close();
         }
     }
@@ -250,34 +219,7 @@ public class PasiensyncActivity extends SessionManagement {
         return currentNamaDokter;
     }
 
-
-//    //SINKRONISASI TIDAK BERHASIL
-//    Button mShowDialog = (Button) findViewById(R.id.btnShowDialog);
-//        mShowDialog.setOnClickListener(new View.OnClickListener() {
-//        @Override
-//        public void onClick(View view) {
-//            AlertDialog.Builder mBuilder = new AlertDialog.Builder(PasiensyncActivity.this);
-//            mBuilder.setIcon(R.drawable.logo2);
-//            mBuilder.setTitle("Kartu pasien tidak dapat diakses");
-//            mBuilder.setMessage("Silahkan coba lagi");
-//            mBuilder.setCancelable(false);
-//            mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//        @Override
-//        public void onClick(DialogInterface dialogInterface, int i) {
-//            dialogInterface.dismiss();
-//            }
-//            });
-//            AlertDialog alertDialog = mBuilder.create();
-//            alertDialog.show();
-//        }
-//        });
-//        }
-//        }
-
-    /*
-     * Komunikasi dengan kartu
-     */
-
+    // Broadcast untuk mendeteksi kartu pada card reader
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -349,6 +291,7 @@ public class PasiensyncActivity extends SessionManagement {
         }
     };
 
+    // Membaca APDU response
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] bytes) {
@@ -356,7 +299,7 @@ public class PasiensyncActivity extends SessionManagement {
             data = Util.bytesToHex(bytes);
             Log.d(TAG, "Data " + data);
 
-            if (i == 1) { //select
+            if (i == 1) { // Select Applet
                 respondData.put(bytes);
                 if (respondData.position() == 2) {
                     selectResponse = new byte[2];
@@ -370,7 +313,7 @@ public class PasiensyncActivity extends SessionManagement {
                         send();
                     }
                 }
-            } else if (i == 2) { //select
+            } else if (i == 2) { // Cek personalized status
                 respondData.put(bytes);
                 if (respondData.position() == 3) {
                     cardCheckingResponse = new byte[3];
@@ -381,7 +324,6 @@ public class PasiensyncActivity extends SessionManagement {
                     Log.i(TAG, "Select response string: " + Util.bytesToHex(cardCheckingResponse));
                     if (Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("11")
                             || Util.bytesToHex(Arrays.copyOfRange(cardCheckingResponse, 0, 1)).toString().equals("01")) {
-//                        progressStatus = 0;
                         i = 2;
                     } else {
                         personalized = false;
@@ -390,7 +332,7 @@ public class PasiensyncActivity extends SessionManagement {
 
                     send();
                 }
-            } else if (i == 3) { //medrec statik
+            } else if (i == 3) { // Membaca medrec statik
                 respondData.put(bytes);
                 byte golodar;
                 byte[] al, operasi, rawatrs, kronis, bawaan, resiko;
@@ -430,7 +372,7 @@ public class PasiensyncActivity extends SessionManagement {
 
                     send();
                 }
-            } else if (i == 4) { // biodata
+            } else if (i == 4) { // Membaca biodata
                 respondData.put(bytes);
                 Log.i(TAG, "Biodata statik length : " + respondData.position());
                 if (respondData.position() == 923) {
@@ -448,6 +390,7 @@ public class PasiensyncActivity extends SessionManagement {
 
                     Log.i(TAG, "Biodata: " + Util.bytesToHex(biodataResponse));
 
+                    // Data personal
                     nik = Arrays.copyOfRange(biodataResponse, 0, 16);
                     kategoriPasien = Arrays.copyOfRange(biodataResponse, 16, 68);
                     noAsuransi = Arrays.copyOfRange(biodataResponse, 68, 150);
@@ -477,6 +420,7 @@ public class PasiensyncActivity extends SessionManagement {
                     statusPernikahan = Arrays.copyOfRange(biodataResponse, 514, 515);
                     kewarganegaraan = Arrays.copyOfRange(biodataResponse, 515, 516);
 
+                    // Data kerabat
                     namaKerabat = Arrays.copyOfRange(biodataResponse, 516, 568);
                     hubunganKerabat = Arrays.copyOfRange(biodataResponse, 568, 569);
                     alamatKerabat = Arrays.copyOfRange(biodataResponse, 569, 671);
@@ -487,6 +431,8 @@ public class PasiensyncActivity extends SessionManagement {
                     kodeposKerabat = Arrays.copyOfRange(biodataResponse, 694, 699);
                     teleponKerabat = Arrays.copyOfRange(biodataResponse, 699, 715);
                     hpKerabat = Arrays.copyOfRange(biodataResponse, 715, 731);
+
+                    //Data kantor
                     namaKantor = Arrays.copyOfRange(biodataResponse, 731, 783);
                     alamatKantor = Arrays.copyOfRange(biodataResponse, 783, 885);
                     kotaKabupatenKantor = Arrays.copyOfRange(biodataResponse, 885, 889);

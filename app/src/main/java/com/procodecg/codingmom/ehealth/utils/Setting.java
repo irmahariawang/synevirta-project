@@ -13,6 +13,13 @@ import android.widget.TextView;
 import com.procodecg.codingmom.ehealth.R;
 import com.procodecg.codingmom.ehealth.main.MainActivity;
 
+/**
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ */
+
 public class Setting extends AppCompatActivity {
 
     private EditText settusername;
@@ -27,17 +34,17 @@ public class Setting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting);
 
-        preferences = getSharedPreferences("SETTING", MODE_PRIVATE);
-        String username= preferences.getString("USERNAME","");
-        String password= preferences.getString("PASSWORD","");
-        String address= preferences.getString("ADDRESS","");
-        Integer time= preferences.getInt("TIME",0);
+        // File penyimpanan data user SIKDA
+        preferences     = getSharedPreferences("SETTING", MODE_PRIVATE);
+        String username = preferences.getString("USERNAME","");
+        String password = preferences.getString("PASSWORD","");
+        String address  = preferences.getString("ADDRESS","");
+        Integer time    = preferences.getInt("TIME",0);
 
-
-        settusername=(EditText)findViewById(R.id.SetUser);
-        settpassword=(EditText)findViewById(R.id.SetPass);
-        setip=(EditText)findViewById(R.id.SetIp);
-        settimeout=(EditText)findViewById(R.id.Settime);
+        settusername    = (EditText)findViewById(R.id.SetUser);
+        settpassword    = (EditText)findViewById(R.id.SetPass);
+        setip           = (EditText)findViewById(R.id.SetIp);
+        settimeout      = (EditText)findViewById(R.id.Settime);
 
         ((TextView) findViewById(R.id.SetUser)).setText(username);
         ((TextView) findViewById(R.id.SetPass)).setText(password);
@@ -46,7 +53,7 @@ public class Setting extends AppCompatActivity {
             ((TextView) findViewById(R.id.Settime)).setText(String.valueOf(time));
         }
 
-        //privacy policy and terms of service
+        // Privacy policy and terms of service
         TextView tv1 = (TextView) findViewById(R.id.text_Policy);
         TextView tv2 = (TextView) findViewById(R.id.text_Terms);
 
@@ -67,7 +74,7 @@ public class Setting extends AppCompatActivity {
         });
 
 
-        //set popup window
+        // Set popup window
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
@@ -78,18 +85,18 @@ public class Setting extends AppCompatActivity {
 
     }
 
-    //set close button
+    // Set close button
     public void closeToMain(View view) {
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
     }
 
-    //set simpan data
+    // Set simpan data
     public void SaveSett(View view){
-        //input data
-        String username= settusername.getText().toString();
-        String password= settpassword.getText().toString();
-        String address= setip.getText().toString();
-        String time= settimeout.getText().toString();
+        // Input data
+        String username = settusername.getText().toString();
+        String password = settpassword.getText().toString();
+        String address  = setip.getText().toString();
+        String time     = settimeout.getText().toString();
 
         if(TextUtils.isEmpty(time)){
             settimeout.setError("Timeout tidak boleh kosong!");
@@ -101,7 +108,7 @@ public class Setting extends AppCompatActivity {
             return;
         }
 
-        //simpan data
+        // Simpan data
         SharedPreferences.Editor editor =preferences.edit();
         editor.putString("USERNAME",username);
         editor.putString("PASSWORD",password);
@@ -109,8 +116,7 @@ public class Setting extends AppCompatActivity {
         editor.putInt("TIME",Integer.valueOf(time));
         editor.apply();
 
-
-        //kembali ke mainVer2
+        // Kembali ke MainActivity
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
 
     }

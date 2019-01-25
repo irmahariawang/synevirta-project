@@ -60,18 +60,15 @@ import java.util.Map;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.hexStringToByteArray;
 import static com.procodecg.codingmom.ehealth.hpcpdc_card.Util.padVariableText;
 
-
 /**
- * Created by macbookpro on 9/4/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
  */
 
 public class RekmedbaruActivity extends AppCompatActivity {
-    String TAG = "hpcpdcdummy";
-    public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
-    Typeface fontBold;
-
-    private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
-            chunk11, chunk12, chunk13;
 
     private TextView txtTitle;
     private int mPoli = RekamMedisEntry.POLI_UMUM;
@@ -97,6 +94,15 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
 
+    // USB Accessories
+    String TAG = "EHEALTHREKMEDBARU";
+    public final String ACTION_USB_PERMISSION = "com.nehceh.hpcpdc.USB_PERMISSION";
+    Typeface fontBold;
+
+    private byte[] chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8, chunk9, chunk10,
+            chunk11, chunk12, chunk13;
+
+
     UsbManager usbManager;
     UsbDevice usbDevice;
     UsbDeviceConnection usbConn;
@@ -107,23 +113,15 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
     ByteBuffer respondData;
     IntentFilter filter;
+
+    // APDU command
     byte[] selectResponse, initTulisResponse;
     byte[] APDU_select = {0x00, (byte) 0xA4, 0x04, 0x00, 0x08, 0x50, 0x44, 0x43, 0x44, 0x55, 0x4D, 0x4D, 0x59};
     byte[] APDU_finish = {(byte)0x80, (byte)0xC7, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-    Activity mActivity;
-
-//    aktivasi tombol x-clear
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //MENGHILANGKAN TOOLBAR
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_rekmedbaru);
 
         txtTitle = (TextView) findViewById(R.id.txt_title);
@@ -149,32 +147,16 @@ public class RekmedbaruActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-//        toolbar.setNavigationIcon(R.drawable.ic_xclose);
-//        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-//        View logo = getLayoutInflater().inflate(R.layout.activity_rekmedbaru, null);
-//        mToolbar.addView(logo, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         toolbar.setContentInsetsAbsolute(0,0);
-//        getSupportActionBar().setDisplayShowTitleEnabled(false);
-//        TextView txt = (TextView) findViewById(R.id.txt_title);
-//        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(txt.getLayoutParams());
-//        lp.setMargins(0, 0, 0, 0);
-//        txt.setLayoutParams(lp);
-//        toolbar.setTitleMarginStart(0);
-//        Toolbar.LayoutParams layoutParams = (Toolbar.LayoutParams) toolbar.getLayoutParams();
-//        layoutParams.setMargins(0, 0, 0, 0);
-//        toolbar.setLayoutParams(layoutParams);
-//        getResources().getDimension(R.dimen.toolbar_right);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 startActivity(new Intent(getApplicationContext(),BottombarActivity.class));
-
             }
         });
 
-        // Find all relevant views that we will need to read user input from
+        // Form input
         mIDPuskesmas = (EditText) findViewById(R.id.idPuskesmas);
         mPoliSpinner = (Spinner) findViewById(R.id.poli_spinner);
         mPemberiRujukan = (EditText) findViewById(R.id.pemberiRujukan);
@@ -212,16 +194,12 @@ public class RekmedbaruActivity extends AppCompatActivity {
         mAdFunctionamSpinner = (Spinner) findViewById(R.id.adFunctionam);
         mAdSanationamSpinner = (Spinner) findViewById(R.id.adSanationam);
 
-
         // setup spinner
         setupSpinner();
 
         //setup autocomplete
         setupAutoComplete();
 
-
-
-        //BUTTON SAVE
         Button mShowDialog = (Button) findViewById(R.id.btnShowDialog);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,7 +227,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 alertDialog.show();
             }
         });
-
 
         respondData = ByteBuffer.allocate(2);
         i = 0;
@@ -286,7 +263,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Toast.makeText(getApplicationContext(), "broadcastReceiver in", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "intent.getAction() " + intent.getAction());
 
             if (intent.getAction().equals(ACTION_USB_PERMISSION)) {
@@ -305,14 +281,18 @@ public class RekmedbaruActivity extends AppCompatActivity {
                             serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                             serialPort.read(mCallback);
                             Log.i(TAG, "Serial port opened");
-//                            Toast.makeText(getApplicationContext(), "Serial connection opened!", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "Ok");
                             send();
                         } else {
                             Log.w(TAG, "PORT NOT OPEN");
+                            Intent activity = new Intent(getApplicationContext(), PasiensyncActivity.class);
+                            startActivity(activity);
+                            finish();
                         }
                     } else {
                         Log.w(TAG, "PORT IS NULL");
+                        Intent activity = new Intent(getApplicationContext(), PasiensyncActivity.class);
+                        startActivity(activity);
+                        finish();
                     }
                 } else {
                     Log.w(TAG, "PERMISSION NOT GRANTED");
@@ -326,6 +306,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
         }
     };
 
+    // Membaca APDU response
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] bytes) {
@@ -386,6 +367,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
         }
     };
 
+    // Mengirim APDU command
     public void send() {
         if ( i == 0 ) {
             serialPort.write(APDU_select);
@@ -505,7 +487,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 mPoli = RekamMedisEntry.POLI_UMUM;
             }
         });
-
 
         //spinner kesadaran
         Spinner spinnerKesadaran = (Spinner) findViewById(R.id.kesadaran_spinner);
@@ -634,7 +615,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
             }
         });
 
-
         //spinner status prognosis ad vitam
         Spinner spinnerAdVitam = (Spinner) findViewById(R.id.adVitam);
         ArrayAdapter<CharSequence> adapterAdVitam = ArrayAdapter.createFromResource(this,
@@ -669,8 +649,7 @@ public class RekmedbaruActivity extends AppCompatActivity {
             }
         });
 
-
-        //spinner status prognosis ad functionam
+        // Spinner status prognosis ad functionam
         Spinner spinnerAdFunctionam = (Spinner) findViewById(R.id.adFunctionam);
         ArrayAdapter<CharSequence> adapterAdFunctionam = ArrayAdapter.createFromResource(this,
                 R.array.ad_functionam, android.R.layout.simple_spinner_item);
@@ -703,7 +682,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
                 mAdFunctionam = RekamMedisEntry.FUNCTIONAM_ADBONAM;
             }
         });
-        //spinner status prognosis ad sanationam
+
+        // Spinner status prognosis ad sanationam
         Spinner spinnerAdSanationam = (Spinner) findViewById(R.id.adSanationam);
         ArrayAdapter<CharSequence> adapterAdSanationam = ArrayAdapter.createFromResource(this,
                 R.array.ad_sanationam, android.R.layout.simple_spinner_item);
@@ -742,7 +722,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
         AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.statusDiagnosis);
         EhealthDbHelper dbHelper = new EhealthDbHelper(getApplicationContext());
         dbHelper.openDB();
-        //String pencarian = getIntent().getStringExtra("hasil");
         String[] diagnosa = dbHelper.getAllDiagnosa();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, diagnosa);
         textView.setAdapter(adapter);
@@ -753,15 +732,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
         EhealthDbHelper mDbHelper = new EhealthDbHelper(this);
         mDbHelper.openDB();
-        //mDbHelper.createTableRekMed();
 
         if(validateData()){
-            // Read from input fields
-            // Use trim to eliminate leading or trailing white space
-            //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            //String mTanggalPeriksa = sdf.format(new java.util.Date());
-
-            //setting format tanggal device yg baru
             Long tsLong = System.currentTimeMillis();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Calendar calendar = Calendar.getInstance();
@@ -805,11 +777,8 @@ public class RekmedbaruActivity extends AppCompatActivity {
             // AdFunctionamSpinner
             // AdSanationamSpinner
 
-            // Gets the database in write mode
             SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-            // Create a ContentValues object where column names are the keys,
-            // and pet attributes from the editor are the values.
             ContentValues values = new ContentValues();
             values.put(RekamMedisEntry.COLUMN_TGL_PERIKSA, mTanggalPeriksa);
             values.put(RekamMedisEntry.COLUMN_NAMA_DOKTER, mNamaDokterString);
@@ -872,13 +841,9 @@ public class RekmedbaruActivity extends AppCompatActivity {
 
             // Show a toast message depending on whether or not the insertion was successful
             if (newRowId == -1) {
-                // If the row ID is -1, then there was an error with insertion.
                 //Toast.makeText(this, "Error with saving data", Toast.LENGTH_SHORT).show();
             } else {
-                // Otherwise, the insertion was successful and we can display a toast with the row ID.
                 //Toast.makeText(this, "Data saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
-                //simpanData();
-//                    finish();
             }
             mDbHelper.closeDB();
         }
@@ -902,21 +867,6 @@ public class RekmedbaruActivity extends AppCompatActivity {
         for(int i=0; i<allEditText.length; i++){
             if (Validation.hasSpecialCharacter(allEditText[i])) valid  = false;
         }
-
-//        if (!Validation.hasText(mSystole, "Systole") || Validation.hasSpecialCharacter(mSystole)) valid = false;
-//        if (!Validation.hasText(mDiastole, "Diastole") || Validation.hasSpecialCharacter(mDiastole)) valid = false;
-//        if (!Validation.hasText(mSuhu, "Suhu") || Validation.hasSpecialCharacter(mSuhu)) valid = false;
-//        if (!Validation.hasText(mNadi, "Nadi") || Validation.hasSpecialCharacter(mNadi)) valid = false;
-//        if (!Validation.hasText(mRespirasi, "Respirasi") || Validation.hasSpecialCharacter(mRespirasi)) valid = false;
-//        if (!Validation.hasText(mKeluhanUtama, "Keluhan Utama") || Validation.hasSpecialCharacter(mKeluhanUtama)) valid = false;
-//        if (!Validation.hasText(mBerat, "Berat") || Validation.hasSpecialCharacter(mBerat)) valid = false;
-//        if (!Validation.hasText(mTinggi, "Tinggi") || Validation.hasSpecialCharacter(mTinggi)) valid = false;
-//        if (!Validation.hasText(mKepala, "Kepala") || Validation.hasSpecialCharacter(mKepala)) valid = false;
-//        if (!Validation.hasText(mThorax, "Thorax") || Validation.hasSpecialCharacter(mThorax)) valid = false;
-//        if (!Validation.hasText(mAbdomen, "Abdomen") || Validation.hasSpecialCharacter(mAbdomen)) valid = false;
-//        if (!Validation.hasText(mDiagnosisKerja, "Diagnosis Kerja") || Validation.hasSpecialCharacter(mDiagnosisBanding)) valid = false;
-//        if (!Validation.hasText(mICD10, "ICD10") || Validation.hasSpecialCharacter(mICD10)) valid = false;
-//        if (!Validation.hasText(mResep, "Resep") || Validation.hasSpecialCharacter(mResep)) valid = false;
 
         return valid;
     }

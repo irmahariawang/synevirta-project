@@ -24,12 +24,15 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Created by macbookpro on 7/30/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Annisa Alifiani
+ *      Arieza Nadya
  */
 
 public class ProfilpasienFragment extends Fragment {
 
-//    Typeface font;
     private SessionManagement sessionManagement;
 
     public static Fragment newInstance() {
@@ -40,8 +43,6 @@ public class ProfilpasienFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //sessionManagement = new SessionManagement();
-        //sessionManagement.resetDisconnectTimer();
     }
 
 
@@ -51,7 +52,6 @@ public class ProfilpasienFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_profilpasien, container, false);
         ((BottombarActivity) getActivity()).setTitleText("Profil Pasien");
         ((BottombarActivity) getActivity()).setSubTitleText();
-//      ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle("dr X");
 
         FloatingActionButton fabDetail = (FloatingActionButton) view.findViewById(R.id.fabDetail);
         View.OnClickListener listener = new View.OnClickListener() {
@@ -73,17 +73,6 @@ public class ProfilpasienFragment extends Fragment {
         };
         fabKeluarga.setOnClickListener(listenerKel);
 
-        //font
-//        font = Typeface.createFromAsset(getActivity().getAssets(),"font1.ttf");
-//        TextView tv1 = (TextView) view.findViewById(R.id.textNamaPasien);
-//        TextView tv2 = (TextView) view.findViewById(R.id.textTglLahir);
-//        TextView tv3 = (TextView) view.findViewById(R.id.textUmur);
-//        TextView tv4 = (TextView) view.findViewById(R.id.textJenisKlmn);
-//        tv1.setTypeface(font);
-//        tv2.setTypeface(font);
-//        tv3.setTypeface(font);
-//        tv4.setTypeface(font);
-
         return view;
     }
 
@@ -91,7 +80,6 @@ public class ProfilpasienFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // TODO data pasien diambil data PDCData
         TextView namaPasienTv = (TextView) getView().findViewById(R.id.textNamaPasien);
         namaPasienTv.setText(PDCData.namaPasien);
 

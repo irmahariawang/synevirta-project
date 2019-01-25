@@ -15,7 +15,10 @@ import com.procodecg.codingmom.ehealth.hpcpdc_card.PDCData;
 import com.procodecg.codingmom.ehealth.hpcpdc_card.Util;
 
 /**
- * Created by macbookpro on 8/9/17.
+ * (c) 2017
+ * Created by :
+ *      Coding Mom
+ *      Arieza Nadya
  */
 
 public class PasiendetailActivity extends AppCompatActivity {
@@ -26,10 +29,6 @@ public class PasiendetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //MENGHILANGKAN TOOLBAR
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_pasiendetail);
 
@@ -62,10 +61,6 @@ public class PasiendetailActivity extends AppCompatActivity {
         int height = dm.heightPixels;
 
         getWindow().setLayout((int)(width*.92),(int)(height*.88));
-
-
-        TextView noSmartCardTv = (TextView) findViewById(R.id.textNoSmartCard);
-        //noSmartCardTv.setText(PDCData.noSmartCard);
 
         TextView kategoriPasienTv = (TextView) findViewById(R.id.textKategoriPasien);
         kategoriPasienTv.setText(PDCData.kategoriPasien);
